@@ -1,4 +1,6 @@
 # SC2 Master Coach — Replay Intelligence Engine
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/606eed8f-538c-40b8-b3b3-cac639a2ecf6" />
+
 
 **Created by MBMapps**
 
