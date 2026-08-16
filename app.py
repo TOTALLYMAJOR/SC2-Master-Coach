@@ -20,7 +20,7 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_REPLAY_BYTES
 
 @app.get("/")
 def index():
-    return send_from_directory(STATIC, "index.html")
+    return send_from_directory(STATIC, "hud-v2.html")
 
 
 @app.get("/api/health")
