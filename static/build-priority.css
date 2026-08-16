@@ -1,0 +1,30 @@
+.build-priority-zone{
+  position:sticky;top:66px;z-index:45;
+  display:grid;gap:6px;margin:7px 0;
+  padding:7px;border:1px solid var(--accent);
+  background:linear-gradient(180deg,rgba(5,20,30,.98),rgba(2,9,14,.98));
+  box-shadow:0 10px 32px rgba(0,0,0,.42),0 0 22px var(--race-glow),inset 0 0 20px rgba(91,220,255,.035);
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)
+}
+.build-priority-zone.log-expanded{position:relative;top:auto}
+.build-priority-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:1px 4px 5px;border-bottom:1px solid rgba(91,220,255,.17)}
+.build-priority-heading b{display:block;color:var(--accent);font-size:.7rem;letter-spacing:.14em}
+.build-priority-heading span{display:block;color:var(--muted);font-size:.52rem;margin-top:2px;text-transform:uppercase}
+.build-priority-live{display:flex;align-items:center;gap:5px;color:var(--good);font-size:.5rem;letter-spacing:.1em;white-space:nowrap}
+.build-priority-live i{width:6px;height:6px;border-radius:50%;background:var(--good);box-shadow:0 0 9px var(--good);animation:buildPriorityPulse 1.2s infinite}
+.build-priority-zone>.build-queue-priority,.build-priority-zone>.build-log-priority{margin:0!important}
+.build-priority-zone .build-queue{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.build-priority-zone .build-log{max-height:168px;overflow:auto;scrollbar-width:thin;transition:max-height .22s ease}
+.build-priority-zone.log-expanded .build-log{max-height:540px}
+.build-priority-zone .build-log-row.active{border-color:var(--accent);background:linear-gradient(90deg,var(--race-glow),rgba(4,16,24,.96));box-shadow:inset 3px 0 0 var(--accent)}
+.build-priority-zone .build-log-row.done{opacity:.72}
+.build-priority-zone .build-log-toolbar{display:flex;gap:5px;flex-wrap:wrap}
+@keyframes buildPriorityPulse{50%{opacity:.35;transform:scale(.75)}}
+@media(max-width:900px){
+ .build-priority-zone{position:relative;top:auto}
+ .build-priority-zone .build-queue{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+ .build-priority-heading{align-items:flex-start;flex-direction:column}
+ .build-priority-zone .build-queue{grid-template-columns:1fr}
+}
