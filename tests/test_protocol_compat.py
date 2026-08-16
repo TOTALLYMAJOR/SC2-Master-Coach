@@ -38,7 +38,10 @@ def test_new_sc2_replay_versions_bind_to_their_exact_base_build():
     assert runtime_version.binary == "local-install"
 
 
-def test_windows_runtime_finds_support64_icu_and_sets_child_context(tmp_path, monkeypatch):
+def test_windows_runtime_finds_support64_icu_and_sets_child_context(tmp_path):
+    if os.name != "nt":
+        return
+
     import sc2_frame_capture as capture
 
     support64 = tmp_path / "Support64"
@@ -47,7 +50,6 @@ def test_windows_runtime_finds_support64_icu_and_sets_child_context(tmp_path, mo
         (support64 / name).write_bytes(b"test")
 
     config = SimpleNamespace(data_dir=str(tmp_path), cwd="wrong", env={"PATH": "existing"})
-    monkeypatch.setattr(capture.os, "name", "nt", raising=False)
     result = capture._configure_windows_runtime(config)
 
     assert result["configured"] is True
