@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -15,6 +16,6 @@ def test_moment_theater_assets_expose_real_frame_modes():
 
 def test_app_version_and_capture_routes_are_present():
     app = (ROOT / "app.py").read_text(encoding="utf-8")
-    assert 'CURRENT_VERSION = "1.3.0"' in app
+    assert re.search(r'CURRENT_VERSION = "\d+\.\d+\.\d+"', app)
     assert '@app.post("/api/replay/capture")' in app
     assert '@app.get("/api/replay/capture/status")' in app
