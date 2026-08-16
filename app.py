@@ -1,22 +1,35 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
 import os
 import tempfile
 import threading
-import webbrowser
-import json
+import subprocess
+import sys
 import urllib.request
+import webbrowser
 
 from flask import Flask, jsonify, request, send_from_directory
 
+from case_workspace import (
+    create_or_update_case,
+    resolve_case_frames,
+    resolve_case_replay,
+)
+from observation_service import enrich_demo_analysis, enrich_replay_analysis
 from replay_engine import analyze_replay, demo_analysis
-from observation_service import enrich_replay_analysis, enrich_demo_analysis
+from sc2_frame_capture import (
+    CaptureRequest,
+    CaptureUnavailable,
+    capture_replay_views,
+    capture_status,
+)
 
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
 MAX_REPLAY_BYTES = 40 * 1024 * 1024
-CURRENT_VERSION = "1.2.0"
+CURRENT_VERSION = "1.3.0"
 RELEASES_API = "https://api.github.com/repos/TOTALLYMAJOR/SC2-Master-Coach/releases/latest"
 
 app = Flask(__name__, static_folder=str(STATIC), static_url_path="")
@@ -25,14 +38,28 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_REPLAY_BYTES
 
 @app.get("/")
 def index():
-    # Keep the Command HUD source maintainable while layering first-run,
-    # observation, build-execution, and critical-moment UI at serve-time.
+    # Keep the Command HUD source maintainable while layering the optional
+    # coaching and replay-intelligence modules at serve time.
     html = (STATIC / "index.html").read_text(encoding="utf-8")
-    if "/experience.css" not in html:
-        html = html.replace("</head>", '<link rel="stylesheet" href="/experience.css">\n</head>')
-    if "/experience.js" not in html:
-        html = html.replace("</body>", '<script src="/experience-bridge.js"></script>\n<script src="/experience.js"></script>\n</body>')
+    for href in ("/experience.css", "/moment-theater.css"):
+        if href not in html:
+            html = html.replace("</head>", f'<link rel="stylesheet" href="{href}">\n</head>')
+    scripts = (
+        "/experience-bridge.js",
+        "/experience.js",
+        "/moment-theater.js",
+    )
+    for src in scripts:
+        if src not in html:
+            html = html.replace("</body>", f'<script src="{src}"></script>\n</body>')
     return html
+
+
+def _analyze_replay_path(path: str | Path) -> dict:
+    replay_path = Path(path).expanduser().resolve()
+    result = enrich_replay_analysis(replay_path, analyze_replay(replay_path))
+    create_or_update_case(replay_path, result)
+    return result
 
 
 @app.get("/api/health")
@@ -50,6 +77,7 @@ def health():
         "parser_error": parser_error,
         "max_replay_mb": MAX_REPLAY_BYTES // (1024 * 1024),
         "version": CURRENT_VERSION,
+        "capture": capture_status(),
     })
 
 
@@ -68,7 +96,7 @@ def _version_tuple(value: str):
 
 
 def _latest_release():
-    req = urllib.request.Request(RELEASES_API, headers={"User-Agent": "SC2-Master-Coach/1.2"})
+    req = urllib.request.Request(RELEASES_API, headers={"User-Agent": "SC2-Master-Coach/1.3"})
     with urllib.request.urlopen(req, timeout=4) as response:
         return json.loads(response.read().decode("utf-8"))
 
@@ -82,7 +110,7 @@ def launch_context():
     if not replay_path.exists() or replay_path.suffix.lower() != ".sc2replay":
         return jsonify({"replay": None, "error": "Associated replay path is unavailable."})
     try:
-        result = enrich_replay_analysis(replay_path, analyze_replay(replay_path))
+        result = _analyze_replay_path(replay_path)
         app.config["OPEN_REPLAY_PATH"] = None
         return jsonify({"replay": result})
     except Exception as exc:
@@ -139,7 +167,7 @@ def replay_analyze_latest():
         }), 404
     latest = max(candidates, key=lambda p: p.stat().st_mtime)
     try:
-        return jsonify(enrich_replay_analysis(latest, analyze_replay(latest)))
+        return jsonify(_analyze_replay_path(latest))
     except Exception as exc:
         return jsonify({"error": "Latest replay analysis failed.", "detail": f"{type(exc).__name__}: {exc}"}), 422
 
@@ -160,8 +188,7 @@ def replay_analyze():
             upload.save(path)
             if path.stat().st_size > MAX_REPLAY_BYTES:
                 return jsonify({"error": "Replay exceeds the 40 MB safety limit."}), 413
-            result = enrich_replay_analysis(path, analyze_replay(path))
-            return jsonify(result)
+            return jsonify(_analyze_replay_path(path))
     except ImportError:
         return jsonify({
             "error": "Replay parser is not installed.",
@@ -173,6 +200,97 @@ def replay_analyze():
             "detail": f"{type(exc).__name__}: {exc}",
             "hint": "If this is a brand-new SC2 patch, update sc2reader from its upstream GitHub branch."
         }), 422
+
+
+@app.get("/api/replay/capture/status")
+def replay_capture_status():
+    return jsonify(capture_status())
+
+
+def _frame_urls(case_id: str, capture: dict) -> dict:
+    result = dict(capture)
+    result["case_id"] = case_id
+    result["workspace"] = str(resolve_case_frames(case_id).parent)
+    frames = {}
+    for key, value in (capture.get("frames") or {}).items():
+        if value and value.get("filename"):
+            item = dict(value)
+            item["url"] = f"/api/cases/{case_id}/frames/{value['filename']}"
+            frames[key] = item
+        else:
+            frames[key] = value
+    result["frames"] = frames
+    return result
+
+
+@app.post("/api/replay/capture")
+def replay_capture():
+    payload = request.get_json(silent=True) or {}
+    case_id = str(payload.get("case_id") or "")
+    try:
+        player_id = int(payload.get("player_id"))
+        second = float(payload.get("second"))
+    except (TypeError, ValueError):
+        return jsonify({"error": "player_id and second are required."}), 400
+    if second < 0 or second > 8 * 60 * 60:
+        return jsonify({"error": "The requested replay timestamp is invalid."}), 400
+
+    camera = payload.get("camera") or {}
+    try:
+        camera_x = float(camera["x"]) if camera.get("x") is not None else None
+        camera_y = float(camera["y"]) if camera.get("y") is not None else None
+    except (TypeError, ValueError):
+        return jsonify({"error": "Camera coordinates must be numeric."}), 400
+
+    try:
+        replay_path = resolve_case_replay(case_id)
+        output_dir = resolve_case_frames(case_id)
+        captured = capture_replay_views(CaptureRequest(
+            replay_path=replay_path,
+            output_dir=output_dir,
+            second=second,
+            player_id=player_id,
+            camera_x=camera_x,
+            camera_y=camera_y,
+            width=1280,
+            height=720,
+            moment_key=str(payload.get("moment_key") or f"moment-{second:.1f}"),
+        ))
+        return jsonify(_frame_urls(case_id, captured))
+    except FileNotFoundError as exc:
+        return jsonify({"error": str(exc)}), 404
+    except CaptureUnavailable as exc:
+        return jsonify({
+            "error": "Actual SC2 frame capture is unavailable.",
+            "detail": str(exc),
+            "fallback": "The in-app tactical reconstruction remains available."
+        }), 503
+    except Exception as exc:
+        return jsonify({"error": "SC2 frame capture failed.", "detail": f"{type(exc).__name__}: {exc}"}), 422
+
+
+@app.get("/api/cases/<case_id>/frames/<path:filename>")
+def case_frame(case_id: str, filename: str):
+    try:
+        directory = resolve_case_frames(case_id)
+        return send_from_directory(directory, filename, as_attachment=False, max_age=86400)
+    except (FileNotFoundError, ValueError):
+        return jsonify({"error": "Frame not found."}), 404
+
+
+@app.post("/api/cases/<case_id>/open")
+def open_case_folder(case_id: str):
+    try:
+        directory = resolve_case_frames(case_id).parent
+        if os.name == "nt":
+            os.startfile(str(directory))  # type: ignore[attr-defined]
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", str(directory)])
+        else:
+            subprocess.Popen(["xdg-open", str(directory)])
+        return jsonify({"ok": True, "workspace": str(directory)})
+    except Exception as exc:
+        return jsonify({"ok": False, "error": f"{type(exc).__name__}: {exc}"}), 422
 
 
 def open_browser():

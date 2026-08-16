@@ -1,2 +1,4 @@
 Flask
+Pillow
+pysc2 @ git+https://github.com/google-deepmind/pysc2.git@master
 sc2reader @ git+https://github.com/ggtracker/sc2reader.git@upstream
