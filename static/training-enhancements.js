@@ -51,7 +51,7 @@
   const replay=byId("replayResult")?.closest("section");
   if(replay&&!byId("criticalMoments")){
    const section=document.createElement("section");section.className="frame panel-pad critical-panel";
-   section.innerHTML='<div class="section-title">Critical Moment Snapshots <span>reconstructed stills</span></div><div class="critical-note">Generated from replay events, camera/selection evidence and tactical positions. These are analytical reconstructions—not game-rendered video frames.</div><div class="critical-grid" id="criticalMoments"><div class="critical-empty">Analyze a replay to generate the most consequential observation, engagement and doctrine snapshots.</div></div>';
+   section.innerHTML='<div class="section-title">In-App Snapshot View <span>critical moments · optional PNG export</span></div><div class="critical-note"><strong>Review snapshots directly inside SC2 Master Coach.</strong> Save PNG is optional. Views are generated from replay events, camera/selection evidence and tactical positions; they are analytical reconstructions, not game-rendered video frames.</div><div class="critical-grid" id="criticalMoments"><div class="critical-empty">Analyze a replay to populate the in-app snapshot view with the most consequential observation, engagement and doctrine moments.</div></div>';
    replay.after(section);
   }
  }
