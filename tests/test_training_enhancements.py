@@ -19,6 +19,6 @@ def test_build_cues_and_snapshots_are_present():
     script = (STATIC / "training-enhancements.js").read_text(encoding="utf-8")
     assert "In five seconds" in script
     assert "Build Log" in script
-    assert "Critical Moment Snapshots" in script
+    assert "In-App Snapshot View" in script
     assert "Save PNG" in script
     assert "not game-rendered video frames" in script
