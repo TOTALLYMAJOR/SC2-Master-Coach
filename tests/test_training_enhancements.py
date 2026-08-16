@@ -28,5 +28,5 @@ def test_build_order_is_above_tactical_map_and_theater():
     html = (STATIC / "index.html").read_text(encoding="utf-8")
     css = (STATIC / "training-enhancements.css").read_text(encoding="utf-8")
     assert html.index('id="buildQueue"') < html.index('class="tactical-map"')
-    assert ".center-stack>.build-priority-panel{order:20}" in css
+    assert ".center-stack>.build-priority-panel,.center-stack>.build-priority-zone{order:20}" in css
     assert ".center-stack>.moment-theater{order:70}" in css

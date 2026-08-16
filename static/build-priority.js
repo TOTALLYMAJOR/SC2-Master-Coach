@@ -18,6 +18,11 @@
   toolbar.prepend(button);
  }
 
+ function keepReplayTheaterOutsideBuildZone(zone){
+  const theater=byId("momentTheater");
+  if(theater&&theater.parentElement===zone)zone.after(theater);
+ }
+
  function prioritizeBuildOrder(){
   const command=document.querySelector(".command-center");
   const queue=byId("buildQueue")?.closest("section");
@@ -43,6 +48,7 @@
    if(log.parentElement!==zone)zone.appendChild(log);
    addLogToggle(zone,log);
   }
+  keepReplayTheaterOutsideBuildZone(zone);
   return true;
  }
 

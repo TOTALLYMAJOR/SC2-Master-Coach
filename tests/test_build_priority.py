@@ -9,6 +9,8 @@ def test_build_priority_assets_exist_and_relocate_the_build_ui():
     assert "buildPriorityZone" in js
     assert "command.after(zone)" in js
     assert "buildLogVisibility" in js
+    assert "keepReplayTheaterOutsideBuildZone" in js
+    assert "zone.after(theater)" in js
     assert "position:sticky" in css
     assert "ALWAYS VISIBLE" in js
 

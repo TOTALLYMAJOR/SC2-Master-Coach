@@ -13,14 +13,14 @@
 
 /* Keep execution guidance in the first viewport and above replay analysis. */
 .center-stack>.command-center{order:10}
-.center-stack>.build-priority-panel{order:20}
+.center-stack>.build-priority-panel,.center-stack>.build-priority-zone{order:20}
 .center-stack>.build-log-panel{order:30}
 .center-stack>.alert-frame{order:40}
 .center-stack>.doctrine-frame{order:50}
 .center-stack>.tactical-map{order:60}
 .center-stack>.moment-theater{order:70}
 .build-priority-panel{
-  position:sticky;top:8px;z-index:25;border-color:var(--accent);
+  position:relative;top:auto;z-index:1;border-color:var(--accent);
   background:linear-gradient(90deg,rgba(91,220,255,.09),rgba(4,16,24,.97));
   box-shadow:0 0 18px var(--race-glow),inset 0 1px 0 rgba(255,255,255,.04)
 }
@@ -44,4 +44,4 @@
 .critical-empty{border:1px dashed var(--line2);padding:12px;text-align:center;color:var(--muted);font-size:.61rem;line-height:1.4}
 
 @media(max-width:1250px){.critical-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.critical-panel{grid-column:1/-1}}
-@media(max-width:820px){.critical-grid{grid-template-columns:1fr}.advance-cue{grid-template-columns:44px 1fr}.cue-mode{grid-column:1/-1;text-align:right}.build-log-row{grid-template-columns:46px 1fr auto}.build-priority-panel{position:relative;top:auto}}
+@media(max-width:820px){.critical-grid{grid-template-columns:1fr}.advance-cue{grid-template-columns:44px 1fr}.cue-mode{grid-column:1/-1;text-align:right}.build-log-row{grid-template-columns:46px 1fr auto}}
