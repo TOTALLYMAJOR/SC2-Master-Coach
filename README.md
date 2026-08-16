@@ -8,7 +8,30 @@ SC2 Master Coach is a local-first StarCraft II coaching application built around
 
 > **Play → Observe → Infer → Decide → Execute → Replay → Diagnose → Train again**
 
-It combines a race-reactive Command HUD, matchup doctrine, timed build execution, replay reconstruction, cognitive observation analysis, and downloadable critical-moment tactical stills.
+It combines a race-reactive Command HUD, matchup doctrine, timed build execution, replay reconstruction, cognitive observation analysis, and an **in-app critical-moment snapshot viewer** with optional PNG export.
+
+## Release Notes
+
+### v1.2.0 — Build Execution + In-App Snapshot View
+
+- Added five-second visual build-preparation cues.
+- Added optional race-aware spoken instructions such as: **“In five seconds, pull one Probe to warp in a Gateway.”**
+- Restored the full chronological Build Log with planned time, cue time and timing delta.
+- Added the **In-App Snapshot View** for critical replay moments.
+- Added reconstructed tactical views for observation failures, costly engagements and doctrine violations.
+- Added optional **Save PNG** export for individual snapshot cards.
+- Updated the Windows installer and automated release pipeline.
+
+### v1.1.0 — Observation Reconstruction + Easier Installation
+
+- Added camera, selection, command and sparse unit-position analysis.
+- Added plausible-observation, inference-proxy and decision-latency measurements.
+- Added first-run onboarding with **Train Now**, **Analyze Replay** and **Try Demo Match**.
+- Added automatic latest-replay discovery and `.SC2Replay` file association.
+- Added the local update checker.
+- Added the one-click Windows installer and portable build.
+
+The GitHub Releases page is the source of truth for downloadable versions and release assets.
 
 ## Install on Windows
 
@@ -60,7 +83,7 @@ The Command HUD provides:
 
 ## Five-second build preparation cues — v1.2
 
-The coach now gives a visual cue before each timed build action and, when Voice is enabled, speaks a preparation instruction such as:
+The coach gives a visual cue before each timed build action and, when Voice is enabled, speaks a preparation instruction such as:
 
 > **In five seconds, pull one Probe to warp in a Gateway.**
 
@@ -74,7 +97,7 @@ It also issues a **Now** cue when the build timer crosses the scheduled action.
 
 ## Build Log — v1.2
 
-The full chronological build log is visible again. It shows:
+The full chronological build log is visible in the Command HUD. It shows:
 
 - scheduled timestamp
 - build action
@@ -130,15 +153,27 @@ This is not presented as exact fog-of-war reconstruction. Tracker positions are 
 - **inference proxy** — behavior after attention, not private thought
 - **decision proxy** — first qualifying command after the observation
 
-## Critical Moment Snapshots — v1.2
+## In-App Snapshot View — v1.2
 
-Replay Intelligence now turns the highest-signal moments into downloadable PNG stills:
+Replay Intelligence displays the highest-signal reconstructed moments **inside the application** after analysis. Players can review the visual cards without first downloading or opening a separate image file.
+
+The in-app view can surface:
 
 - late or unconfirmed observations
 - costly engagements
+- unfavorable resource exchanges
 - doctrine violations and review anchors
 
-Each card combines timestamp, severity, tactical position when available, replay evidence and latency/trade information.
+Each snapshot card combines:
+
+- replay timestamp
+- severity and moment type
+- tactical position when available
+- observation, inference or decision latency
+- engagement and trade evidence
+- doctrine context
+
+The cards remain visible in the app for immediate review. **Save PNG** is an optional export action, not the primary viewing experience.
 
 These are **reconstructed tactical snapshots**, not screenshots rendered by the StarCraft II game client. A `.SC2Replay` stores simulation and event data rather than video frames, so the application visualizes the evidence honestly instead of fabricating a literal in-game screenshot.
 
