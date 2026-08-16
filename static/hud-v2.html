@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="author" content="MBMapps">
+<meta name="creator" content="MBMapps">
+<title>SC2 Master Coach — Command HUD</title>
+<style>
+:root{
+  --bg:#02070b;--panel:#07131d;--panel2:#0a1b27;--line:#193a52;--line2:#315d79;
+  --text:#edf8ff;--muted:#7f9caf;--accent:#5bdcff;--accent2:#7ab8ff;--good:#61e6a6;
+  --warn:#ffd166;--bad:#ff7070;--violet:#b284ff;--race-glow:rgba(91,220,255,.22);
+  --race-image-opacity:.44;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#02070b;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+body{
+  background:
+    radial-gradient(circle at 50% -10%,var(--race-glow),transparent 34rem),
+    linear-gradient(180deg,#030b11 0,#02070b 38%,#010407 100%);
+  overflow-x:hidden;
+}
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:80;opacity:.08;
+  background:repeating-linear-gradient(180deg,transparent 0 3px,rgba(255,255,255,.025) 3px 4px);
+  mix-blend-mode:screen
+}
+body:after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:79;
+  background:radial-gradient(circle at center,transparent 52%,rgba(0,0,0,.58) 100%);
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.hud{max-width:1880px;margin:auto;padding:9px;position:relative;z-index:1}
+.top-rail{
+  display:grid;grid-template-columns:minmax(280px,1.4fr) repeat(5,minmax(95px,.45fr)) auto;
+  gap:6px;align-items:stretch
+}
+.frame,.rail-cell,.portrait-frame,.command-center,.tactical-map,.command-card,.doctrine-frame,.alert-frame{
+  position:relative;border:1px solid var(--line);background:linear-gradient(180deg,rgba(9,25,37,.97),rgba(4,14,22,.98));
+  clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px),0 10px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 0 18px rgba(0,0,0,.22)
+}
+.frame:before,.rail-cell:before,.portrait-frame:before,.command-center:before,.tactical-map:before,.command-card:before,.doctrine-frame:before,.alert-frame:before{
+  content:"";position:absolute;inset:2px;border:1px solid rgba(91,220,255,.05);clip-path:inherit;pointer-events:none
+}
+.brand{padding:8px 13px;display:flex;gap:11px;align-items:center}
+.brand-mark{
+  width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--accent);color:var(--accent);
+  font-size:.68rem;font-weight:950;letter-spacing:.08em;
+  background:radial-gradient(circle,rgba(91,220,255,.15),rgba(0,0,0,.12));
+  transform:skewX(-7deg);box-shadow:0 0 18px var(--race-glow)
+}
+.brand h1{font-size:.94rem;line-height:1;margin:0;letter-spacing:.15em;text-transform:uppercase}
+.brand p{font-size:.63rem;color:var(--muted);margin:4px 0 0;letter-spacing:.06em}
+.rail-cell{padding:8px 10px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.rail-label{font-size:.55rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.rail-value{font-size:.94rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rail-value.accent{color:var(--accent)}.rail-value.good{color:var(--good)}.rail-value.warn{color:var(--warn)}.rail-value.bad{color:var(--bad)}
+.top-actions{display:flex;gap:5px;align-items:center}
+.hud-btn{
+  color:var(--text);border:1px solid var(--line2);background:linear-gradient(#0c2636,#071822);
+  padding:7px 9px;border-radius:2px;font-size:.66rem;font-weight:850;letter-spacing:.04em;text-transform:uppercase;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05)
+}
+.hud-btn:hover,.hud-btn.active{border-color:var(--accent);color:var(--accent);box-shadow:0 0 13px var(--race-glow),inset 0 1px 0 rgba(255,255,255,.05)}
+.hud-btn.warn{border-color:#685729;color:var(--warn)}
+.main-grid{
+  display:grid;grid-template-columns:300px minmax(570px,1.62fr) 350px;
+  gap:7px;margin-top:7px;align-items:start
+}
+.left-stack,.right-stack,.center-stack{display:grid;gap:7px}
+.section-title{
+  display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px;
+  font-size:.62rem;letter-spacing:.13em;text-transform:uppercase;color:#dceaf2
+}
+.section-title span{font-size:.54rem;color:var(--muted);letter-spacing:.06em}
+.panel-pad{padding:9px}
+.race-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.race-btn{padding:7px 3px}.race-btn.active{border-color:var(--accent);color:var(--accent);background:linear-gradient(180deg,rgba(91,220,255,.16),#071822)}
+.opponent{width:100%;margin-top:6px;background:#06131d;border:1px solid var(--line);color:var(--text);padding:7px}
+.portrait-frame{height:255px;overflow:hidden;background:linear-gradient(180deg,#07151f,#030a0f)}
+.race-art{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden}
+.race-art svg{width:100%;height:100%;opacity:var(--race-image-opacity);filter:drop-shadow(0 0 18px var(--race-glow));transform:scale(1.04)}
+.race-art:after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 45%,rgba(2,7,11,.82) 100%),linear-gradient(90deg,rgba(2,7,11,.6),transparent 34%,transparent 70%,rgba(2,7,11,.5))
+}
+.portrait-overlay{position:absolute;left:9px;right:9px;bottom:8px;z-index:2}
+.portrait-name{font-size:1.04rem;font-weight:950;letter-spacing:.1em;text-transform:uppercase}
+.portrait-sub{font-size:.62rem;color:var(--accent);letter-spacing:.09em;text-transform:uppercase;margin-top:2px}
+.voice-line{font-size:.68rem;color:#bfd3df;line-height:1.4;margin-top:6px;border-left:2px solid var(--accent);padding-left:7px}
+.command-center{padding:13px 15px;min-height:244px;border-color:#2b6688;background:linear-gradient(135deg,rgba(91,220,255,.09),rgba(178,132,255,.035)),#06131d}
+.command-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.phase{font-size:.61rem;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;display:flex;align-items:center;gap:6px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.45;transform:scale(.82)}}
+.clock{font-size:3.35rem;font-weight:950;letter-spacing:-.06em;font-variant-numeric:tabular-nums;line-height:1}
+.execute-label{margin-top:12px;font-size:.57rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.execute{font-size:clamp(1.7rem,3.2vw,2.85rem);font-weight:950;line-height:1.02;letter-spacing:-.035em;margin-top:2px}
+.execute-why{font-size:.79rem;color:#bdd0dc;line-height:1.45;margin-top:7px;max-width:900px}
+.command-footer{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+.next-step strong{font-size:.81rem}.next-step span,.countdown span{display:block;color:var(--muted);font-size:.56rem;text-transform:uppercase;letter-spacing:.1em}
+.countdown{text-align:right}.countdown strong{font-size:1.25rem;color:var(--warn);font-variant-numeric:tabular-nums}
+.alert-frame{padding:8px 10px;display:grid;grid-template-columns:100px 1fr;gap:10px;align-items:center}
+.alert-level{
+  padding:8px;border:1px solid var(--good);color:var(--good);text-align:center;font-size:.69rem;font-weight:950;letter-spacing:.1em;
+  background:rgba(97,230,166,.04)
+}
+.alert-level.caution{border-color:var(--warn);color:var(--warn);background:rgba(255,209,102,.04)}
+.alert-level.critical{border-color:var(--bad);color:var(--bad);background:rgba(255,112,112,.05);animation:criticalPulse .85s ease-in-out infinite alternate}
+@keyframes criticalPulse{to{box-shadow:0 0 18px rgba(255,112,112,.18)}}
+.alert-copy{font-size:.71rem;line-height:1.42;color:#c5d6e0}
+.doctrine-frame{padding:9px}
+.doctrine-head{display:flex;justify-content:space-between;gap:8px}
+.doctrine-name{font-size:.95rem;font-weight:950}.doctrine-posture{font-size:.56rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.matchup-code{border:1px solid var(--line2);padding:4px 7px;color:var(--accent);font-size:.65rem}
+.doctrine-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}
+.doctrine-cell{border:1px solid var(--line);padding:7px;background:#05101a;min-height:64px}
+.doctrine-cell b{display:block;font-size:.55rem;color:var(--muted);letter-spacing:.09em;text-transform:uppercase;margin-bottom:3px}.doctrine-cell span{font-size:.66rem;line-height:1.35;color:#c1d2dd}
+.tactical-map{height:235px;overflow:hidden;background:radial-gradient(circle at 50% 50%,rgba(91,220,255,.09),transparent 55%),#041018}
+.map-grid{
+  position:absolute;inset:0;opacity:.38;
+  background-image:linear-gradient(rgba(91,220,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(91,220,255,.08) 1px,transparent 1px);
+  background-size:24px 24px
+}
+.map-svg{position:absolute;inset:9px;width:calc(100% - 18px);height:calc(100% - 18px)}
+.map-ping{animation:ping 1.5s ease-out infinite;transform-origin:center}
+@keyframes ping{0%{opacity:.9;transform:scale(.35)}80%,100%{opacity:0;transform:scale(1.35)}}
+.map-label{position:absolute;left:10px;top:8px;font-size:.55rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase}
+.resource-row{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.resource-chip{border:1px solid var(--line);background:#04111a;padding:7px;text-align:center}
+.resource-chip b{display:block;font-size:.95rem}.resource-chip span{font-size:.52rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.threat-wrap{display:grid;grid-template-columns:104px 1fr;gap:9px;align-items:center}
+.threat-ring{
+  width:92px;height:92px;border-radius:50%;position:relative;display:grid;place-items:center;
+  background:conic-gradient(var(--accent) var(--threat-deg,70deg),#0c2635 0);
+  box-shadow:0 0 18px var(--race-glow)
+}
+.threat-ring:before{content:"";position:absolute;inset:8px;background:#06131d;border-radius:50%;border:1px solid var(--line)}
+.threat-ring strong{position:relative;z-index:1;font-size:1.25rem}.threat-ring span{position:absolute;top:59px;z-index:1;font-size:.48rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.threat-copy strong{display:block;font-size:.76rem}.threat-copy p{font-size:.64rem;line-height:1.35;color:var(--muted);margin:4px 0 0}
+.command-card{padding:8px}
+.command-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.command-key{
+  position:relative;aspect-ratio:1.12;border:1px solid var(--line);background:linear-gradient(145deg,#0b2535,#06131d);color:#dceaf2;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;overflow:hidden
+}
+.command-key:hover{border-color:var(--accent);box-shadow:inset 0 0 20px var(--race-glow)}
+.command-key .icon{font-size:1.12rem;color:var(--accent);font-weight:900}
+.command-key .name{font-size:.52rem;text-transform:uppercase;letter-spacing:.07em}
+.command-key kbd{position:absolute;right:3px;bottom:2px;color:var(--muted);font-size:.47rem}
+.priority-list{display:grid;gap:4px}
+.priority{display:grid;grid-template-columns:23px 1fr;gap:6px;border-top:1px solid rgba(25,58,82,.65);padding-top:5px}.priority:first-child{border-top:0;padding-top:0}
+.priority-num{height:21px;display:grid;place-items:center;border:1px solid var(--line2);color:var(--accent);font-size:.6rem;font-weight:900}
+.priority b{display:block;font-size:.67rem}.priority span{display:block;font-size:.58rem;color:var(--muted);line-height:1.3}
+.build-queue{display:flex;gap:4px;overflow:hidden}
+.build-item{flex:1;min-width:0;border:1px solid var(--line);background:#06131d;padding:6px;position:relative}
+.build-item:before{content:"";position:absolute;left:0;bottom:0;height:2px;width:var(--p,30%);background:var(--accent)}
+.build-item b{display:block;font-size:.62rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.build-item span{font-size:.5rem;color:var(--muted)}
+.replay-drop{border:1px dashed var(--line2);padding:9px;text-align:center;background:#041018}.replay-drop.drag{border-color:var(--accent);box-shadow:inset 0 0 22px var(--race-glow)}.replay-drop strong{display:block;font-size:.68rem}.replay-drop span{font-size:.55rem;color:var(--muted)}
+#replayFile{display:none}
+.status{font-size:.59rem;line-height:1.35;color:var(--muted);margin-top:5px}.status.ok{color:var(--good)}.status.error{color:var(--bad)}
+.replay-result{display:none;margin-top:5px}.replay-result.show{display:block}.replay-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}.replay-metric{border:1px solid var(--line);padding:5px;background:#041018}.replay-metric b{display:block;font-size:.75rem}.replay-metric span{font-size:.48rem;color:var(--muted)}
+.footer-rail{
+  margin-top:7px;display:grid;grid-template-columns:auto auto auto auto 1fr auto;gap:5px;align-items:center;padding:6px 7px;
+  border:1px solid var(--line);background:rgba(4,14,22,.94);position:sticky;bottom:4px;z-index:30
+}
+.footer-note{text-align:center;font-size:.55rem;color:var(--muted);letter-spacing:.05em}
+.mbm{color:var(--muted);font-size:.57rem;text-transform:uppercase;letter-spacing:.08em}.mbm strong{color:var(--text)}
+.holo-flicker{animation:holo 5.8s linear infinite}@keyframes holo{0%,98%,100%{opacity:1}98.4%{opacity:.78}98.7%{opacity:1}99%{opacity:.86}}
+@media(max-width:1250px){.main-grid{grid-template-columns:275px 1fr}.right-stack{grid-column:1/-1;grid-template-columns:repeat(3,1fr)}.top-rail{grid-template-columns:1.4fr repeat(3,.45fr) auto}.hide-1250{display:none}}
+@media(max-width:820px){.hud{padding:5px}.top-rail{grid-template-columns:1fr 1fr}.brand{grid-column:1/-1}.top-actions{grid-column:1/-1}.main-grid{grid-template-columns:1fr}.center-stack{order:-1}.right-stack{grid-column:auto;grid-template-columns:1fr}.portrait-frame{height:200px}.doctrine-grid{grid-template-columns:1fr}.footer-rail{grid-template-columns:repeat(4,1fr)}.footer-note,.mbm{grid-column:span 2}}
+</style>
+</head>
+<body data-race="Zerg">
+<div class="hud">
+  <header class="top-rail">
+    <section class="frame brand">
+      <div class="brand-mark">SC2</div>
+      <div><h1>Master Coach // Command HUD</h1><p>Observe → infer → decide → execute → verify → adapt</p></div>
+    </section>
+    <div class="rail-cell"><span class="rail-label">Race</span><strong class="rail-value accent" id="railRace">Zerg</strong></div>
+    <div class="rail-cell"><span class="rail-label">Matchup</span><strong class="rail-value" id="railMatchup">ZvT</strong></div>
+    <div class="rail-cell"><span class="rail-label">Threat</span><strong class="rail-value good" id="railThreat">Stable</strong></div>
+    <div class="rail-cell hide-1250"><span class="rail-label">Doctrine</span><strong class="rail-value" id="railDoctrine">Elastic Swarm</strong></div>
+    <div class="rail-cell hide-1250"><span class="rail-label">Coach State</span><strong class="rail-value accent" id="railCoach">Live</strong></div>
+    <div class="top-actions">
+      <button class="hud-btn" id="voiceBtn">Voice</button>
+      <button class="hud-btn" id="fullscreenBtn">Fullscreen</button>
+    </div>
+  </header>
+
+  <div class="main-grid">
+    <aside class="left-stack">
+      <section class="frame panel-pad">
+        <div class="section-title">Race Command <span>switch doctrine</span></div>
+        <div class="race-tabs">
+          <button class="hud-btn race-btn active" data-race="Zerg">Zerg</button>
+          <button class="hud-btn race-btn" data-race="Terran">Terran</button>
+          <button class="hud-btn race-btn" data-race="Protoss">Protoss</button>
+        </div>
+        <select id="opponent" class="opponent"><option>Terran</option><option>Protoss</option><option>Zerg</option></select>
+      </section>
+
+      <section class="portrait-frame holo-flicker">
+        <div class="race-art" id="raceArt"></div>
+        <div class="portrait-overlay">
+          <div class="portrait-name" id="portraitName">Overmind Node</div>
+          <div class="portrait-sub" id="portraitSub">Zerg tactical cognition</div>
+          <div class="voice-line" id="voiceLine">Larva is optionality. Spend it only after evidence tells you what future state must exist.</div>
+        </div>
+      </section>
+
+      <section class="frame panel-pad">
+        <div class="section-title">Scouting Evidence <span>1–6</span></div>
+        <div class="priority-list" id="evidenceList"></div>
+      </section>
+
+      <section class="frame panel-pad">
+        <div class="section-title">Resource Telemetry <span>manual / replay</span></div>
+        <div class="resource-row">
+          <div class="resource-chip"><b id="workersVal">—</b><span>Workers</span></div>
+          <div class="resource-chip"><b id="basesVal">—</b><span>Bases</span></div>
+          <div class="resource-chip"><b id="armyVal">—</b><span>Army</span></div>
+          <div class="resource-chip"><b id="bankVal">—</b><span>Bank</span></div>
+        </div>
+      </section>
+    </aside>
+
+    <main class="center-stack">
+      <section class="command-center">
+        <div class="command-top">
+          <div class="phase"><span class="live-dot"></span><span id="phase">Opening</span></div>
+          <div class="clock" id="clock">0:00</div>
+        </div>
+        <div class="execute-label">Execute now</div>
+        <div class="execute" id="execute">Drone continuously</div>
+        <div class="execute-why" id="executeWhy">Build the economy that pays for every later decision.</div>
+        <div class="command-footer">
+          <div class="next-step"><span>Next transition</span><strong id="nextAction">Overlord · 12 supply</strong></div>
+          <div class="countdown"><span>Window opens in</span><strong id="nextCountdown">0:32</strong></div>
+        </div>
+      </section>
+
+      <section class="alert-frame">
+        <div class="alert-level" id="alertLevel">STABLE</div>
+        <div class="alert-copy" id="alertCopy">No exception signal selected. Continue the economic spine, but keep scouting.</div>
+      </section>
+
+      <section class="doctrine-frame">
+        <div class="doctrine-head">
+          <div><div class="doctrine-name" id="doctrineName">Elastic Swarm</div><div class="doctrine-posture" id="doctrinePosture">ABSORB → SURROUND → OVERWHELM</div></div>
+          <div class="matchup-code" id="matchupCode">ZvT</div>
+        </div>
+        <div class="doctrine-grid">
+          <div class="doctrine-cell"><b>Win Condition</b><span id="docWin"></span></div>
+          <div class="doctrine-cell"><b>Economy Rule</b><span id="docEco"></span></div>
+          <div class="doctrine-cell"><b>Fight Rule</b><span id="docFight"></span></div>
+          <div class="doctrine-cell"><b>Critical Question</b><span id="docQuestion"></span></div>
+        </div>
+      </section>
+
+      <section class="tactical-map">
+        <div class="map-grid"></div><div class="map-label">Tactical radar // doctrine projection</div>
+        <svg class="map-svg" id="mapSvg" viewBox="0 0 600 330"></svg>
+      </section>
+
+      <section class="frame panel-pad">
+        <div class="section-title">Build / Decision Queue <span>forward state</span></div>
+        <div class="build-queue" id="buildQueue"></div>
+      </section>
+    </main>
+
+    <aside class="right-stack">
+      <section class="frame panel-pad">
+        <div class="section-title">Threat Matrix <span>state-driven</span></div>
+        <div class="threat-wrap">
+          <div class="threat-ring" id="threatRing"><strong id="threatScore">18</strong><span>Threat</span></div>
+          <div class="threat-copy"><strong id="threatTitle">Low strategic pressure</strong><p id="threatDetail">No evidence conflicts with the current economic plan.</p></div>
+        </div>
+      </section>
+
+      <section class="command-card">
+        <div class="section-title">Command Card <span>hotkeys</span></div>
+        <div class="command-grid">
+          <button class="command-key" data-command="Scout"><span class="icon">⌖</span><span class="name">Scout</span><kbd>Q</kbd></button>
+          <button class="command-key" data-command="Pressure"><span class="icon">▲</span><span class="name">Pressure</span><kbd>W</kbd></button>
+          <button class="command-key" data-command="Expand"><span class="icon">◇</span><span class="name">Expand</span><kbd>E</kbd></button>
+          <button class="command-key" data-command="Hold"><span class="icon">▣</span><span class="name">Hold</span><kbd>A</kbd></button>
+          <button class="command-key" data-command="Adapt"><span class="icon">↻</span><span class="name">Adapt</span><kbd>S</kbd></button>
+          <button class="command-key" data-command="Recover"><span class="icon">✚</span><span class="name">Recover</span><kbd>D</kbd></button>
+          <button class="command-key" data-command="Trap"><span class="icon">⚠</span><span class="name">Trap Lab</span><kbd>Z</kbd></button>
+          <button class="command-key" data-command="Replay"><span class="icon">▶</span><span class="name">Replay</span><kbd>X</kbd></button>
+          <button class="command-key" data-command="Reset"><span class="icon">⟲</span><span class="name">Reset</span><kbd>C</kbd></button>
+        </div>
+      </section>
+
+      <section class="frame panel-pad">
+        <div class="section-title">Tactical Priority Queue <span>do these in order</span></div>
+        <div class="priority-list" id="priorityList"></div>
+      </section>
+
+      <section class="frame panel-pad">
+        <div class="section-title">Replay Intelligence <span>local analysis</span></div>
+        <div class="replay-drop" id="replayDrop"><strong>Drop .SC2Replay</strong><span>State reconstruction · doctrine review · engagement analysis</span><input id="replayFile" type="file" accept=".SC2Replay"></div>
+        <div class="status" id="replayStatus">Checking parser service…</div>
+        <button class="hud-btn" id="demoBtn" style="width:100%;margin-top:5px">Load demo replay</button>
+        <div class="replay-result" id="replayResult"><div class="replay-metrics" id="replayMetrics"></div></div>
+      </section>
+    </aside>
+  </div>
+
+  <footer class="footer-rail">
+    <button class="hud-btn active" id="playBtn">Start</button>
+    <button class="hud-btn" id="minusBtn">−10s</button>
+    <button class="hud-btn" id="plusBtn">+10s</button>
+    <button class="hud-btn" id="speedBtn">1×</button>
+    <div class="footer-note">Command HUD is a coaching interface, not gameplay automation.</div>
+    <div class="mbm">Created by <strong>MBMapps</strong></div>
+  </footer>
+</div>
+
+<script>
+const RACES={
+ Zerg:{
+  theme:{accent:"#b978ff",accent2:"#e26dff",glow:"rgba(185,120,255,.24)",line:"#49305e"},
+  portrait:{name:"Overmind Node",sub:"Zerg tactical cognition",voice:"Larva is optionality. Spend it only after evidence tells you what future state must exist."},
+  art:`<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <defs><radialGradient id="zg"><stop stop-color="#d36cff"/><stop offset="1" stop-color="#3b163f"/></radialGradient></defs>
+    <path d="M54 241 C85 180 92 118 139 82 C121 44 151 26 179 57 C200 8 224 8 233 59 C265 22 296 48 270 85 C321 112 328 178 354 241 C303 216 275 219 244 248 C220 264 181 264 157 246 C124 219 94 217 54 241Z" fill="url(#zg)" stroke="#f2b2ff" stroke-width="4"/>
+    <path d="M126 123 C155 90 180 101 197 132 C214 101 247 92 275 126 C250 126 233 139 226 166 C216 190 179 190 168 164 C159 140 145 127 126 123Z" fill="#180d23" stroke="#d77cff" stroke-width="3"/>
+    <ellipse cx="165" cy="139" rx="8" ry="5" fill="#ffe0ff"/><ellipse cx="236" cy="139" rx="8" ry="5" fill="#ffe0ff"/>
+    <path d="M87 159 Q43 172 35 211 Q77 197 112 200M308 158 Q357 170 367 211 Q323 196 290 202" fill="none" stroke="#c764ef" stroke-width="10" stroke-linecap="round"/>
+    <path d="M146 203 Q199 230 256 203" fill="none" stroke="#f0a6ff" stroke-width="5"/>
+  </svg>`
+ },
+ Terran:{
+  theme:{accent:"#5bdcff",accent2:"#7ab8ff",glow:"rgba(91,220,255,.22)",line:"#193a52"},
+  portrait:{name:"Ghost Command",sub:"Terran operational warfare",voice:"Terran is scheduling. Pressure two places, force the response, then expand behind the defensive tax."},
+  art:`<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="tg" x1="0" x2="1"><stop stop-color="#8edfff"/><stop offset="1" stop-color="#163b57"/></linearGradient></defs>
+    <path d="M95 244 L118 146 Q124 91 166 72 L178 35 H222 L236 73 Q278 92 284 147 L306 244Z" fill="#102536" stroke="url(#tg)" stroke-width="5"/>
+    <path d="M143 106 Q200 72 258 108 L247 170 Q201 190 153 170Z" fill="#07131d" stroke="#79dfff" stroke-width="4"/>
+    <path d="M157 127 H245 L237 151 H166Z" fill="#001d2a" stroke="#68eaff" stroke-width="3"/>
+    <circle cx="182" cy="139" r="6" fill="#6dff9b"/><circle cx="222" cy="139" r="6" fill="#6dff9b"/>
+    <path d="M126 182 L70 212 L54 245 H112 L153 203M273 183 L332 215 L347 245 H287 L249 202" fill="#173d58" stroke="#62cfff" stroke-width="4"/>
+    <path d="M166 208 H235 V257 H166Z" fill="#0b1b26" stroke="#417997" stroke-width="3"/>
+  </svg>`
+ },
+ Protoss:{
+  theme:{accent:"#ffd45d",accent2:"#6ee7ff",glow:"rgba(255,212,93,.22)",line:"#5b4b22"},
+  portrait:{name:"Khalai Nexus",sub:"Protoss psionic command",voice:"Preserve expensive power. Create local asymmetry, force movement, and attack only when abilities make the geometry unfair."},
+  art:`<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="pg" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#fff2a1"/><stop offset=".55" stop-color="#e6a93e"/><stop offset="1" stop-color="#2b6381"/></linearGradient></defs>
+    <path d="M200 25 L248 72 L272 135 L255 213 L200 272 L144 213 L126 135 L153 70Z" fill="#102635" stroke="url(#pg)" stroke-width="6"/>
+    <path d="M157 107 Q200 76 244 108 L235 171 Q201 194 165 170Z" fill="#07131d" stroke="#f8d269" stroke-width="4"/>
+    <path d="M173 126 Q188 115 196 134 Q187 148 173 141Z" fill="#7df3ff"/><path d="M226 126 Q211 115 204 134 Q213 148 227 141Z" fill="#7df3ff"/>
+    <path d="M151 72 L111 117 L126 167M249 72 L291 117 L275 166" fill="none" stroke="#ffd45d" stroke-width="9" stroke-linecap="round"/>
+    <path d="M181 198 L200 224 L219 198" fill="none" stroke="#77eaff" stroke-width="5"/>
+    <circle cx="200" cy="60" r="13" fill="#7df3ff" opacity=".72"/>
+  </svg>`
+ }
+};
+
+const DOCTRINES={
+ "ZvT":{name:"Elastic Swarm",posture:"ABSORB → SURROUND → OVERWHELM",win:"Absorb scheduled Terran pressure without sacrificing the larva economy that powers the second army.",eco:"Drone while production and CC evidence permits it; compress Drone windows when production outpaces expansion.",fight:"Trade space for time, break siege geometry, attack reinforcements, then collapse.",q:"Where is Terran spending the next two production cycles?"},
+ "ZvP":{name:"Information Elasticity",posture:"READ → ALLOCATE → DENY SPIKE",win:"Convert Protoss tech and Gateway counts into the correct larva allocation before the power spike arrives.",eco:"Greed is earned by evidence; a third Nexus is not safety if Gateways spike.",fight:"Avoid Battery and splash geometry; force expensive Protoss units to reposition.",q:"What exact Protoss power spike is being purchased?"},
+ "ZvZ":{name:"Larva Knife-Fight",posture:"COUNT → SURVIVE → COMPOUND",win:"Read Drone-versus-army cycles earlier than the opponent and exploit reinforcement geometry.",eco:"Worker leads matter only if they survive the next larva cycle.",fight:"Stop damage-chasing when defender reinforcement flips the local fight.",q:"Did the opponent's last larva cycle become Drones or army?"},
+ "TvZ":{name:"Scheduled Taxation",posture:"SCOUT → SCHEDULE → MULTI-PRONG",win:"Force Zerg larvae into army instead of Drones while expanding behind repeatable production pressure.",eco:"Third CC and scalable production belong behind credible pressure.",fight:"Siege before contact, clear creep, pre-split, and refuse the prepared surround.",q:"Can your next scheduled threat force the worse larva choice?"},
+ "TvP":{name:"Geometry & Tax",posture:"IDENTIFY SPIKE → PRE-SPLIT → FORCE MOVEMENT",win:"Make expensive Protoss power units defend too much space while Bio production compounds.",eco:"Expand behind pressure when Protoss is stable or greedy.",fight:"Threaten a second location before demanding a frontal win.",q:"Which Protoss power spike is approaching, and where can it be made inefficient?"},
+ "TvT":{name:"Vision Siege Chess",posture:"SEE → POSITION → DENY ROTATION",win:"Convert information and air control into superior Tank geometry.",eco:"Expand only when army location and siege lanes are controlled.",fight:"Air superiority exists to improve vision and siege placement, not erase a ground deficit.",q:"Where can the enemy siege next?"},
+ "PvT":{name:"Asymmetric Power",posture:"SEE → THREATEN → PRESERVE",win:"Use tech thresholds, Blink/Prism geometry and preservation to create threats Terran cannot answer simultaneously.",eco:"Take economy when mobile map control buys safety.",fight:"Preserve splash/casters and force Terran to move before committing.",q:"Can your current power spike attack the Terran schedule rather than the fortress?"},
+ "PvZ":{name:"Power-Spike Leverage",posture:"CLASSIFY → PIN → EXPAND",win:"Use concentrated power spikes and warp geometry to force larvae into defense while economy compounds.",eco:"Reconcile army size with Drone/base evidence before canceling economy.",fight:"Use chokes, spell geometry and threatened bases to compress Zerg choices.",q:"What is the next Zerg larva cycle becoming?"},
+ "PvP":{name:"Local Superiority",posture:"VERIFY → PRESERVE → OUT-GEOMETRY",win:"Create local asymmetry with vision, Blink, Batteries, warp geometry and tech timing.",eco:"Hidden tech increases scouting priority, not automatic panic.",fight:"Visible Stalker count is not the whole local fight; reinforcement geometry matters.",q:"What hidden allocation would make the visible army misleading?"}
+};
+
+const BUILD={
+ Zerg:[[0,"Drone continuously","Opening","Build the economy that pays for every later decision."],[32,"Overlord","Opening","Stay ahead of the first supply block."],[73,"Natural Hatchery","Opening","Economy + larva + map claim."],[97,"Spawning Pool","Opening","Queens and defense without strangling expansion."],[145,"2 Queens + first Zerglings","Stabilize","Inject immediately; Lings scout and protect."],[194,"Third Hatchery","Expand","Convert a safe read into economy."],[220,"Roach Warren","Tech","Insurance against ground aggression."]],
+ Terran:[[0,"SCVs continuously","Opening","Worker cycles establish the income floor."],[32,"Supply Depot","Opening","Create room and start wall geometry."],[48,"Barracks + Refinery","Opening","Begin the Reaper-tech backbone."],[105,"Orbital + Reaper","Scout","MULE economy plus information."],[145,"Command Center","Expand","Expand behind scouting pressure."],[195,"Factory + second gas","Tech","Unlock flexible 1/1/1 responses."],[235,"Starport","Tech","Reconfigure production rapidly."]],
+ Protoss:[[0,"Probes continuously","Opening","Chrono + worker continuity fund tech."],[35,"Pylon","Opening","Power-field geometry already matters."],[55,"Gateway","Opening","Begin the tech chain."],[70,"Assimilator","Opening","Gas funds power spikes."],[115,"Nexus if scout permits","Expand","Expansion follows evidence, not habit."],[125,"Cybernetics Core","Tech","Unlock advanced Gateway tech."],[225,"Twilight Council","Tech","Blink gives mobility and preservation."]]
+};
+
+const EVIDENCE={
+ Zerg:[["No enemy natural","allin"],["Extra production","pressure"],["Air tech","tech"],["Opponent turtles","turtle"],["Greedy expansion","greed"],["Hidden information","hidden"]],
+ Terran:[["No enemy natural","allin"],["Fast tech","tech"],["Greedy third","greed"],["Heavy static","turtle"],["Large move-out","pressure"],["Hidden army","hidden"]],
+ Protoss:[["No enemy natural","allin"],["Fast air","tech"],["Heavy timing","pressure"],["Greedy third","greed"],["Turtle/static","turtle"],["Hidden tech","hidden"]]
+};
+
+let race="Zerg", elapsed=0, running=false, speed=1, timer=null, selected=new Set(), voice=false;
+const $=id=>document.getElementById(id);
+const fmt=s=>Math.floor(Math.max(0,s)/60)+":"+String(Math.floor(Math.max(0,s))%60).padStart(2,"0");
+const raceLetter=r=>r==="Zerg"?"Z":r==="Terran"?"T":"P";
+function matchup(){return raceLetter(race)+"v"+raceLetter($("opponent").value)}
+function currentStep(){
+ const b=BUILD[race];let i=0;for(let n=0;n<b.length;n++){if(elapsed>=b[n][0])i=n;else break}return [i,b[i]];
+}
+function applyTheme(){
+ const r=RACES[race],t=r.theme,root=document.documentElement;
+ root.style.setProperty("--accent",t.accent);root.style.setProperty("--accent2",t.accent2);root.style.setProperty("--race-glow",t.glow);root.style.setProperty("--line",t.line);
+ $("raceArt").innerHTML=r.art;$("portraitName").textContent=r.portrait.name;$("portraitSub").textContent=r.portrait.sub;$("voiceLine").textContent=r.portrait.voice;
+ $("railRace").textContent=race;
+ document.querySelectorAll(".race-btn").forEach(b=>b.classList.toggle("active",b.dataset.race===race));
+}
+function threatModel(){
+ const k=[...selected];let score=18,name="STABLE",title="Low strategic pressure",detail="No evidence conflicts with the current economic plan.",cls="";
+ if(k.includes("allin")){score=94;name="CRITICAL";title="All-in commitment";detail="Survival allocation overrides the economic script.";cls="critical"}
+ else if(k.includes("pressure")){score=78;name="HIGH";title="Pressure wave active";detail="Prepare for the next reinforcement cycle before contact.";cls="critical"}
+ else if(k.includes("hidden")){score=62;name="UNCERTAIN";title="Information deficit";detail="Resolve the missing allocation before a fragile commitment.";cls="caution"}
+ else if(k.includes("tech")){score=49;name="TECH SHIFT";title="Composition transition";detail="Buy enough of the answer without over-countering.";cls="caution"}
+ else if(k.includes("greed")){score=39;name="WINDOW";title="Economic opportunity";detail="Tax greed with economy, map control or efficient pressure.";cls="caution"}
+ else if(k.includes("turtle")){score=34;name="CONTAIN";title="Static-defense state";detail="Attack the map, not the fortress.";cls="caution"}
+ return {score,name,title,detail,cls};
+}
+function priorities(){
+ const t=threatModel(),d=DOCTRINES[matchup()]||{},step=currentStep()[1],arr=[];
+ if(t.name==="CRITICAL")arr.push(["Survive next cycle","Cancel luxury spending and turn production currency into immediate defense."]);
+ else if(t.name==="HIGH")arr.push(["Meet pressure before contact","Position for the next wave, not the units currently visible."]);
+ else if(t.name==="UNCERTAIN")arr.push(["Resolve uncertainty","Scout before making the most fragile commitment."]);
+ else if(t.name==="WINDOW")arr.push(["Tax the greed window","Expand or force defensive spending without a frontal fortress test."]);
+ else arr.push([step[1],step[3]]);
+ arr.push(["Protect doctrine",d.eco||"Keep the economic spine intact."]);
+ arr.push(["Ask next question",d.q||"What changes the next decision?"]);
+ return arr;
+}
+function renderEvidence(){
+ $("evidenceList").innerHTML=EVIDENCE[race].map(([n,k],i)=>`<button class="hud-btn ${selected.has(k)?"active":""}" data-k="${k}" style="text-align:left">${i+1} · ${n}</button>`).join("");
+ $("evidenceList").querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{selected.has(b.dataset.k)?selected.delete(b.dataset.k):selected.add(b.dataset.k);renderAll()});
+}
+function renderMap(){
+ const t=threatModel(),c=RACES[race].theme.accent;
+ $("mapSvg").innerHTML=`
+ <defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+ <path d="M62 272 C105 221 127 176 186 172 C245 168 262 116 324 122 C394 128 419 78 538 55" fill="none" stroke="${c}" stroke-opacity=".22" stroke-width="7"/>
+ <path d="M82 250 L185 185 L298 210 L395 143 L523 72" fill="none" stroke="${c}" stroke-opacity=".65" stroke-width="2" stroke-dasharray="7 5"/>
+ <circle cx="82" cy="250" r="26" fill="#07131d" stroke="${c}" stroke-width="3"/><text x="82" y="254" text-anchor="middle" fill="${c}" font-size="12">YOU</text>
+ <circle cx="523" cy="72" r="27" fill="#07131d" stroke="#ff7070" stroke-width="3"/><text x="523" y="76" text-anchor="middle" fill="#ff9292" font-size="11">ENEMY</text>
+ <circle cx="298" cy="210" r="10" fill="${c}" opacity=".8"/><circle class="map-ping" cx="298" cy="210" r="${t.score>70?40:27}" fill="none" stroke="${t.score>70?"#ff7070":c}" stroke-width="3"/>
+ <circle cx="395" cy="143" r="8" fill="#ffd166"/><circle cx="185" cy="185" r="7" fill="#61e6a6"/>
+ <text x="310" y="201" fill="#a8bdca" font-size="10">CONTEST</text><text x="404" y="135" fill="#ffd166" font-size="10">TECH</text>
+ `;
+}
+function renderQueue(){
+ const b=BUILD[race],i=currentStep()[0],items=b.slice(i,Math.min(b.length,i+4));
+ $("buildQueue").innerHTML=items.map((x,n)=>`<div class="build-item" style="--p:${n===0?75:20}%"><b>${x[1]}</b><span>${fmt(x[0])} · ${x[2]}</span></div>`).join("");
+}
+function renderDoctrine(){
+ const d=DOCTRINES[matchup()]||DOCTRINES["ZvT"];
+ $("railMatchup").textContent=matchup();$("railDoctrine").textContent=d.name;$("matchupCode").textContent=matchup();$("doctrineName").textContent=d.name;$("doctrinePosture").textContent=d.posture;
+ $("docWin").textContent=d.win;$("docEco").textContent=d.eco;$("docFight").textContent=d.fight;$("docQuestion").textContent=d.q;
+}
+function renderCommand(){
+ const [i,s]=currentStep(),b=BUILD[race],next=b[i+1];
+ $("phase").textContent=s[2];$("clock").textContent=fmt(elapsed);$("execute").textContent=s[1];$("executeWhy").textContent=s[3];
+ $("nextAction").textContent=next?`${next[1]} · ${fmt(next[0])}`:"Adapt to game state";$("nextCountdown").textContent=next?fmt(Math.max(0,next[0]-elapsed)):"—";
+}
+function renderThreat(){
+ const t=threatModel();$("alertLevel").textContent=t.name;$("alertLevel").className="alert-level "+t.cls;$("alertCopy").textContent=t.detail;
+ $("railThreat").textContent=t.name;$("railThreat").className="rail-value "+(t.cls==="critical"?"bad":t.cls==="caution"?"warn":"good");
+ $("threatScore").textContent=t.score;$("threatRing").style.setProperty("--threat-deg",Math.round(t.score*3.6)+"deg");$("threatTitle").textContent=t.title;$("threatDetail").textContent=t.detail;
+}
+function renderPriority(){
+ $("priorityList").innerHTML=priorities().map((x,i)=>`<div class="priority"><div class="priority-num">${i+1}</div><div><b>${x[0]}</b><span>${x[1]}</span></div></div>`).join("");
+}
+function renderAll(){applyTheme();renderDoctrine();renderEvidence();renderCommand();renderThreat();renderPriority();renderMap();renderQueue()}
+document.querySelectorAll(".race-btn").forEach(b=>b.onclick=()=>{race=b.dataset.race;selected.clear();elapsed=0;renderAll()});
+$("opponent").onchange=()=>renderAll();
+$("playBtn").onclick=()=>{running=!running;$("playBtn").textContent=running?"Pause":"Start";$("playBtn").classList.toggle("active",running);clearInterval(timer);if(running)timer=setInterval(()=>{elapsed+=speed;renderCommand();renderQueue()},1000)};
+$("minusBtn").onclick=()=>{elapsed=Math.max(0,elapsed-10);renderCommand();renderQueue()};
+$("plusBtn").onclick=()=>{elapsed+=10;renderCommand();renderQueue()};
+$("speedBtn").onclick=()=>{speed=speed===1?2:speed===2?4:1;$("speedBtn").textContent=speed+"×"};
+$("voiceBtn").onclick=()=>{voice=!voice;$("voiceBtn").classList.toggle("active",voice);if(voice&&"speechSynthesis"in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance($("execute").textContent))}};
+$("fullscreenBtn").onclick=async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){}};
+document.querySelectorAll(".command-key").forEach(b=>b.onclick=()=>{const c=b.dataset.command;if(c==="Reset"){elapsed=0;selected.clear();renderAll()}else if(c==="Replay")$("replayFile").click();else if(c==="Scout"){if(EVIDENCE[race][5])selected.add(EVIDENCE[race][5][1]);renderAll()}else if(c==="Pressure"){selected.add("pressure");renderAll()}else if(c==="Expand"){selected.add("greed");renderAll()}else if(c==="Hold"){selected.add("allin");renderAll()}else if(c==="Recover"){selected.delete("pressure");selected.delete("allin");renderAll()}else if(c==="Adapt"){selected.add("tech");renderAll()}else if(c==="Trap"){selected.add("hidden");renderAll()}});
+document.addEventListener("keydown",e=>{if(["INPUT","SELECT","TEXTAREA"].includes(document.activeElement.tagName))return;const k=e.key.toLowerCase();if(k===" "){e.preventDefault();$("playBtn").click()}if(/^[1-6]$/.test(k)){const x=$("evidenceList").children[+k-1];if(x)x.click()}const map={q:"Scout",w:"Pressure",e:"Expand",a:"Hold",s:"Adapt",d:"Recover",z:"Trap",x:"Replay",c:"Reset"};if(map[k]){const b=[...document.querySelectorAll(".command-key")].find(x=>x.dataset.command===map[k]);if(b)b.click()}});
+const drop=$("replayDrop"),file=$("replayFile"),status=$("replayStatus");
+drop.onclick=()=>file.click();["dragenter","dragover"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add("drag")}));["dragleave","drop"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove("drag")}));drop.addEventListener("drop",e=>{const f=e.dataTransfer.files?.[0];if(f)analyzeReplay(f)});file.onchange=()=>{if(file.files[0])analyzeReplay(file.files[0])};
+async function health(){try{const r=await fetch("/api/health"),d=await r.json();status.textContent=d.parser_ready?"Replay parser ready.":"Replay server online; parser dependency unavailable.";status.className="status "+(d.parser_ready?"ok":"error")}catch(e){status.textContent="Replay service not running.";status.className="status error"}}
+async function analyzeReplay(f){status.textContent="Analyzing replay…";status.className="status";const form=new FormData();form.append("replay",f);try{const r=await fetch("/api/replay/analyze",{method:"POST",body:form}),d=await r.json();if(!r.ok)throw new Error(d.detail||d.error);showReplay(d);status.textContent="Replay reconstructed.";status.className="status ok"}catch(e){status.textContent=e.message||"Replay analysis failed.";status.className="status error"}}
+function showReplay(d){const p=d.players?.[0],a=p?d.analysis_by_player?.[String(p.pid)]:null;if(!p||!a)return;$("replayResult").classList.add("show");$("replayMetrics").innerHTML=[["Score",a.score],["Matchup",a.matchup],["Flags",a.violations?.length||0]].map(x=>`<div class="replay-metric"><b>${x[1]}</b><span>${x[0]}</span></div>`).join("");race=p.race&&RACES[p.race]?p.race:race;const opp=d.players.find(x=>x.pid!==p.pid);if(opp&&RACES[opp.race])$("opponent").value=opp.race;const s=a.stats?.at(-1)||{};$("workersVal").textContent=s.workers??"—";$("basesVal").textContent=s.bases??"—";$("armyVal").textContent=s.army_supply_approx??"—";$("bankVal").textContent=s.bank??"—";renderAll()}
+$("demoBtn").onclick=async()=>{try{const r=await fetch("/api/demo"),d=await r.json();showReplay(d);status.textContent="Synthetic replay demo loaded.";status.className="status ok"}catch(e){status.textContent="Demo unavailable.";status.className="status error"}};
+health();renderAll();
+</script>
+</body>
+</html>
