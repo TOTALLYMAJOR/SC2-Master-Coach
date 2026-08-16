@@ -18,6 +18,8 @@ The current strategy/build baseline targets **StarCraft II 5.0.16b**, including 
 
 - Fixed **“Unknown game version: 5.0.16. Known versions: ['latest']”** during SC2 frame capture.
 - Uses the replay's authoritative `BaseBuild` and `DataVersion` to launch the exact locally installed `Versions/BaseXXXXX` binary, even when PySC2's static version catalog has not yet added the current patch name.
+- Fixed the Windows **“Required library 'icuuc52.dll' does not exist”** launch failure by explicitly discovering StarCraft II's `Support64` runtime, validating the ICU runtime trio, using it as the child SC2 working directory, and prepending it to the child process `PATH`.
+- If the bundled SC2 ICU runtime is genuinely incomplete, the app now stops before launch and directs the user to Battle.net **Scan and Repair** rather than suggesting third-party DLL downloads.
 - Reports the locally installed SC2 Base builds when a replay-compatible binary is genuinely missing.
 - Allows SC2 to try its local map cache before declaring map data unavailable.
 - Moved **Build / Decision Queue** directly below **Execute Now**.
@@ -78,7 +80,9 @@ The executable is unsigned under the zero-cost release constraint, so Windows Sm
 
 Replay parsing works without launching StarCraft II. **Player POV / Observer Truth frames require StarCraft II to be installed locally and launched at least once.**
 
-The renderer looks in the normal Windows installation location and also honors the `SC2PATH` environment variable. It reads the replay's exact `BaseBuild`, selects the corresponding local SC2 binary, advances to the critical timestamp, moves to the recorded camera position when available, and retrieves RGB frame data from the StarCraft II engine.
+The renderer looks in the normal Windows installation location and also honors the `SC2PATH` environment variable. It reads the replay's exact `BaseBuild`, selects the corresponding local SC2 binary, validates the local `Support64` ICU runtime, launches SC2 with that runtime directory explicitly in its DLL search path, advances to the critical timestamp, moves to the recorded camera position when available, and retrieves RGB frame data from the StarCraft II engine.
+
+If `icuuc52.dll`, `icuin52.dll`, or `icudt52.dll` is missing from the local StarCraft II runtime, use Battle.net **Scan and Repair**. Do not install DLLs from third-party download sites.
 
 This is not a Playwright screenshot. Playwright can capture the web application itself; SC2 Master Coach uses the **StarCraft II replay rendering API** to obtain actual game-engine frames.
 
