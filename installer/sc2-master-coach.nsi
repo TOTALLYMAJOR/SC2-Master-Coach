@@ -8,7 +8,7 @@ Unicode true
 !define APPID "SC2MasterCoach"
 
 Name "${APPNAME}"
-OutFile "${__FILEDIR__}\out\SC2-Master-Coach-Setup.exe"
+OutFile "out\SC2-Master-Coach-Setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\${APPNAME}"
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
@@ -35,7 +35,7 @@ Function EnsureWebView2
     DetailPrint "Installing Microsoft Edge WebView2 Runtime..."
     InitPluginsDir
     SetOutPath "$PLUGINSDIR"
-    File /oname=MicrosoftEdgeWebview2Setup.exe "${__FILEDIR__}\MicrosoftEdgeWebview2Setup.exe"
+    File /oname=MicrosoftEdgeWebview2Setup.exe "MicrosoftEdgeWebview2Setup.exe"
     ExecWait '"$PLUGINSDIR\MicrosoftEdgeWebview2Setup.exe" /silent /install'
   ${Else}
     DetailPrint "WebView2 Runtime detected: $0"
@@ -45,7 +45,7 @@ FunctionEnd
 Section "Install"
   Call EnsureWebView2
   SetOutPath "$INSTDIR"
-  File /r "${__FILEDIR__}\..\dist\SC2 Master Coach\*.*"
+  File /r "..\dist\SC2 Master Coach\*.*"
 
   CreateDirectory "$SMPROGRAMS\${APPNAME}"
   CreateShortcut "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk" "$INSTDIR\${EXE}"
