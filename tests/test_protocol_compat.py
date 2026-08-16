@@ -1,4 +1,6 @@
 from pathlib import Path
+from types import SimpleNamespace
+import os
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,6 +36,24 @@ def test_new_sc2_replay_versions_bind_to_their_exact_base_build():
     assert runtime_version.build_version == 97563
     assert runtime_version.data_version == "ABCDEF0123456789"
     assert runtime_version.binary == "local-install"
+
+
+def test_windows_runtime_finds_support64_icu_and_sets_child_context(tmp_path, monkeypatch):
+    import sc2_frame_capture as capture
+
+    support64 = tmp_path / "Support64"
+    support64.mkdir()
+    for name in capture._SC2_RUNTIME_DLLS:
+        (support64 / name).write_bytes(b"test")
+
+    config = SimpleNamespace(data_dir=str(tmp_path), cwd="wrong", env={"PATH": "existing"})
+    monkeypatch.setattr(capture.os, "name", "nt", raising=False)
+    result = capture._configure_windows_runtime(config)
+
+    assert result["configured"] is True
+    assert result["missing"] == []
+    assert Path(config.cwd) == support64
+    assert config.env["PATH"].split(os.pathsep)[0] == str(support64)
 
 
 def test_release_version_is_consistent_without_hardcoding_a_patch_number():
