@@ -47,7 +47,11 @@ jobs:
           choco install nsis.portable -y --no-progress
           $makensis = (Get-Command makensis.exe -ErrorAction SilentlyContinue).Source
           if (-not $makensis) { $makensis = "C:\ProgramData\chocolatey\bin\makensis.exe" }
-          & $makensis "installer\sc2-master-coach.nsi"
+          Push-Location installer
+          & $makensis "sc2-master-coach.nsi"
+          $exitCode = $LASTEXITCODE
+          Pop-Location
+          if ($exitCode -ne 0) { exit $exitCode }
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
