@@ -1,0 +1,58 @@
+name: Windows desktop release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Python build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-desktop.txt
+
+      - name: Build native desktop bundle
+        shell: pwsh
+        run: |
+          python -m PyInstaller --noconfirm --clean --windowed --onedir --name "SC2 Master Coach" --add-data "static:static" --collect-all sc2reader --collect-all mpyq --collect-all webview --hidden-import webview.platforms.edgechromium desktop_app.py
+          Compress-Archive -Path "dist\SC2 Master Coach\*" -DestinationPath "dist\SC2-Master-Coach-Portable.zip" -Force
+
+      - name: Prepare zero-cost NSIS installer
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path installer\out | Out-Null
+          Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile "installer\MicrosoftEdgeWebview2Setup.exe"
+          choco install nsis.portable -y --no-progress
+          $makensis = (Get-Command makensis.exe -ErrorAction SilentlyContinue).Source
+          if (-not $makensis) { $makensis = "C:\ProgramData\chocolatey\bin\makensis.exe" }
+          & $makensis "installer\sc2-master-coach.nsi"
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: SC2-Master-Coach-Windows
+          path: |
+            installer/out/SC2-Master-Coach-Setup.exe
+            dist/SC2-Master-Coach-Portable.zip
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" "installer\out\SC2-Master-Coach-Setup.exe" "dist\SC2-Master-Coach-Portable.zip" --title "SC2 Master Coach ${{ github.ref_name }}" --generate-notes
