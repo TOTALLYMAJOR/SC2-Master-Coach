@@ -19,14 +19,7 @@ from case_workspace import (
 )
 from observation_service import enrich_demo_analysis, enrich_replay_analysis
 from replay_engine import analyze_replay, demo_analysis
-from sc2_version_compat import install_pysc2_version_compatibility
-
-# PySC2's bundled version catalog stops before current retail releases. Install
-# a narrow compatibility layer that uses replay BaseBuild metadata only when
-# the exact local Versions/Base##### binary exists.
-install_pysc2_version_compatibility()
-
-from sc2_frame_capture import (  # noqa: E402
+from sc2_frame_capture import (
     CaptureRequest,
     CaptureUnavailable,
     capture_replay_views,
@@ -48,18 +41,13 @@ def index():
     # Keep the Command HUD source maintainable while layering the optional
     # coaching and replay-intelligence modules at serve time.
     html = (STATIC / "index.html").read_text(encoding="utf-8")
-    for href in (
-        "/experience.css",
-        "/moment-theater.css",
-        "/build-priority.css",
-    ):
+    for href in ("/experience.css", "/moment-theater.css"):
         if href not in html:
             html = html.replace("</head>", f'<link rel="stylesheet" href="{href}">\n</head>')
     scripts = (
         "/experience-bridge.js",
         "/experience.js",
         "/moment-theater.js",
-        "/build-priority.js",
     )
     for src in scripts:
         if src not in html:
@@ -108,10 +96,7 @@ def _version_tuple(value: str):
 
 
 def _latest_release():
-    req = urllib.request.Request(
-        RELEASES_API,
-        headers={"User-Agent": "SC2-Master-Coach/1.3.2"},
-    )
+    req = urllib.request.Request(RELEASES_API, headers={"User-Agent": "SC2-Master-Coach/1.3.2"})
     with urllib.request.urlopen(req, timeout=4) as response:
         return json.loads(response.read().decode("utf-8"))
 
@@ -138,13 +123,7 @@ def update_check():
         release = _latest_release()
         tag = release.get("tag_name") or ""
         available = _version_tuple(tag) > _version_tuple(CURRENT_VERSION)
-        setup_asset = next(
-            (
-                asset for asset in release.get("assets", [])
-                if str(asset.get("name", "")).lower().endswith("setup.exe")
-            ),
-            None,
-        )
+        setup_asset = next((a for a in release.get("assets", []) if str(a.get("name", "")).lower().endswith("setup.exe")), None)
         return jsonify({
             "current_version": CURRENT_VERSION,
             "latest_version": tag,
@@ -160,13 +139,7 @@ def update_check():
 def update_open():
     try:
         release = _latest_release()
-        setup_asset = next(
-            (
-                asset for asset in release.get("assets", [])
-                if str(asset.get("name", "")).lower().endswith("setup.exe")
-            ),
-            None,
-        )
+        setup_asset = next((a for a in release.get("assets", []) if str(a.get("name", "")).lower().endswith("setup.exe")), None)
         url = (setup_asset or {}).get("browser_download_url") or release.get("html_url")
         if not url:
             return jsonify({"ok": False, "error": "No release URL available."}), 404
@@ -186,20 +159,17 @@ def replay_analyze_latest():
     for root in roots:
         if root.exists():
             candidates.extend(root.glob("**/Replays/**/*.SC2Replay"))
-    candidates = [candidate for candidate in candidates if candidate.is_file()]
+    candidates = [p for p in candidates if p.is_file()]
     if not candidates:
         return jsonify({
             "error": "No local SC2 replay was found automatically.",
             "hint": "Use the Replay drop zone to choose a .SC2Replay file manually."
         }), 404
-    latest = max(candidates, key=lambda candidate: candidate.stat().st_mtime)
+    latest = max(candidates, key=lambda p: p.stat().st_mtime)
     try:
         return jsonify(_analyze_replay_path(latest))
     except Exception as exc:
-        return jsonify({
-            "error": "Latest replay analysis failed.",
-            "detail": f"{type(exc).__name__}: {exc}",
-        }), 422
+        return jsonify({"error": "Latest replay analysis failed.", "detail": f"{type(exc).__name__}: {exc}"}), 422
 
 
 @app.post("/api/replay/analyze")
@@ -290,16 +260,9 @@ def replay_capture():
     except FileNotFoundError as exc:
         return jsonify({"error": str(exc)}), 404
     except CaptureUnavailable as exc:
-        detail = str(exc)
-        if "Replay requires SC2 base build" in detail:
-            return jsonify({
-                "error": "The replay's exact SC2 binary is not installed.",
-                "detail": detail,
-                "fallback": "The Tactical Map remains available for this replay."
-            }), 503
         return jsonify({
             "error": "Actual SC2 frame capture is unavailable.",
-            "detail": detail,
+            "detail": str(exc),
             "fallback": "The in-app tactical reconstruction remains available."
         }), 503
     except Exception as exc:
@@ -308,12 +271,6 @@ def replay_capture():
             return jsonify({
                 "error": "SC2 protocol runtime compatibility error.",
                 "detail": "This installation loaded an unsupported Protobuf runtime. Install SC2 Master Coach v1.3.1 or newer.",
-                "fallback": "The Tactical Map remains available until the application is updated."
-            }), 503
-        if "Unknown game version" in detail:
-            return jsonify({
-                "error": "SC2 replay build resolution failed.",
-                "detail": "Install SC2 Master Coach v1.3.2 or newer. It resolves current replay versions from the installed BaseBuild binary instead of PySC2's stale version catalog.",
                 "fallback": "The Tactical Map remains available until the application is updated."
             }), 503
         return jsonify({"error": "SC2 frame capture failed.", "detail": detail}), 422

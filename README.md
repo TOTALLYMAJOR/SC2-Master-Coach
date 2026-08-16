@@ -10,63 +10,55 @@ SC2 Master Coach is a local-first StarCraft II coaching application built around
 
 It combines a race-reactive Command HUD, matchup doctrine, timed build execution, replay reconstruction, cognitive observation analysis, actual SC2 engine-rendered replay frames, and a tactical intelligence theater.
 
-The current strategy/build baseline targets **StarCraft II 5.0.16b**, including the eight-worker starting economy and the hotfix changes to Protoss Gateway/Warpgate timings, Terran Command Center cost, and Ghost supply. Build timings should still be treated as benchmark windows: scouting evidence outranks a memorized script.
+The current strategy/build baseline targets **StarCraft II 5.0.16b**, including the eight-worker starting economy and the hotfix changes to Protoss Gateway/Warpgate timings, Terran Command Center cost, and Ghost supply. Build timings remain benchmark windows: scouting evidence outranks a memorized script.
 
 ## Release Notes
 
-### v1.3.2 — Current-Replay Build Resolution + Build Order Priority
+### v1.3.2 — Exact Replay Build Selection + Build-First HUD
 
-- Fixed **“Unknown game version: 5.0.16. Known versions: [latest]”** in the actual SC2 frame renderer.
-- Stopped relying on PySC2's stale static version-name catalog for current retail replays.
-- The renderer now reads the replay's `BaseBuild` and `DataVersion`, verifies that the exact local `Versions\Base#####` binary exists, and launches that binary directly.
-- The resolver never substitutes an arbitrary newer binary for an older replay; missing exact builds produce a precise diagnostic while Tactical Map remains available.
-- Moved the **Build / Decision Queue** and **Build Log** directly below **Execute Now**.
-- Added a compact, sticky **Build Execution Rail** so the current step, next steps, and five-second cue stay visible.
-- Added **Show full log / Compact log** controls to prevent the build history from pushing tactical intelligence off screen.
+- Fixed **“Unknown game version: 5.0.16. Known versions: ['latest']”** during SC2 frame capture.
+- Uses the replay's authoritative `BaseBuild` and `DataVersion` to launch the exact locally installed `Versions/BaseXXXXX` binary, even when PySC2's static version catalog has not yet added the current patch name.
+- Reports the locally installed SC2 Base builds when a replay-compatible binary is genuinely missing.
+- Allows SC2 to try its local map cache before declaring map data unavailable.
+- Moved **Build / Decision Queue** directly below **Execute Now**.
+- Keeps the build queue visually prioritized and sticky while scrolling.
+- Keeps the Build Log above doctrine, tactical-map, and Moment Intelligence Theater content.
 
 ### v1.3.1 — SC2 Frame Renderer Protocol Hotfix
 
-- Fixed the **“Descriptors cannot be created directly”** failure shown by the actual SC2 frame renderer.
-- Pinned the bundled Protobuf runtime to `3.20.3`, compatible with PySC2 and `s2clientprotocol` generated modules.
+- Fixed the **“Descriptors cannot be created directly”** failure in the actual SC2 frame renderer.
+- Pinned the bundled Protobuf runtime to `3.20.3`, compatible with PySC2 and `s2clientprotocol`.
 - Added a Windows CI smoke test that imports `s2clientprotocol.sc2api_pb2` before packaging.
-- Preserved Tactical Map fallback when actual rendering is unavailable.
-- Updated the strategy baseline label to the current **5.0.16b hotfix**.
+- Preserved Tactical Map fallback when actual frame capture is unavailable.
+- Updated the strategy baseline label to **5.0.16b**.
 
 ### v1.3.0 — Actual SC2 Frames + Moment Intelligence Theater
 
 - Added real replay-frame capture through the local StarCraft II RGB rendering API.
 - Added **Player POV** captures with fog enabled.
 - Added **Observer Truth** captures at the same timestamp and camera with fog disabled.
-- Added a click-to-cycle display: **Player POV → Observer Truth → Tactical Map**.
-- Replaced the narrow snapshot list with a large **Moment Intelligence Theater**.
-- Added an always-visible **Observation → Camera → Inference → Decision** evidence chain beside the frame.
-- Added a critical-moment filmstrip for observations, engagements, and doctrine violations.
-- Added an actual SC2 minimap inset when the renderer provides it.
-- Added persistent replay case folders under `Documents\SC2 Master Coach\Replays`.
-- Player/truth frames, minimaps, replay, analysis JSON, and capture metadata are saved in the replay case folder.
-- Added **Open case folder** from inside the theater.
-- Preserved the reconstructed Tactical Map as the fallback when SC2 rendering is unavailable.
+- Added click-to-cycle display: **Player POV → Observer Truth → Tactical Map**.
+- Added a large **Moment Intelligence Theater** with an Observation → Camera → Inference → Decision evidence chain.
+- Added a critical-moment filmstrip, SC2 minimap inset, persistent replay case folders, and **Open case folder**.
 
 ### v1.2.0 — Build Execution + In-App Snapshot View
 
 - Added five-second visual build-preparation cues.
 - Added optional race-aware spoken instructions such as: **“In five seconds, pull one Probe to warp in a Gateway.”**
-- Restored the full chronological Build Log with planned time, cue time, and timing delta.
+- Restored the chronological Build Log with planned time, cue time, and timing delta.
 - Added reconstructed tactical snapshot cards and optional PNG export.
 
 ### v1.1.0 — Observation Reconstruction + Easier Installation
 
 - Added camera, selection, command, and sparse unit-position analysis.
 - Added plausible-observation, inference-proxy, and decision-latency measurements.
-- Added first-run onboarding with **Train Now**, **Analyze Replay**, and **Try Demo Match**.
-- Added automatic latest-replay discovery and `.SC2Replay` file association.
-- Added the local update checker, one-click Windows installer, and portable build.
+- Added first-run onboarding, automatic latest-replay discovery, `.SC2Replay` association, update checking, and the Windows installer.
 
 The GitHub Releases page is the source of truth for downloadable versions and release assets.
 
 ## Install on Windows
 
-Download the latest installer from the GitHub Releases page:
+Download the latest release assets:
 
 - **`SC2-Master-Coach-Setup.exe`** — recommended
 - **`SC2-Master-Coach-Portable.zip`** — no-install alternative
@@ -75,68 +67,28 @@ The installer:
 
 - installs per-user under `%LOCALAPPDATA%\Programs\SC2 Master Coach`
 - creates Start Menu and desktop shortcuts
-- installs WebView2 silently when it is missing
+- installs WebView2 silently when missing
 - registers an uninstall entry
 - associates `.SC2Replay` files with SC2 Master Coach
 - lets a player double-click a replay and open directly into Replay Intelligence
 
 The executable is unsigned under the zero-cost release constraint, so Windows SmartScreen can initially show an **Unknown Publisher** warning.
 
-## First run
-
-The first-run screen asks for player name, preferred race, and current skill level, then offers:
-
-- **TRAIN NOW** — start the Command HUD and build timer
-- **ANALYZE REPLAY** — locate the newest replay automatically or select one manually
-- **TRY DEMO MATCH** — see the analysis flow without finding a replay
-
-Profiles and coaching history stay on the local machine.
-
-## Command HUD and Build Execution Rail
-
-The Command HUD provides:
-
-- Zerg, Terran, and Protoss visual identities
-- nine matchup doctrines
-- current action and next transition
-- scouting-evidence controls
-- threat classification
-- tactical priority queue
-- race-specific command card and hotkeys
-- build/decision queue
-- optional spoken coaching
-
-The **Build Execution Rail** sits immediately below **Execute Now**. It keeps the current build step, forward queue, five-second preparation cue, and a compact build history in the first working viewport. The full chronological log remains available through **Show full log**.
-
-## Five-second build preparation cues
-
-The coach gives a visual cue before each timed build action and, when Voice is enabled, speaks a preparation instruction such as:
-
-> **In five seconds, pull one Probe to warp in a Gateway.**
-
-The cue generator distinguishes race workers and structure behavior:
-
-- Zerg — send a Drone to morph the structure
-- Terran — pull an SCV to build the structure
-- Protoss — pull a Probe to warp in the structure
-
-It also issues a **Now** cue when the build timer crosses the scheduled action.
-
 ## Requirements for actual game frames
 
-Replay parsing works without launching StarCraft II. **Actual Player POV / Observer Truth frames require StarCraft II to be installed locally and launched at least once.**
+Replay parsing works without launching StarCraft II. **Player POV / Observer Truth frames require StarCraft II to be installed locally and launched at least once.**
 
-The renderer honors the normal Windows installation location and the `SC2PATH` environment variable. It reads the replay's exact `BaseBuild`, checks for the matching `Versions\Base#####` directory, starts that binary, advances to the critical timestamp, moves to the recorded camera position when available, and retrieves RGB data from the StarCraft II engine.
+The renderer looks in the normal Windows installation location and also honors the `SC2PATH` environment variable. It reads the replay's exact `BaseBuild`, selects the corresponding local SC2 binary, advances to the critical timestamp, moves to the recorded camera position when available, and retrieves RGB frame data from the StarCraft II engine.
 
-This is not a Playwright screenshot. Playwright can capture the web application; SC2 Master Coach uses the **StarCraft II replay rendering API** to obtain the game frame.
+This is not a Playwright screenshot. Playwright can capture the web application itself; SC2 Master Coach uses the **StarCraft II replay rendering API** to obtain actual game-engine frames.
 
 ### Frame evidence boundary
 
-- **Player POV**: engine-rendered replay frame with fog enabled for the analyzed player.
-- **Observer Truth**: same timestamp/camera with fog disabled.
-- **Tactical Map**: SC2 Master Coach's explanatory map for geometry, attention, and decision context.
-- Rendering resolution is selected by SC2 Master Coach and may not exactly match the player's original monitor resolution, UI scale, or graphics configuration.
-- Replays are binary-version dependent. If the exact Base build is no longer installed, Tactical Map remains available and the app reports the missing build.
+- **Player POV** — engine-rendered replay frame with fog enabled for the analyzed player.
+- **Observer Truth** — same timestamp/camera with fog disabled.
+- **Tactical Map** — SC2 Master Coach's explanatory map for geometry, attention, and decision context.
+- Rendering resolution is selected by SC2 Master Coach and may not exactly match the original monitor resolution, UI scale, or graphics settings.
+- If a matching replay binary or map cannot be loaded, Tactical Map remains available and the application reports the exact missing prerequisite.
 
 ## Replay case workspace
 
@@ -157,14 +109,54 @@ Documents\SC2 Master Coach\Replays\<case-id>\
 
 The app can open this folder directly from the Moment Intelligence Theater.
 
+## First run
+
+The first-run screen asks for:
+
+- player name
+- preferred race
+- current skill level
+
+Then it offers:
+
+- **TRAIN NOW** — start the Command HUD and build timer
+- **ANALYZE REPLAY** — locate the newest replay automatically or select one manually
+- **TRY DEMO MATCH** — see the analysis flow without locating a replay
+
+Profiles and coaching history stay on the local machine.
+
+## Command HUD
+
+The Command HUD provides:
+
+- Zerg, Terran, and Protoss visual identities
+- nine matchup doctrines
+- current action and next transition
+- scouting-evidence controls
+- threat classification
+- tactical priority queue
+- race-specific command card and hotkeys
+- optional spoken coaching
+- an elevated, sticky **Build / Decision Queue** immediately below the current command
+- the complete Build Log directly beneath that queue
+
+## Five-second build preparation cues
+
+Before each timed build action, the coach provides a visual cue and, when Voice is enabled, a race-aware spoken instruction such as:
+
+> **In five seconds, pull one Probe to warp in a Gateway.**
+
+It also issues a **Now** cue as the timer crosses the scheduled action.
+
+The chronological Build Log shows scheduled timestamp, build action, coaching rationale, cue time, and timing delta. It is a cue history—not proof that the in-game action was completed.
+
 ## Replay Intelligence
 
 For supported `.SC2Replay` versions, the parser extracts and derives:
 
 - map, duration, players, races, and result
 - worker, economy, supply, and army-value checkpoints
-- building and expansion timings
-- upgrade completions
+- building, expansion, and upgrade timings
 - unit deaths and approximate combat locations
 - engagement windows and trade efficiency
 - economy inflection points
@@ -183,23 +175,22 @@ Camera + selections + unit-position evidence + conservative vision model
 → decision timing
 ```
 
-This is not presented as exact fog-of-war reconstruction. Tracker positions are sparse, so the application distinguishes replay-derived facts from plausible observation and behavioral proxies.
+This is not presented as exact fog-of-war reconstruction. The application distinguishes replay-derived facts from plausible observation and behavioral proxies.
 
 ## Free release pipeline
 
-`.github/workflows/windows-release.yml`:
+`.github/workflows/windows-release.yml` runs on Windows and:
 
 1. installs dependencies
-2. verifies the SC2 protocol/Protobuf compatibility boundary
+2. verifies SC2 protocol compatibility
 3. runs tests
 4. builds the native desktop application with PyInstaller
 5. bundles PySC2 and SC2 protocol libraries
 6. builds the free NSIS installer
 7. packages the portable ZIP
-8. uploads artifacts
-9. publishes the current semantic version as a GitHub Release
+8. uploads artifacts and publishes the current semantic version
 
-The release architecture uses zero-cost/open tooling for this public project. Paid code signing and paid Store distribution are intentionally excluded.
+The release architecture uses zero-cost/open tooling. Paid code signing and paid Store distribution are intentionally excluded.
 
 ## Developer run
 

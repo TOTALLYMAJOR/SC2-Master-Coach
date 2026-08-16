@@ -34,6 +34,79 @@ def _safe_name(value: str) -> str:
     return (text or "moment")[:80]
 
 
+def _installed_builds(data_dir: str | Path) -> list[int]:
+    versions_dir = Path(data_dir) / "Versions"
+    if not versions_dir.is_dir():
+        return []
+    builds: list[int] = []
+    for path in versions_dir.iterdir():
+        match = re.fullmatch(r"Base(\d+)", path.name)
+        if match and path.is_dir():
+            builds.append(int(match.group(1)))
+    return sorted(set(builds))
+
+
+def _runtime_replay_version(replay_version: Any):
+    """Make an exact local-build version PySC2 accepts for new SC2 patches.
+
+    PySC2's static version catalog currently stops before modern 5.0.16
+    builds. Its normal lookup therefore reduces an installed current build to
+    the single alias ``latest`` and rejects a replay that identifies itself as
+    ``5.0.16``. A replay already supplies the authoritative BaseBuild and
+    DataVersion. Supplying those fields as a complete Version object lets the
+    local run config launch the matching ``Versions/BaseXXXXX`` binary without
+    waiting for PySC2's static catalog to be regenerated.
+    """
+    from pysc2.run_configs import lib as run_configs_lib
+
+    build_version = int(getattr(replay_version, "build_version", 0) or 0)
+    data_version = getattr(replay_version, "data_version", None)
+    game_version = str(getattr(replay_version, "game_version", "") or "")
+    if not build_version:
+        raise CaptureUnavailable("The replay does not expose a usable SC2 BaseBuild.")
+    if not data_version:
+        raise CaptureUnavailable(
+            "The replay does not expose a DataVersion, so its exact local SC2 "
+            "binary cannot be selected safely."
+        )
+    return run_configs_lib.Version(
+        game_version=game_version or f"build-{build_version}",
+        build_version=build_version,
+        data_version=str(data_version),
+        # RunConfig._get_version only treats a Version as complete when this
+        # field is populated. LocalBase.start still resolves the platform's
+        # actual executable name itself.
+        binary="local-install",
+    )
+
+
+def _select_replay_run_config(replay_data: bytes):
+    from pysc2 import run_configs
+    from pysc2.lib import replay as replay_lib
+
+    default_config = run_configs.get()
+    replay_version = replay_lib.get_replay_version(replay_data)
+    replay_build = int(getattr(replay_version, "build_version", 0) or 0)
+    installed = _installed_builds(default_config.data_dir)
+    exact_dir = Path(default_config.data_dir) / "Versions" / f"Base{replay_build:05d}"
+
+    if replay_build and exact_dir.is_dir() and getattr(replay_version, "data_version", None):
+        exact_version = _runtime_replay_version(replay_version)
+        return run_configs.get(version=exact_version), replay_version, "exact-base-build"
+
+    latest_build = int(getattr(default_config.version, "build_version", 0) or 0)
+    if replay_build and replay_build == latest_build:
+        return default_config, replay_version, "latest-alias"
+
+    available = ", ".join(str(x) for x in installed[-8:]) or "none detected"
+    raise CaptureUnavailable(
+        f"Replay {getattr(replay_version, 'game_version', 'unknown')} requires "
+        f"SC2 Base{replay_build:05d}, but that local binary was not found. "
+        f"Installed Base builds: {available}. Launch Battle.net, update StarCraft II, "
+        "and open the game once so the matching replay binary is installed."
+    )
+
+
 def capture_status() -> dict[str, Any]:
     status = {
         "available": False,
@@ -41,11 +114,12 @@ def capture_status() -> dict[str, Any]:
         "requires_local_sc2": True,
         "reason": None,
         "sc2_path": os.environ.get("SC2PATH"),
+        "installed_builds": [],
+        "latest_build": None,
     }
     try:
         from absl import flags
         from pysc2 import run_configs
-        from pysc2.lib import sc_process
 
         if not flags.FLAGS.is_parsed():
             flags.FLAGS(["sc2-master-coach"])
@@ -61,6 +135,12 @@ def capture_status() -> dict[str, Any]:
         versions = data_dir / "Versions"
         if not versions.is_dir():
             status["reason"] = "The StarCraft II Versions directory was not found."
+            return status
+        installed = _installed_builds(data_dir)
+        status["installed_builds"] = installed
+        status["latest_build"] = installed[-1] if installed else None
+        if not installed:
+            status["reason"] = "No local StarCraft II Base build directories were found."
             return status
         status["available"] = True
         return status
@@ -101,7 +181,6 @@ def _camera_action(x: float, y: float, distance: float = 0.0):
 
 
 def _step_to_loop(controller: Any, target_loop: int) -> int:
-    current = 0
     first = controller.observe()
     current = int(first.observation.game_loop)
     while current < target_loop:
@@ -116,8 +195,6 @@ def _step_to_loop(controller: Any, target_loop: int) -> int:
 
 def _capture_locked(req: CaptureRequest) -> dict[str, Any]:
     from absl import flags
-    from pysc2 import run_configs
-    from pysc2.lib import replay as replay_lib
     from s2clientprotocol import sc2api_pb2 as sc_pb
 
     if not flags.FLAGS.is_parsed():
@@ -127,10 +204,14 @@ def _capture_locked(req: CaptureRequest) -> dict[str, Any]:
     if not replay_path.is_file():
         raise CaptureUnavailable("The stored replay file is missing.")
 
+    # Read with the default install config, then select the exact BaseBuild
+    # from replay metadata even when PySC2's static version catalog only knows
+    # the alias "latest" for that installed build.
+    from pysc2 import run_configs
+
     base_run_config = run_configs.get()
     replay_data = base_run_config.replay_data(str(replay_path))
-    version = replay_lib.get_replay_version(replay_data)
-    run_config = run_configs.get(version=version)
+    run_config, replay_version, version_resolution = _select_replay_run_config(replay_data)
 
     interface = sc_pb.InterfaceOptions(
         raw=True,
@@ -162,11 +243,19 @@ def _capture_locked(req: CaptureRequest) -> dict[str, Any]:
     ) as controller:
         info = controller.replay_info(replay_data)
         map_data = None
+        map_data_error = None
         if info.local_map_path:
             try:
-                map_data = run_config.map_data(info.local_map_path, len(info.player_info))
-            except TypeError:
-                map_data = run_config.map_data(info.local_map_path)
+                try:
+                    map_data = run_config.map_data(info.local_map_path, len(info.player_info))
+                except TypeError:
+                    map_data = run_config.map_data(info.local_map_path)
+            except Exception as exc:
+                # RequestStartReplay can still succeed when the map already
+                # exists in Battle.net's local cache. Preserve the diagnostic
+                # instead of failing before SC2 gets a chance to load it.
+                map_data_error = f"{type(exc).__name__}: {exc}"
+                map_data = None
 
         start = sc_pb.RequestStartReplay(
             replay_data=replay_data,
@@ -217,6 +306,13 @@ def _capture_locked(req: CaptureRequest) -> dict[str, Any]:
         "reached_game_loop": reached_loop,
         "loops_per_second": round(loops_per_second, 4),
         "player_id": int(req.player_id),
+        "replay_version": {
+            "game_version": getattr(replay_version, "game_version", None),
+            "build_version": getattr(replay_version, "build_version", None),
+            "data_version": getattr(replay_version, "data_version", None),
+            "resolution": version_resolution,
+        },
+        "map_data_warning": map_data_error,
         "camera": {
             "x": req.camera_x,
             "y": req.camera_y,
@@ -249,6 +345,12 @@ def capture_replay_views(req: CaptureRequest) -> dict[str, Any]:
             raise CaptureUnavailable(f"Replay rendering dependency is unavailable: {exc}") from exc
         except Exception as exc:
             message = f"{type(exc).__name__}: {exc}"
-            if "SC2" in message or "StarCraft" in message or "binary" in message.lower():
+            if (
+                "SC2" in message
+                or "StarCraft" in message
+                or "binary" in message.lower()
+                or "Unknown game version" in message
+                or "BaseBuild" in message
+            ):
                 raise CaptureUnavailable(message) from exc
             raise RuntimeError(message) from exc
