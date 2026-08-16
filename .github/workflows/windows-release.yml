@@ -36,7 +36,12 @@ jobs:
       - name: Build native desktop bundle
         shell: pwsh
         run: |
-          python -m PyInstaller --noconfirm --clean --windowed --onedir --name "SC2 Master Coach" --add-data "static:static" --collect-all sc2reader --collect-all mpyq --collect-all webview --collect-all pysc2 --collect-all s2clientprotocol --collect-all portpicker --hidden-import webview.platforms.edgechromium --hidden-import pysc2.run_configs.platforms --hidden-import pysc2.lib.features desktop_app.py
+          # PySC2 still declares enum34, an obsolete Python 2 backport that
+          # PyInstaller correctly rejects on modern Python. PySC2 itself uses
+          # the standard-library enum module under Python 3.
+          python -m pip uninstall -y enum34
+          python -m PyInstaller --noconfirm --clean --windowed --onedir --name "SC2 Master Coach" --add-data "static:static" --collect-all sc2reader --collect-all mpyq --collect-all webview --collect-all pysc2 --collect-all s2clientprotocol --collect-all s2protocol --collect-all portpicker --hidden-import webview.platforms.edgechromium --hidden-import pysc2.run_configs.platforms --hidden-import pysc2.lib.features desktop_app.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Compress-Archive -Path "dist\SC2 Master Coach\*" -DestinationPath "dist\SC2-Master-Coach-Portable.zip" -Force
 
       - name: Prepare zero-cost NSIS installer
