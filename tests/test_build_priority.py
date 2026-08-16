@@ -13,7 +13,8 @@ def test_build_priority_assets_exist_and_relocate_the_build_ui():
     assert "ALWAYS VISIBLE" in js
 
 
-def test_app_loads_build_priority_assets():
-    app = (ROOT / "app.py").read_text(encoding="utf-8")
-    assert '"/build-priority.css"' in app
-    assert '"/build-priority.js"' in app
+def test_static_command_hud_loads_build_priority_assets():
+    index = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
+    assert '<link rel="stylesheet" href="/build-priority.css">' in index
+    assert '<script src="/build-priority.js"></script>' in index
+    assert index.index('id="buildQueue"') < index.index('class="tactical-map"')
