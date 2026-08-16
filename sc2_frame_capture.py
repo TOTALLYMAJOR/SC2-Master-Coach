@@ -5,11 +5,11 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 import json
-import math
 import os
 import re
 
 _CAPTURE_LOCK = Lock()
+_SC2_RUNTIME_DLLS = ("icuuc52.dll", "icuin52.dll", "icudt52.dll")
 
 
 class CaptureUnavailable(RuntimeError):
@@ -46,17 +46,95 @@ def _installed_builds(data_dir: str | Path) -> list[int]:
     return sorted(set(builds))
 
 
-def _runtime_replay_version(replay_version: Any):
-    """Make an exact local-build version PySC2 accepts for new SC2 patches.
+def _find_windows_runtime_dirs(data_dir: str | Path) -> tuple[list[Path], list[str]]:
+    """Locate SC2's bundled Windows ICU runtime without copying DLLs.
 
-    PySC2's static version catalog currently stops before modern 5.0.16
-    builds. Its normal lookup therefore reduces an installed current build to
-    the single alias ``latest`` and rejects a replay that identifies itself as
-    ``5.0.16``. A replay already supplies the authoritative BaseBuild and
-    DataVersion. Supplying those fields as a complete Version object lets the
-    local run config launch the matching ``Versions/BaseXXXXX`` binary without
-    waiting for PySC2's static catalog to be regenerated.
+    Normal Battle.net installs place these libraries in Support64. Some custom
+    installs can move supporting files, so search the install root only when
+    the standard locations do not contain the full ICU trio.
     """
+    root = Path(data_dir).expanduser().resolve()
+    targets = {name.lower() for name in _SC2_RUNTIME_DLLS}
+    found: dict[str, Path] = {}
+
+    for directory in (root / "Support64", root / "Support", root):
+        if not directory.is_dir():
+            continue
+        for name in _SC2_RUNTIME_DLLS:
+            candidate = directory / name
+            if candidate.is_file():
+                found[name.lower()] = directory
+        if targets.issubset(found):
+            break
+
+    if not targets.issubset(found) and root.is_dir():
+        # A Battle.net installation is finite and shallow enough for this
+        # fallback. Stop immediately once every required runtime is found.
+        for directory, dirnames, filenames in os.walk(root):
+            # Version directories contain huge game payloads but not the shared
+            # Support64 ICU runtime; avoiding them keeps first capture fast.
+            dirnames[:] = [d for d in dirnames if d.lower() not in {"versions", "maps", "mods"}]
+            lower_files = {name.lower(): name for name in filenames}
+            for target in targets - set(found):
+                if target in lower_files:
+                    found[target] = Path(directory)
+            if targets.issubset(found):
+                break
+
+    runtime_dirs: list[Path] = []
+    for name in _SC2_RUNTIME_DLLS:
+        directory = found.get(name.lower())
+        if directory and directory not in runtime_dirs:
+            runtime_dirs.append(directory)
+    missing = [name for name in _SC2_RUNTIME_DLLS if name.lower() not in found]
+    return runtime_dirs, missing
+
+
+def _configure_windows_runtime(run_config: Any, *, strict: bool = True) -> dict[str, Any]:
+    """Give the child SC2 process the same shared-library context Battle.net uses."""
+    if os.name != "nt":
+        return {"configured": False, "platform": os.name, "runtime_dirs": [], "missing": []}
+
+    runtime_dirs, missing = _find_windows_runtime_dirs(run_config.data_dir)
+    if missing:
+        detail = (
+            "StarCraft II's Support64 runtime is incomplete. Missing: "
+            + ", ".join(missing)
+            + ". Open Battle.net → StarCraft II → Settings → Scan and Repair, launch the game once, then retry. "
+            "Do not download replacement DLLs from third-party DLL sites."
+        )
+        if strict:
+            raise CaptureUnavailable(detail)
+        return {
+            "configured": False,
+            "runtime_dirs": [str(p) for p in runtime_dirs],
+            "missing": missing,
+            "reason": detail,
+        }
+
+    # The SC2 executable lives under Versions/BaseXXXXX, while its shared ICU
+    # libraries live under Support64. PySC2 normally uses Support64 as cwd, but
+    # an embedded desktop launch should not rely on inherited DLL search state.
+    # Set both cwd and PATH explicitly for the child process.
+    preferred = next((p for p in runtime_dirs if p.name.lower() == "support64"), runtime_dirs[0])
+    run_config.cwd = str(preferred)
+    env = dict(os.environ)
+    if getattr(run_config, "env", None):
+        env.update(run_config.env)
+    existing_path = env.get("PATH", "")
+    runtime_path = os.pathsep.join(str(p) for p in runtime_dirs)
+    env["PATH"] = runtime_path + (os.pathsep + existing_path if existing_path else "")
+    run_config.env = env
+    return {
+        "configured": True,
+        "runtime_dirs": [str(p) for p in runtime_dirs],
+        "cwd": str(preferred),
+        "missing": [],
+    }
+
+
+def _runtime_replay_version(replay_version: Any):
+    """Make an exact local-build version PySC2 accepts for new SC2 patches."""
     from pysc2.run_configs import lib as run_configs_lib
 
     build_version = int(getattr(replay_version, "build_version", 0) or 0)
@@ -66,16 +144,12 @@ def _runtime_replay_version(replay_version: Any):
         raise CaptureUnavailable("The replay does not expose a usable SC2 BaseBuild.")
     if not data_version:
         raise CaptureUnavailable(
-            "The replay does not expose a DataVersion, so its exact local SC2 "
-            "binary cannot be selected safely."
+            "The replay does not expose a DataVersion, so its exact local SC2 binary cannot be selected safely."
         )
     return run_configs_lib.Version(
         game_version=game_version or f"build-{build_version}",
         build_version=build_version,
         data_version=str(data_version),
-        # RunConfig._get_version only treats a Version as complete when this
-        # field is populated. LocalBase.start still resolves the platform's
-        # actual executable name itself.
         binary="local-install",
     )
 
@@ -116,6 +190,7 @@ def capture_status() -> dict[str, Any]:
         "sc2_path": os.environ.get("SC2PATH"),
         "installed_builds": [],
         "latest_build": None,
+        "runtime": None,
     }
     try:
         from absl import flags
@@ -142,6 +217,12 @@ def capture_status() -> dict[str, Any]:
         if not installed:
             status["reason"] = "No local StarCraft II Base build directories were found."
             return status
+        if os.name == "nt":
+            runtime = _configure_windows_runtime(run_config, strict=False)
+            status["runtime"] = runtime
+            if runtime.get("missing"):
+                status["reason"] = runtime.get("reason")
+                return status
         status["available"] = True
         return status
     except ImportError as exc:
@@ -204,14 +285,12 @@ def _capture_locked(req: CaptureRequest) -> dict[str, Any]:
     if not replay_path.is_file():
         raise CaptureUnavailable("The stored replay file is missing.")
 
-    # Read with the default install config, then select the exact BaseBuild
-    # from replay metadata even when PySC2's static version catalog only knows
-    # the alias "latest" for that installed build.
     from pysc2 import run_configs
 
     base_run_config = run_configs.get()
     replay_data = base_run_config.replay_data(str(replay_path))
     run_config, replay_version, version_resolution = _select_replay_run_config(replay_data)
+    runtime_context = _configure_windows_runtime(run_config) if os.name == "nt" else None
 
     interface = sc_pb.InterfaceOptions(
         raw=True,
@@ -251,9 +330,6 @@ def _capture_locked(req: CaptureRequest) -> dict[str, Any]:
                 except TypeError:
                     map_data = run_config.map_data(info.local_map_path)
             except Exception as exc:
-                # RequestStartReplay can still succeed when the map already
-                # exists in Battle.net's local cache. Preserve the diagnostic
-                # instead of failing before SC2 gets a chance to load it.
                 map_data_error = f"{type(exc).__name__}: {exc}"
                 map_data = None
 
@@ -312,6 +388,7 @@ def _capture_locked(req: CaptureRequest) -> dict[str, Any]:
             "data_version": getattr(replay_version, "data_version", None),
             "resolution": version_resolution,
         },
+        "runtime_context": runtime_context,
         "map_data_warning": map_data_error,
         "camera": {
             "x": req.camera_x,
@@ -351,6 +428,7 @@ def capture_replay_views(req: CaptureRequest) -> dict[str, Any]:
                 or "binary" in message.lower()
                 or "Unknown game version" in message
                 or "BaseBuild" in message
+                or "icuuc52.dll" in message.lower()
             ):
                 raise CaptureUnavailable(message) from exc
             raise RuntimeError(message) from exc
