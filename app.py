@@ -29,7 +29,7 @@ from sc2_frame_capture import (
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
 MAX_REPLAY_BYTES = 40 * 1024 * 1024
-CURRENT_VERSION = "1.3.0"
+CURRENT_VERSION = "1.3.1"
 RELEASES_API = "https://api.github.com/repos/TOTALLYMAJOR/SC2-Master-Coach/releases/latest"
 
 app = Flask(__name__, static_folder=str(STATIC), static_url_path="")
@@ -96,7 +96,7 @@ def _version_tuple(value: str):
 
 
 def _latest_release():
-    req = urllib.request.Request(RELEASES_API, headers={"User-Agent": "SC2-Master-Coach/1.3"})
+    req = urllib.request.Request(RELEASES_API, headers={"User-Agent": "SC2-Master-Coach/1.3.1"})
     with urllib.request.urlopen(req, timeout=4) as response:
         return json.loads(response.read().decode("utf-8"))
 
@@ -266,7 +266,14 @@ def replay_capture():
             "fallback": "The in-app tactical reconstruction remains available."
         }), 503
     except Exception as exc:
-        return jsonify({"error": "SC2 frame capture failed.", "detail": f"{type(exc).__name__}: {exc}"}), 422
+        detail = f"{type(exc).__name__}: {exc}"
+        if "Descriptors cannot be created directly" in detail:
+            return jsonify({
+                "error": "SC2 protocol runtime compatibility error.",
+                "detail": "This installation loaded an unsupported Protobuf runtime. Install SC2 Master Coach v1.3.1 or newer.",
+                "fallback": "The Tactical Map remains available until the application is updated."
+            }), 503
+        return jsonify({"error": "SC2 frame capture failed.", "detail": detail}), 422
 
 
 @app.get("/api/cases/<case_id>/frames/<path:filename>")

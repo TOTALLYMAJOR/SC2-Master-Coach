@@ -10,9 +10,17 @@ SC2 Master Coach is a local-first StarCraft II coaching application built around
 
 It combines a race-reactive Command HUD, matchup doctrine, timed build execution, replay reconstruction, cognitive observation analysis, actual SC2 engine-rendered replay frames, and a tactical intelligence theater.
 
-The current strategy/build baseline targets **StarCraft II 5.0.16**, including the eight-worker starting economy. Build timings should still be treated as benchmark windows: scouting evidence outranks a memorized script.
+The current strategy/build baseline targets **StarCraft II 5.0.16b**, including the eight-worker starting economy and the hotfix changes to Protoss Gateway/Warpgate timings, Terran Command Center cost, and Ghost supply. Build timings should still be treated as benchmark windows: scouting evidence outranks a memorized script.
 
 ## Release Notes
+
+### v1.3.1 — SC2 Frame Renderer Protocol Hotfix
+
+- Fixed the **“Descriptors cannot be created directly”** failure shown by the actual SC2 frame renderer.
+- Pinned the bundled Protobuf runtime to `3.20.3`, which is compatible with the generated SC2 protocol modules used by PySC2 and `s2clientprotocol`.
+- Added a Windows CI smoke test that imports `s2clientprotocol.sc2api_pb2` before packaging, so this exact incompatibility cannot silently reach another release.
+- Added a clearer in-app compatibility message while preserving Tactical Map fallback.
+- Updated the strategy baseline label from 5.0.16 to the current **5.0.16b hotfix**.
 
 ### v1.3.0 — Actual SC2 Frames + Moment Intelligence Theater
 
@@ -191,13 +199,14 @@ This is not presented as exact fog-of-war reconstruction. Tracker positions are 
 `.github/workflows/windows-release.yml` runs on Windows and:
 
 1. installs dependencies
-2. runs tests
-3. builds the native desktop application with PyInstaller
-4. bundles PySC2 and the SC2 protocol libraries for local RGB replay rendering
-5. builds the free NSIS installer
-6. packages the portable ZIP
-7. uploads artifacts
-8. publishes the current semantic version as a GitHub Release
+2. verifies the SC2 protocol/Protobuf compatibility boundary
+3. runs tests
+4. builds the native desktop application with PyInstaller
+5. bundles PySC2 and the SC2 protocol libraries for local RGB replay rendering
+6. builds the free NSIS installer
+7. packages the portable ZIP
+8. uploads artifacts
+9. publishes the current semantic version as a GitHub Release
 
 The release architecture uses zero-cost/open tooling for this public project. Paid code signing and paid Store distribution are intentionally excluded.
 
