@@ -79,7 +79,7 @@ jobs:
         run: |
           gh release create "${{ github.ref_name }}" "installer\out\SC2-Master-Coach-Setup.exe" "dist\SC2-Master-Coach-Portable.zip" --title "SC2 Master Coach ${{ github.ref_name }}" --generate-notes
 
-      - name: Publish current version from main
+      - name: Publish or refresh current version from main
         if: github.ref == 'refs/heads/main'
         shell: pwsh
         env:
@@ -91,7 +91,8 @@ jobs:
           $tag = "v$version"
           gh release view $tag *> $null
           if ($LASTEXITCODE -eq 0) {
-            Write-Host "$tag release already exists; leaving it unchanged."
+            gh release upload $tag "installer\out\SC2-Master-Coach-Setup.exe" "dist\SC2-Master-Coach-Portable.zip" --clobber
+            Write-Host "$tag release assets refreshed from validated main build $env:GITHUB_SHA."
             exit 0
           }
           gh release create $tag "installer\out\SC2-Master-Coach-Setup.exe" "dist\SC2-Master-Coach-Portable.zip" --target main --title "SC2 Master Coach $tag" --generate-notes
