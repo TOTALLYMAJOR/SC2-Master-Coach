@@ -73,7 +73,19 @@ def wait_until_ready(host: str, port: int, timeout: float = 8.0) -> bool:
     return False
 
 
+def configure_launch_context() -> None:
+    # The NSIS installer associates .SC2Replay with this executable. When a
+    # replay path is passed on launch, the local API analyzes it and the HUD
+    # opens directly into Replay Intelligence.
+    for arg in sys.argv[1:]:
+        candidate = Path(arg.strip('"')).expanduser()
+        if candidate.suffix.lower() == ".sc2replay" and candidate.exists():
+            app.config["OPEN_REPLAY_PATH"] = str(candidate.resolve())
+            break
+
+
 def main() -> None:
+    configure_launch_context()
     local = LocalServer()
     atexit.register(local.stop)
     local.start()
@@ -81,7 +93,7 @@ def main() -> None:
     if not wait_until_ready("127.0.0.1", local.port):
         raise RuntimeError("SC2 Master Coach local service failed to start.")
 
-    window = webview.create_window(
+    webview.create_window(
         APP_TITLE,
         local.url,
         width=DEFAULT_WIDTH,
