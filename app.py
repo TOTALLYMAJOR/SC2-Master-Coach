@@ -25,7 +25,14 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_REPLAY_BYTES
 
 @app.get("/")
 def index():
-    return send_from_directory(STATIC, "index.html")
+    # Keep the Command HUD source maintainable while layering first-run and
+    # observation UI at serve-time; this also preserves direct static preview.
+    html = (STATIC / "index.html").read_text(encoding="utf-8")
+    if "/experience.css" not in html:
+        html = html.replace("</head>", '<link rel="stylesheet" href="/experience.css">\n</head>')
+    if "/experience.js" not in html:
+        html = html.replace("</body>", '<script src="/experience-bridge.js"></script>\n<script src="/experience.js"></script>\n</body>')
+    return html
 
 
 @app.get("/api/health")
