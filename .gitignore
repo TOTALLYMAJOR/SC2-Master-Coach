@@ -1,0 +1,11 @@
+.venv/
+.venv-desktop/
+__pycache__/
+*.py[cod]
+*.spec
+build/
+dist/
+.pytest_cache/
+.DS_Store
+Thumbs.db
+*.log
