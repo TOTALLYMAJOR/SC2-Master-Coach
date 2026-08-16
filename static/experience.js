@@ -1,6 +1,14 @@
 (function(){
  const $x=id=>document.getElementById(id);
  const stateKey="sc2-master-coach:first-run:v1";
+ function loadTrainingEnhancements(){
+  if(!document.querySelector('link[href="/training-enhancements.css"]')){
+   const css=document.createElement("link");css.rel="stylesheet";css.href="/training-enhancements.css";document.head.appendChild(css);
+  }
+  if(!document.querySelector('script[src="/training-enhancements.js"]')){
+   const js=document.createElement("script");js.src="/training-enhancements.js";js.async=false;document.body.appendChild(js);
+  }
+ }
  function addExperienceUI(){
   const replaySection=$x("replayResult")?.parentElement;
   if(replaySection){
@@ -19,7 +27,7 @@
  function renderObservation(a){const model=a?.observation_model,p=$x("observationPanel"),body=$x("obsBody");if(!p||!body||!model)return;p.style.display="block";const s=model.summary||{},c=model.coverage||{};const fmt=v=>v==null?"—":v;body.innerHTML=`<div class="obs-grid"><div class="obs-metric"><b>${fmt(c.plausibly_observed)}/${fmt(c.opportunities)}</b><span>Plausibly observed</span></div><div class="obs-metric"><b>${fmt(s.median_observation_latency_seconds)}s</b><span>Observation latency</span></div><div class="obs-metric"><b>${fmt(s.median_inference_proxy_latency_seconds)}s</b><span>Inference proxy</span></div><div class="obs-metric"><b>${fmt(s.median_decision_latency_seconds)}s</b><span>Decision latency</span></div></div><div class="obs-list">${(model.opportunities||[]).slice(0,10).map(x=>`<div class="obs-row"><span>${x.event_time}</span><div><strong>${x.enemy_unit}</strong><br>${x.status.replaceAll("_"," ")} · decision ${x.decision_proxy||"not confirmed"}</div><span class="confidence ${x.confidence}">${x.confidence}</span></div>`).join("")||'<div class="status">No observation opportunities reconstructed from this replay.</div>'}</div><div class="status">${model.evidence_boundary||""}</div>`}
  async function launchContext(){try{const r=await fetch("/api/launch-context"),d=await r.json();if(d.replay){showReplay(d.replay);$x("firstRun")?.classList.remove("show")}}catch{}}
  async function checkUpdate(){try{const r=await fetch("/api/update/check"),d=await r.json();if(d.available){$x("updateTitle").textContent=`SC2 Master Coach ${d.latest_version} is available`;$x("updateCopy").textContent="Updates are distributed free through GitHub Releases.";$x("updateBanner").classList.add("show")}}catch{}}
- addExperienceUI();const profile=applyProfile();if(!profile?.done)$x("firstRun").classList.add("show");
+ addExperienceUI();loadTrainingEnhancements();const profile=applyProfile();if(!profile?.done)$x("firstRun").classList.add("show");
  $x("onboardingBtn").onclick=()=>{$x("firstRun").classList.add("show")};
  $x("latestReplayBtn").onclick=latestReplay;
  $x("obTrain").onclick=()=>{closeOnboard();if($x("playBtn").textContent.trim().toLowerCase()==="start")$x("playBtn").click()};

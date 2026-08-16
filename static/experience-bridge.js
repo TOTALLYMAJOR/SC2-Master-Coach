@@ -5,6 +5,10 @@
   coreShowReplay(d);
   const p=d?.players?.[0];
   const a=p?d?.analysis_by_player?.[String(p.pid)]:null;
-  if(p&&a)window.dispatchEvent(new CustomEvent("sc2:replay",{detail:{data:d,player:p,analysis:a}}));
+  if(p&&a){
+   const detail={data:d,player:p,analysis:a};
+   window.__sc2LastReplay=detail;
+   window.dispatchEvent(new CustomEvent("sc2:replay",{detail}));
+  }
  };
 })();
