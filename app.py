@@ -16,7 +16,7 @@ from observation_service import enrich_replay_analysis, enrich_demo_analysis
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
 MAX_REPLAY_BYTES = 40 * 1024 * 1024
-CURRENT_VERSION = "1.1.0"
+CURRENT_VERSION = "1.2.0"
 RELEASES_API = "https://api.github.com/repos/TOTALLYMAJOR/SC2-Master-Coach/releases/latest"
 
 app = Flask(__name__, static_folder=str(STATIC), static_url_path="")
@@ -25,8 +25,8 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_REPLAY_BYTES
 
 @app.get("/")
 def index():
-    # Keep the Command HUD source maintainable while layering first-run and
-    # observation UI at serve-time; this also preserves direct static preview.
+    # Keep the Command HUD source maintainable while layering first-run,
+    # observation, build-execution, and critical-moment UI at serve-time.
     html = (STATIC / "index.html").read_text(encoding="utf-8")
     if "/experience.css" not in html:
         html = html.replace("</head>", '<link rel="stylesheet" href="/experience.css">\n</head>')
@@ -68,7 +68,7 @@ def _version_tuple(value: str):
 
 
 def _latest_release():
-    req = urllib.request.Request(RELEASES_API, headers={"User-Agent": "SC2-Master-Coach/1.1"})
+    req = urllib.request.Request(RELEASES_API, headers={"User-Agent": "SC2-Master-Coach/1.2"})
     with urllib.request.urlopen(req, timeout=4) as response:
         return json.loads(response.read().decode("utf-8"))
 

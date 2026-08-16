@@ -1,77 +1,107 @@
 # SC2 Master Coach — Command HUD + Replay Intelligence
+
 <img width="1536" height="1024" alt="SC2 Master Coach marketing artwork" src="https://github.com/user-attachments/assets/606eed8f-538c-40b8-b3b3-cac639a2ecf6" />
 
 **Created by MBMapps**
 
-SC2 Master Coach is a local-first coaching application built around one loop:
+SC2 Master Coach is a local-first StarCraft II coaching application built around one learning loop:
 
-**Play → Observe → Infer → Decide → Execute → Replay → Diagnose → Train again**
+> **Play → Observe → Infer → Decide → Execute → Replay → Diagnose → Train again**
 
-The product combines:
+It combines a race-reactive Command HUD, matchup doctrine, timed build execution, replay reconstruction, cognitive observation analysis, and downloadable critical-moment tactical stills.
 
-1. **Command HUD** — race-reactive StarCraft-style second-screen coaching.
-2. **Tactical Doctrine** — nine matchup operating models across Zerg, Terran and Protoss.
-3. **Replay Intelligence** — `.SC2Replay` state reconstruction, engagements, economy, doctrine review and training anchors.
-4. **Observation Reconstruction** — camera, selection, command and sparse unit-position evidence used to estimate what the player could plausibly know and how quickly they reacted.
+## Install on Windows
 
-## Easiest Windows installation
+Download the latest installer from the GitHub Releases page:
 
-Normal players should not need Python, a terminal, or a ZIP workflow.
+- **`SC2-Master-Coach-Setup.exe`** — recommended
+- **`SC2-Master-Coach-Portable.zip`** — no-install alternative
 
-The automated Windows build produces:
-
-```text
-SC2-Master-Coach-Setup.exe
-```
-
-The zero-cost NSIS installer:
+The installer:
 
 - installs per-user under `%LOCALAPPDATA%\Programs\SC2 Master Coach`
 - creates Start Menu and desktop shortcuts
-- silently installs the Microsoft Edge WebView2 runtime when it is missing
+- installs WebView2 silently when it is missing
 - registers an uninstall entry
 - associates `.SC2Replay` files with SC2 Master Coach
 - lets a player double-click a replay and open directly into Replay Intelligence
 
-Developers can also use the portable build artifact.
+The executable is currently unsigned under the zero-cost release constraint, so Windows SmartScreen can initially show an **Unknown Publisher** warning.
 
-## First-run experience
+## First run
 
-On first launch, the player sees only three setup fields:
+The first-run screen asks for only:
 
-- name
+- player name
 - preferred race
 - current skill level
 
-Then three actions:
+Then it offers:
 
-- **TRAIN NOW** — enter the Command HUD immediately
-- **ANALYZE REPLAY** — automatically find the newest replay when possible, with manual file selection as fallback
-- **TRY DEMO MATCH** — understand the product without locating a replay first
+- **TRAIN NOW** — start the Command HUD and build timer
+- **ANALYZE REPLAY** — locate the newest replay automatically or select one manually
+- **TRY DEMO MATCH** — see the analysis flow without finding a replay
 
-The profile is stored locally on the machine.
+Profiles and coaching history stay on the local machine.
+
+## Command HUD
+
+The Command HUD provides:
+
+- Zerg, Terran and Protoss visual identities
+- nine matchup doctrines
+- current action and next transition
+- scouting-evidence controls
+- threat classification
+- tactical priority queue
+- race-specific command card and hotkeys
+- build/decision queue
+- optional spoken coaching
+
+## Five-second build preparation cues — v1.2
+
+The coach now gives a visual cue before each timed build action and, when Voice is enabled, speaks a preparation instruction such as:
+
+> **In five seconds, pull one Probe to warp in a Gateway.**
+
+The cue generator distinguishes race workers and structure behavior:
+
+- Zerg — send a Drone to morph the structure
+- Terran — pull an SCV to build the structure
+- Protoss — pull a Probe to warp in the structure
+
+It also issues a **Now** cue when the build timer crosses the scheduled action.
+
+## Build Log — v1.2
+
+The full chronological build log is visible again. It shows:
+
+- scheduled timestamp
+- build action
+- phase and coaching rationale
+- next action
+- cue-issued timestamp
+- timing delta from the plan
+
+The log can be copied for review after practice. It is explicitly a **cue history**, not proof that the player completed the action in-game.
 
 ## Replay Intelligence
 
-For supported replay versions, the parser extracts and derives:
+For supported `.SC2Replay` versions, the parser extracts and derives:
 
-- replay metadata, map, duration, players, races and result
-- player stats checkpoints
-- workers, minerals/gas, collection rates and supply
-- approximate army supply
-- active-force resource value
-- resources lost and killed
-- building and expansion starts
-- upgrade completion timings
+- map, duration, players, races and result
+- worker, economy, supply and army-value checkpoints
+- building and expansion timings
+- upgrade completions
 - unit deaths and approximate combat locations
-- clustered engagement windows
+- engagement windows and trade efficiency
 - economy inflection points
 - inferred decision windows
 - doctrine-review flags
 
-## Observation Reconstruction — v1.1
+## Observation Reconstruction
 
-The replay model now adds the cognitive chain that was previously only planned:
+The replay model analyzes:
 
 ```text
 Camera + selections + unit-position evidence + conservative vision model
@@ -81,78 +111,74 @@ Camera + selections + unit-position evidence + conservative vision model
 → decision timing
 ```
 
-For each relevant enemy structure/expansion opportunity the model can report:
+For relevant enemy structures and expansions, it can report:
 
-- first plausible visibility timestamp
-- camera-attention timestamp
+- first plausible visibility
+- camera-attention time
 - observation latency
-- first nearby selection/command as an inference proxy
+- selection/command inference proxy
 - inference-proxy latency
-- first subsequent command as a decision proxy
-- decision latency
-- selected units / command proxy
+- decision proxy and decision latency
 - confidence level
 
 ### Evidence boundary
 
-This is intentionally **not presented as perfect fog-of-war reconstruction**.
+This is not presented as exact fog-of-war reconstruction. Tracker positions are sparse, so the application distinguishes:
 
-SC2 tracker position events are sparse, so the model uses a conservative approximate sight radius plus camera/selection/command evidence. The application distinguishes:
+- **replay-derived fact** — event, camera, selection, command or tracker state
+- **plausible observation** — conservative visibility approximation
+- **inference proxy** — behavior after attention, not private thought
+- **decision proxy** — first qualifying command after the observation
 
-- **replay-derived facts** — camera events, selection events, commands, tracker state, unit/building timings
-- **plausible observation** — inferred from available unit-position evidence and camera attention
-- **inference proxy** — behavior after observation, not a claim about private thought
-- **decision proxy** — first qualifying subsequent command
+## Critical Moment Snapshots — v1.2
 
-That distinction prevents hindsight knowledge from being mislabeled as information the player definitely possessed at the time.
+Replay Intelligence now turns the highest-signal moments into downloadable PNG stills:
 
-## Doctrine-review heuristics
+- late or unconfirmed observations
+- costly engagements
+- doctrine violations and review anchors
 
-The current engine reviews signals including:
+Each card combines timestamp, severity, tactical position when available, replay evidence and latency/trade information.
 
-- sustained resource-bank conversion failure
-- sustained supply lock
-- early/midgame worker-growth stall (review flag only)
-- unfavorable combat-resource exchange
+These are **reconstructed tactical snapshots**, not screenshots rendered by the StarCraft II game client. A `.SC2Replay` stores simulation and event data rather than video frames, so the application visualizes the evidence honestly instead of fabricating a literal in-game screenshot.
+
+## Doctrine review
+
+Current review signals include:
+
+- sustained bank-conversion failure
+- supply lock
+- worker-growth stall review points
+- unfavorable combat exchange
 - engagement while materially down active-force value
-- post-hoc greed-under-pressure signature (review flag only)
-- worker shock / army-value collapse / bank spike inflection events
+- greed-under-pressure signatures
+- worker shock, army collapse and bank spikes
 
-These create **review anchors**, not deterministic declarations that strategy can be reduced to one metric.
+These are review anchors, not claims that strategy can be reduced to one metric.
 
 ## Free release pipeline
 
-The repository contains an automated Windows workflow at:
+`.github/workflows/windows-release.yml` runs on Windows and:
 
-```text
-.github/workflows/windows-release.yml
-```
+1. installs dependencies
+2. runs tests
+3. builds the native desktop application with PyInstaller
+4. builds the free NSIS installer
+5. packages the portable ZIP
+6. uploads artifacts
+7. publishes the current semantic version as a GitHub Release
 
-On `main`, it validates tests and builds the Windows application and installer. On a version tag such as `v1.1.0`, it also publishes the installer and portable ZIP to a GitHub Release.
-
-The release path intentionally uses only zero-cost/open tooling for this project:
-
-- GitHub Actions standard public-repository runners
-- PyInstaller
-- NSIS
-- Microsoft WebView2 Evergreen bootstrapper
-- GitHub Releases for update distribution
-
-The desktop app checks GitHub Releases for newer versions and can send the player directly to the current installer. No paid update service is required.
-
-### Intentionally excluded under the zero-cost constraint
-
-Commercial code-signing certificates and paid Microsoft Store distribution are **not required by the build** and are not assumed. An unsigned installer can therefore still trigger Windows reputation/SmartScreen warnings on some systems. Signing can be added later without changing the core release architecture.
+The release architecture uses zero-cost/open tooling for this public project. Paid code signing and paid Store distribution are intentionally excluded.
 
 ## Developer run
 
-### Windows desktop development
+### Desktop development
 
 ```text
 run_desktop_windows.bat
 ```
 
-### Local web/service development
+### Local service/browser mode
 
 ```text
 run_windows.bat
@@ -174,46 +200,15 @@ docker run --rm -p 8765:8765 -e SC2_NO_BROWSER=1 sc2-master-coach
 
 ## API
 
-### Health
+- `GET /api/health`
+- `GET /api/demo`
+- `POST /api/replay/analyze`
+- `POST /api/replay/analyze-latest`
+- `GET /api/launch-context`
+- `GET /api/update/check`
 
-```http
-GET /api/health
-```
+## Product thesis
 
-### Synthetic demo
+**Better information and better decisions beat raw numbers.**
 
-```http
-GET /api/demo
-```
-
-### Analyze uploaded replay
-
-```http
-POST /api/replay/analyze
-Content-Type: multipart/form-data
-field: replay=<file.SC2Replay>
-```
-
-### Analyze latest local replay
-
-```http
-POST /api/replay/analyze-latest
-```
-
-### Associated-file launch context
-
-```http
-GET /api/launch-context
-```
-
-### Update check
-
-```http
-GET /api/update/check
-```
-
-## Marketing thesis
-
-The primary campaign image communicates the same idea as the product: **better information and better decisions beat raw numbers**.
-
-The hero composition is a lone Terran Ghost using precision positioning and a nuclear strike to outsmart an overwhelming Zerg swarm. The Ghost should feel calm, surgical and intelligent; the swarm should feel massive and inevitable until one superior tactical decision changes the battlefield.
+The marketing image expresses that thesis through one Terran Ghost using positioning and a nuclear strike to outthink an overwhelming Zerg swarm.
