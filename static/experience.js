@@ -22,7 +22,7 @@
  addExperienceUI();const profile=applyProfile();if(!profile?.done)$x("firstRun").classList.add("show");
  $x("onboardingBtn").onclick=()=>{$x("firstRun").classList.add("show")};
  $x("latestReplayBtn").onclick=latestReplay;
- $x("obTrain").onclick=()=>{closeOnboard();if(!$x("playBtn").classList.contains("active"))$x("playBtn").click()};
+ $x("obTrain").onclick=()=>{closeOnboard();if($x("playBtn").textContent.trim().toLowerCase()==="start")$x("playBtn").click()};
  $x("obReplay").onclick=async()=>{closeOnboard();if(!(await latestReplay()))$x("replayFile").click()};
  $x("obDemo").onclick=()=>{closeOnboard();$x("demoBtn").click()};
  $x("updateBtn").onclick=async()=>{await fetch("/api/update/open",{method:"POST"});$x("updateBanner").classList.remove("show")};
