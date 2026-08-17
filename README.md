@@ -14,6 +14,17 @@ The current strategy/build baseline targets **StarCraft II 5.0.16b**. This inclu
 
 ## Release Notes
 
+### v1.6.1 — Persistent Branches + Battle Stories + Hover Help
+
+- Fixed the Pro Mind branch-details bug where a branch could open and then immediately close because the live game clock caused the entire panel to be rebuilt.
+- Open strategic branches and investment-responsibility cards now keep their state across normal clock updates and structural re-renders.
+- Pro Mind no longer performs a full structural rebuild every second when only the information-age number changed; it updates the dynamic age label in place until the actual strategic state changes.
+- Added contextual **hover help** to strategic branches, Pro Mind questions, scouting windows, Expansion Permission, manual protection gates, investment responsibilities, and branch concepts such as **What you buy**, **Hidden cost**, and **What breaks it**.
+- Added **Battle Story** explanations for all nine matchups. These narrate how the strategy creates time, attention, distance, defensive movement, production tax, or positional advantage.
+- PvT includes **The False Front**: show credible pressure on one side, make Terran rotate attention and army, establish the third on the safer opposite side, then bring the mobile force home before the distraction becomes a donation.
+- Each PvT branch also gets a branch-specific narrative for Blink, Stargate, or Colossus so the same strategic story is expressed differently by each capability.
+- The Battle Story explicitly teaches that pressure can be successful without damage when it buys attention, army displacement, information, or time for a new expansion.
+
 ### v1.6.0 — PRO MIND // Unwritten Game
 
 Added the professional-reasoning layer behind the build order.
@@ -22,11 +33,11 @@ Added the professional-reasoning layer behind the build order.
 - Added **What Would a Pro Ask Right Now?** The active question changes with the game clock and matchup rather than presenting one static doctrine.
 - Added purposeful **scouting windows** that explain the question the scout is meant to answer, why the information matters, and which decisions change afterward.
 - Added **open strategic branches** framed as capabilities rather than technology names. Every branch explains what it buys, when to choose it, its hidden cost, how to protect the investment, and what invalidates it.
-- PvT now explicitly teaches the trade between **Blink mobility**, **Stargate information/reach**, and **Robo/Colossus ground stability** rather than declaring one universally correct tech path.
+- PvT explicitly teaches the trade between **Blink mobility**, **Stargate information/reach**, and **Robo/Colossus ground stability** rather than declaring one universally correct tech path.
 - Added **Expansion Permission**. Third/fourth bases are evaluated as investments that need fresh opponent information plus manually confirmed vision, army coverage, and reinforcement geometry.
 - Added **information age**. Quick scouting signals are time-stamped so a previously correct read can become visibly fresh, aging, or stale.
 - Added **You Bought This — Now Protect the Investment** for major economy and tech commitments. A Nexus, Command Center, Hatchery, Blink, Colossus, Tank line, Spire, etc. each creates new responsibilities.
-- Quick Signals now publish live evidence events to Pro Mind and retain their game-time timestamp.
+- Quick Signals publish live evidence events to Pro Mind and retain their game-time timestamp.
 - If opponent race is still **Unknown**, Pro Mind does not fabricate a matchup model. It explicitly keeps options open until the player reports the race.
 - The evidence boundary remains strict: without live SC2 integration, Master Coach cannot know exact army positions, production counts, camera state, vision, or whether a prompted action was actually executed unless the player reports it or replay analysis later establishes it.
 
@@ -130,6 +141,28 @@ For PvT, for example:
 - **Blink / mobility** buys map presence, preservation, drop response, and flexibility.
 - **Stargate / air information** buys repeatable vision, harassment, and map reach.
 - **Robo / Colossus stability** buys a protected ground-army anchor and ranged splash geometry.
+
+Strategic branches remain open while the clock advances. Hovering the branch, question, scouting, or investment help markers explains what each concept means without forcing another panel open.
+
+### Battle Stories
+
+The strategy layer also tells a short battlefield story so the player can picture *how* the advantage is created.
+
+Example PvT — **The False Front**:
+
+```text
+Blink Stalkers show pressure on the right.
+Terran rotates Bio to respect the threat.
+A Probe places the third Nexus on the safer opposite side.
+The Stalkers disengage before the rotation becomes a real fight.
+The army returns to screen the Nexus while it begins paying back.
+```
+
+The important lesson is not “attack right.” It is:
+
+> **A credible threat can protect economy by buying attention, army displacement, and time even when it deals no damage.**
+
+Other matchup stories teach the same causal style through different mechanics: forcing defensive larva in PvZ, creating local-superiority uncertainty in PvP, taxing Zerg with Terran mobility, splitting Protoss attention in TvP, controlling siege roads in TvT, using creep as warning time in ZvT, reserving larva around Protoss power spikes in ZvP, and threatening Drones to buy your own Drone cycle in ZvZ.
 
 ### Scouting has a purpose
 
@@ -316,4 +349,4 @@ chmod +x run_wsl.sh
 
 **Better information and better decisions beat raw numbers.**
 
-The Spellbook teaches the spell. **PRO MIND teaches why the player should cast it, what it costs, and when it stops being correct.**
+The Spellbook teaches the spell. **PRO MIND teaches why the player should cast it, what it costs, how it creates time, and when it stops being correct.**
