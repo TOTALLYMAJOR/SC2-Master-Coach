@@ -6,64 +6,61 @@
 
 SC2 Master Coach is a local-first StarCraft II coaching application built around one learning loop:
 
-> **Play → Observe → Infer → Decide → Execute → Replay → Diagnose → Train again**
+> **Choose a plan → scout → adapt → execute → replay → diagnose → refine → train again**
 
-It combines a race-reactive Command HUD, matchup doctrine, timed build execution, scenario strategy library, replay reconstruction, player-identity selection, plain-language strategy narratives, cognitive observation analysis, actual SC2 engine-rendered replay frames, and a tactical intelligence theater.
+It combines a race-reactive Command HUD, matchup strategy library, spoken build timing, player-specific replay analysis, strategy narratives, actual SC2 engine-rendered replay frames, and a configurable **Coach Lab // Spellbook**.
 
-The current strategy/build baseline targets **StarCraft II 5.0.16b**, including the eight-worker starting economy and the hotfix changes to Protoss Gateway/Warpgate timings, Terran Command Center cost, and Ghost supply. Build timings remain benchmark windows: scouting evidence outranks a memorized script.
+The current strategy/build baseline targets **StarCraft II 5.0.16b**. This includes the 5.0.16 eight-worker starting economy and the later 5.0.16b balance hotfix. Build timings are benchmark windows: scouting evidence outranks a memorized script.
 
 ## Release Notes
 
+### v1.5.0 — Coach Lab // Spellbook
+
+Added five systems around the Spellbook concept:
+
+1. **Personal Spell Effectiveness** — explicitly link your replays to a selected strategy and track your own W/L record, coach score, review flags, and sample maturity. The app does not invent a global strategy win rate.
+2. **Replay-Driven Spell Evolution** — replay evidence proposes refinements such as earlier supply, production-conversion checkpoints, engagement gates, greed abort triggers, scouting checkpoints, and decision deadlines. Canonical strategies are never silently rewritten; accepted changes become local personal variants.
+3. **Second-Screen Quick Signals** — one-tap live reporting for opponent race, fast third, extra production, move-out, air/tech, turtle, hidden tech, and no natural. A compact live mode removes nonessential replay/UI surfaces while playing.
+4. **Knowledge Sources & Staleness** — separates official balance sources, curated strategy knowledge, and user-added web references. Every source is patch-tagged or marked as a stable principle / review-needed source.
+5. **Post-Game Spell Prescription** — converts replay diagnosis into a bounded five-game experiment with one or more measurable training spells such as Scout on Schedule, Production Conversion, Engagement Gate, Greed Abort, or Worker Rhythm.
+
+The Coach Lab also makes the live evidence boundary explicit: without a game integration, Master Coach does **not** know exact minerals, enemy production, unit locations, camera position, or whether a prompted build action was actually completed unless the player reports it or replay analysis later proves it.
+
 ### v1.4.0 — Coach Narrative + Strategy Library + Replay Identity
 
-- Added a **Coach Narrative** to the center of the HUD so strategy is communicated in plain language rather than primarily through an abstract diagram.
-- Replay analysis now produces a deterministic, local **five-chapter strategy story**: the plan, what information was plausibly available, economy/conversion, where the game bent, and what to do next.
-- Added **Read briefing** so the replay strategy narrative can be spoken aloud with Windows/browser speech synthesis.
-- Added a **Build & Strategy Library** with matchup-specific plans for all nine 1v1 matchups.
-- Each matchup includes both a **Standard** plan and an **Opponent Fast Third / 3 Bases** scenario plan.
-- Added **Read plan** to hear a selected strategy and its timings before a game.
-- Added **Load into coach** to replace the live Build / Decision Queue with the selected plan and preserve five-second preparation cues.
-- Fixed replay identity handling: the UI no longer silently assumes that the first replay player is the user.
-- Added an explicit **Viewing replay as…** selector. A confirmed replay name is stored locally and reused on future games.
-- Identity resolution now tries, in order: explicit selection, remembered replay name, matching local profile name, unique preferred race, then a clearly labeled temporary first-player fallback.
-- The selected player ID now flows through narrative, observation analysis, engagement review, and Player POV rendering.
-- The old center tactical diagram is hidden by default. **Show decision map** remains available with an explanation that it is a conceptual coaching model, not literal SC2 terrain.
+- Replaced the confusing center diagram with a plain-language **Coach Narrative** by default.
+- Added a deterministic five-chapter replay strategy story and **Read briefing**.
+- Added a **Build & Strategy Library** for all nine 1v1 matchups with Standard and Opponent Fast Third / 3 Bases scenarios.
+- Added **Read plan** and **Load into coach**.
+- Added explicit **Viewing replay as…** player selection and remembered local replay identity.
+- Hid the conceptual decision map by default; it remains optional and clearly labeled as non-literal.
 
-### v1.3.2 — Exact Replay Build Selection + Build-First HUD
+### v1.3.2 — Replay Renderer + Build-First HUD
 
-- Fixed **“Unknown game version: 5.0.16. Known versions: ['latest']”** during SC2 frame capture.
-- Uses the replay's authoritative `BaseBuild` and `DataVersion` to launch the exact locally installed `Versions/BaseXXXXX` binary, even when PySC2's static version catalog has not yet added the current patch name.
-- Fixed the Windows **“Required library 'icuuc52.dll' does not exist”** launch failure by explicitly discovering StarCraft II's `Support64` runtime, validating the ICU runtime trio, using it as the child SC2 working directory, and prepending it to the child process `PATH`.
-- If the bundled SC2 ICU runtime is genuinely incomplete, the app stops before launch and directs the user to Battle.net **Scan and Repair** rather than suggesting third-party DLL downloads.
-- Moved **Build / Decision Queue** directly below **Execute Now** and kept the Build Log above replay-intelligence surfaces.
+- Fixed current-patch replay build selection using replay `BaseBuild` and `DataVersion`.
+- Fixed Windows SC2 `Support64` / ICU runtime discovery.
+- Moved the **Build / Decision Queue** directly below **Execute Now**.
 
-### v1.3.1 — SC2 Frame Renderer Protocol Hotfix
+### v1.3.1 — Protocol Hotfix
 
-- Fixed the **“Descriptors cannot be created directly”** failure in the actual SC2 frame renderer.
-- Pinned the bundled Protobuf runtime to `3.20.3`, compatible with PySC2 and `s2clientprotocol`.
-- Added a Windows CI smoke test for the SC2 protocol import boundary.
+- Pinned the compatible Protobuf runtime and added SC2 protocol smoke tests.
 
-### v1.3.0 — Actual SC2 Frames + Moment Intelligence Theater
+### v1.3.0 — Actual SC2 Frames
 
-- Added real replay-frame capture through the local StarCraft II RGB rendering API.
-- Added **Player POV** with fog enabled and **Observer Truth** with fog disabled.
-- Added click-to-cycle display: **Player POV → Observer Truth → Tactical Map**.
-- Added a critical-moment filmstrip, SC2 minimap inset, persistent replay case folders, and **Open case folder**.
+- Added actual local SC2 engine-rendered **Player POV** and **Observer Truth** frames.
+- Added Moment Intelligence Theater and persistent replay case folders.
 
-### v1.2.0 — Build Execution + In-App Snapshot View
+### v1.2.0 — Build Execution
 
-- Added five-second visual build-preparation cues.
-- Added optional race-aware spoken instructions such as: **“In five seconds, pull one Probe to warp in a Gateway.”**
-- Restored the chronological Build Log with planned time, cue time, and timing delta.
-- Added reconstructed tactical snapshot cards and optional PNG export.
+- Added five-second spoken/visual preparation cues.
+- Restored Build Log.
+- Added in-app critical-moment snapshot viewing.
 
-### v1.1.0 — Observation Reconstruction + Easier Installation
+### v1.1.0 — Observation Reconstruction + Installer
 
-- Added camera, selection, command, and sparse unit-position analysis.
-- Added plausible-observation, inference-proxy, and decision-latency measurements.
-- Added first-run onboarding, automatic latest-replay discovery, `.SC2Replay` association, update checking, and the Windows installer.
-
-The GitHub Releases page is the source of truth for downloadable versions and release assets.
+- Added camera/selection/command observation modeling.
+- Added observation, inference-proxy, and decision latency.
+- Added first-run onboarding, replay discovery, `.SC2Replay` association, update checking, and Windows installer.
 
 ## Install on Windows
 
@@ -72,56 +69,35 @@ Download the latest release assets:
 - **`SC2-Master-Coach-Setup.exe`** — recommended
 - **`SC2-Master-Coach-Portable.zip`** — no-install alternative
 
-The installer:
+The installer is per-user, creates shortcuts, installs WebView2 when necessary, registers uninstall support, and associates `.SC2Replay` files with SC2 Master Coach.
 
-- installs per-user under `%LOCALAPPDATA%\Programs\SC2 Master Coach`
-- creates Start Menu and desktop shortcuts
-- installs WebView2 silently when missing
-- registers an uninstall entry
-- associates `.SC2Replay` files with SC2 Master Coach
-- lets a player double-click a replay and open directly into Replay Intelligence
+The executable remains unsigned under the zero-cost release constraint, so Windows SmartScreen can initially show an **Unknown Publisher** warning.
 
-The executable is unsigned under the zero-cost release constraint, so Windows SmartScreen can initially show an **Unknown Publisher** warning.
+## Live workflow
 
-## How the app knows which replay player is you
+The intended live interaction is deliberately small:
 
-A `.SC2Replay` contains every player in the game. SC2 Master Coach analyzes each player separately, so it does not need to guess permanently.
+```text
+MY RACE
+  ↓
+OPPONENT UNKNOWN
+  ↓
+Identify opponent race
+  ↓
+Choose matchup strategy / spell
+  ↓
+Load into coach
+  ↓
+Build timing + 5-second voice cues
+  ↓
+Report only high-value scouting signals
+  ↓
+Coach adapts priority / threat state
+```
 
-When a replay opens, the app shows:
+The **Quick Signals** panel exists because Master Coach does not read the live SC2 process. It only knows live information supplied by the player plus the selected plan and timer.
 
-> **Viewing replay as: [player name · race · result]**
-
-Identity resolution is:
-
-1. a player you explicitly selected;
-2. a replay name remembered from a prior selection;
-3. an exact match to the local profile name;
-4. a unique player matching your preferred race;
-5. only then, a temporary first-player fallback that is visibly labeled as unconfirmed.
-
-Selecting yourself once stores the replay name only in local application storage. The chosen player ID drives replay narrative, observation timing, engagement metrics, and Player POV rendering.
-
-## Coach Narrative
-
-The center of the application now prioritizes a readable strategy explanation instead of the old abstract path diagram.
-
-During live training it answers:
-
-- **What should I do right now?**
-- **Why does this state matter?**
-- **What transition is coming next?**
-
-After a replay it becomes a five-part story:
-
-1. **The plan** — matchup, opponent, map and doctrine.
-2. **What you could know** — scouting/visibility opportunities and observation latency.
-3. **Economy and conversion** — workers, expansions, bank and production conversion.
-4. **Where the game bent** — the highest-value doctrine or engagement review point.
-5. **What to do next** — concrete changes for the next game.
-
-**Read briefing** speaks the narrative aloud. Narrative generation is local and deterministic; it does not require a paid AI service.
-
-The legacy decision diagram can still be opened with **Show decision map**, but it is explicitly labeled as an abstract coaching model rather than literal map terrain.
+Normal live callouts are intentionally short. Deep explanation belongs in replay review.
 
 ## Build & Strategy Library
 
@@ -132,44 +108,152 @@ The library filters by:
 - scenario
 - strategy/build
 
-Every 1v1 matchup currently includes:
+Opponent race can remain **Unknown** until you identify it. Once known, matchup-specific strategies populate.
 
-- **Standard** — a flexible matchup framework with benchmark timing windows.
-- **Opponent Fast Third / 3 Bases** — a specific response to early economic expansion.
+All nine 1v1 matchups include at least:
 
-Examples include:
+- **Standard** — flexible matchup framework with benchmark timing windows.
+- **Opponent Fast Third / 3 Bases** — response to early economic expansion.
 
-- PvT — **Blink Pressure into Third**
-- PvT fast third — **Pin the Third, Don't Dive the Main**
-- PvZ fast third — **Pin the Larva Cycle**
-- TvZ — **1-1-1 Scheduled Taxation**
-- TvT — **Tank-Raven Vision Chess**
-- ZvT — **Three-Hatch Elastic Ling-Bane**
-- ZvZ fast third — **Two-Base Speedling Tax**
+Example PvT scenario:
 
-**Load into coach** makes the chosen plan the active Build / Decision Queue. **Read plan** speaks the concept, timings, and purpose of each milestone before the game. The normal five-second cues continue to prepare the player immediately before scheduled actions.
+> **Pin the Third, Don't Dive the Main** — pressure the exposed Terran third, preserve Blink units, take your own economy, and force defensive rotations instead of diving into the main army.
 
-## Requirements for actual game frames
+**Read plan** speaks the concept and timing milestones. **Load into coach** replaces the active Build / Decision Queue while preserving five-second preparation cues.
 
-Replay parsing works without launching StarCraft II. **Player POV / Observer Truth frames require StarCraft II to be installed locally and launched at least once.**
+## Coach Lab // Spellbook
 
-The renderer looks in the normal Windows installation location and also honors the `SC2PATH` environment variable. It reads the replay's exact `BaseBuild`, selects the corresponding local SC2 binary, validates the local `Support64` ICU runtime, launches SC2 with that runtime directory explicitly in its DLL search path, advances to the critical timestamp, moves to the recorded camera position when available, and retrieves RGB frame data from the StarCraft II engine.
+### Information boundary
 
-If `icuuc52.dll`, `icuin52.dll`, or `icudt52.dll` is missing from the local StarCraft II runtime, use Battle.net **Scan and Repair**. Do not install DLLs from third-party download sites.
+The top strip shows what is currently known:
 
-This is not a Playwright screenshot. Playwright can capture the web application itself; SC2 Master Coach uses the **StarCraft II replay rendering API** to obtain actual game-engine frames.
+- your race
+- opponent race, or Unknown
+- active strategy/spell
+- live evidence you reported
 
-### Frame evidence boundary
+It also explicitly lists information that is **not available live** without integration.
 
-- **Player POV** — engine-rendered replay frame with fog enabled for the selected replay player.
+### Personal Spell Effectiveness
+
+A strategy's effectiveness is based only on replays you explicitly link to it. The UI reports:
+
+- wins / losses
+- number of linked games
+- average replay coach score
+- total review flags
+- sample maturity: Early / Developing / Stronger Sample
+
+This avoids presenting views, popularity, or source authority as if they were win-rate evidence.
+
+### Replay-Driven Spell Evolution
+
+Replay patterns can propose local personal variants. Examples:
+
+- sustained supply block → move supply earlier
+- bank conversion lag → add production checkpoint
+- bad exchange → add engagement gate
+- greed-under-pressure signature → add greed abort condition
+- slow observation → add scouting/camera checkpoint
+- slow response → add decision deadline
+
+The original strategy remains unchanged until you deliberately create a personal variant.
+
+### Quick Signals / second-screen mode
+
+Available signals include:
+
+- Fast third
+- Extra production
+- Move-out
+- Air / tech
+- Turtle
+- Hidden tech
+- No natural
+
+The panel also lets you set the opponent race once it becomes known and enable **Compact live mode** so build execution and high-value reporting dominate the screen.
+
+### Knowledge Sources & Staleness
+
+The source panel separates:
+
+- official Blizzard balance information
+- MBMapps curated strategy synthesis
+- user-added web/build/replay references
+
+Sources are labeled **Current Patch**, **Stable Principle**, **Verify Patch**, or **Review / Stale**. Adding a URL does not automatically scrape or trust it; it records provenance for later curation.
+
+### Post-Game Spell Prescription
+
+After replay analysis, Master Coach selects up to three high-value training spells and gives each a measurable success condition. A five-game prescription uses:
+
+1. baseline
+2. focus
+3. repeat
+4. stress
+5. verify
+
+The goal is to change one important behavior at a time instead of constantly changing builds.
+
+## How the app knows which replay player is you
+
+A `.SC2Replay` contains all players. Master Coach analyzes each player independently.
+
+When a replay opens, it shows:
+
+> **Viewing replay as: [player name · race · result]**
+
+Identity resolution is:
+
+1. explicit player selection;
+2. remembered replay identity;
+3. local profile-name match;
+4. unique preferred-race match;
+5. temporary first-player fallback, visibly labeled unconfirmed.
+
+The selected player ID drives the strategy narrative, observation timing, engagement review, and Player POV rendering.
+
+## Replay Strategy Narrative
+
+After a replay, the center Coach Narrative tells the game as five chapters:
+
+1. **The plan** — matchup, map and doctrine.
+2. **What you could know** — information opportunities and observation latency.
+3. **Economy and conversion** — workers, expansions, bank and production conversion.
+4. **Where the game bent** — the most consequential strategic/engagement checkpoint.
+5. **What to do next** — concrete training changes.
+
+**Read briefing** speaks the review aloud using local speech synthesis.
+
+## Observation Reconstruction
+
+The replay model analyzes:
+
+```text
+Camera + selections + unit-position evidence + conservative vision model
+→ what the player could plausibly know
+→ observation latency
+→ inference proxy timing
+→ decision timing
+```
+
+This is not presented as exact fog-of-war reconstruction. Replay-derived facts, plausible visibility, behavioral proxies, and coaching interpretations remain distinct.
+
+## Actual game frames
+
+Replay parsing works without launching SC2. Actual **Player POV / Observer Truth** frames require StarCraft II to be installed locally and launched at least once.
+
+The renderer uses the replay's exact BaseBuild/DataVersion, launches the matching local SC2 binary, validates the Windows `Support64` runtime, advances to the critical timestamp, and requests RGB frame data from StarCraft II.
+
+- **Player POV** — engine-rendered replay with fog enabled for the selected player.
 - **Observer Truth** — same timestamp/camera with fog disabled.
-- **Tactical Map** — SC2 Master Coach's explanatory map for geometry, attention, and decision context.
-- Rendering resolution is selected by SC2 Master Coach and may not exactly match the original monitor resolution, UI scale, or graphics settings.
-- If a matching replay binary or map cannot be loaded, Tactical Map remains available and the application reports the exact missing prerequisite.
+- **Tactical Map** — Master Coach analytical reconstruction, not literal terrain.
+
+If the local SC2 runtime is incomplete, use Battle.net **Scan and Repair** rather than third-party DLL downloads.
 
 ## Replay case workspace
 
-Each real replay is persisted locally as a case:
+Each real replay is persisted locally:
 
 ```text
 Documents\SC2 Master Coach\Replays\<case-id>\
@@ -184,101 +268,29 @@ Documents\SC2 Master Coach\Replays\<case-id>\
     └── <moment>.json
 ```
 
-The app can open this folder directly from the Moment Intelligence Theater.
-
-## First run
-
-The first-run screen asks for:
-
-- player name
-- preferred race
-- current skill level
-
-Then it offers:
-
-- **TRAIN NOW** — start the Command HUD and build timer
-- **ANALYZE REPLAY** — locate the newest replay automatically or select one manually
-- **TRY DEMO MATCH** — see the analysis flow without locating a replay
-
-Profiles, replay identity, chosen strategies and coaching history stay on the local machine.
-
-## Command HUD
-
-The Command HUD provides:
-
-- Zerg, Terran, and Protoss visual identities
-- nine matchup doctrines
-- current action and next transition
-- scouting-evidence controls
-- threat classification
-- tactical priority queue
-- race-specific command card and hotkeys
-- optional spoken coaching
-- an elevated, sticky **Build / Decision Queue** immediately below the current command
-- the complete Build Log directly beneath that queue
-
-## Five-second build preparation cues
-
-Before each timed build action, the coach provides a visual cue and, when Voice is enabled, a race-aware spoken instruction such as:
-
-> **In five seconds, pull one Probe to warp in a Gateway.**
-
-It also issues a **Now** cue as the timer crosses the scheduled action.
-
-The chronological Build Log shows scheduled timestamp, build action, coaching rationale, cue time, and timing delta. It is a cue history—not proof that the in-game action was completed.
-
-## Replay Intelligence
-
-For supported `.SC2Replay` versions, the parser extracts and derives:
-
-- map, duration, players, races, and result
-- worker, economy, supply, and army-value checkpoints
-- building, expansion, and upgrade timings
-- unit deaths and approximate combat locations
-- engagement windows and trade efficiency
-- economy inflection points
-- inferred decision windows
-- doctrine-review flags
-- plain-language strategy narrative for every replay player
-
-## Observation Reconstruction
-
-The replay model analyzes:
-
-```text
-Camera + selections + unit-position evidence + conservative vision model
-→ what the player could plausibly know
-→ observation latency
-→ inference proxy timing
-→ decision timing
-```
-
-This is not presented as exact fog-of-war reconstruction. The application distinguishes replay-derived facts from plausible observation and behavioral proxies, and the strategy narrative preserves the same evidence boundary.
-
 ## Free release pipeline
 
-`.github/workflows/windows-release.yml` runs on Windows and:
+The Windows GitHub Actions pipeline:
 
-1. installs dependencies
-2. verifies SC2 protocol compatibility
-3. runs tests
-4. builds the native desktop application with PyInstaller
-5. bundles PySC2 and SC2 protocol libraries
-6. builds the free NSIS installer
-7. packages the portable ZIP
-8. uploads artifacts and publishes the current semantic version
+1. installs dependencies;
+2. verifies SC2 protocol compatibility;
+3. runs tests;
+4. builds the desktop bundle with PyInstaller;
+5. builds the NSIS installer;
+6. packages the portable ZIP;
+7. uploads and publishes the semantic version release.
 
-The release architecture uses zero-cost/open tooling. Paid code signing and paid Store distribution are intentionally excluded.
+Paid signing and paid Store distribution remain intentionally excluded.
 
 ## Developer run
 
-### Desktop development
+### Desktop
 
 ```text
 run_desktop_windows.bat
 ```
 
-### Local service/browser mode
+### Browser/service mode
 
 ```text
 run_windows.bat
@@ -290,28 +302,6 @@ run_windows.bat
 chmod +x run_wsl.sh
 ./run_wsl.sh
 ```
-
-### Docker
-
-Replay parsing works in Docker. Actual RGB frame capture additionally needs an SC2 installation/rendering environment accessible to the container.
-
-```bash
-docker build -t sc2-master-coach .
-docker run --rm -p 8765:8765 -e SC2_NO_BROWSER=1 sc2-master-coach
-```
-
-## API
-
-- `GET /api/health`
-- `GET /api/demo`
-- `POST /api/replay/analyze`
-- `POST /api/replay/analyze-latest`
-- `GET /api/replay/capture/status`
-- `POST /api/replay/capture`
-- `GET /api/cases/<case-id>/frames/<filename>`
-- `POST /api/cases/<case-id>/open`
-- `GET /api/launch-context`
-- `GET /api/update/check`
 
 ## Product thesis
 
