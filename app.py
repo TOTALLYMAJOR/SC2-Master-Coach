@@ -29,7 +29,7 @@ from sc2_frame_capture import (
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
 MAX_REPLAY_BYTES = 40 * 1024 * 1024
-CURRENT_VERSION = "1.4.0"
+CURRENT_VERSION = "1.5.0"
 RELEASES_API = "https://api.github.com/repos/TOTALLYMAJOR/SC2-Master-Coach/releases/latest"
 
 app = Flask(__name__, static_folder=str(STATIC), static_url_path="")
@@ -41,7 +41,12 @@ def index():
     # Keep the Command HUD source maintainable while layering the optional
     # coaching and replay-intelligence modules at serve time.
     html = (STATIC / "index.html").read_text(encoding="utf-8")
-    for href in ("/experience.css", "/moment-theater.css", "/coach-intelligence.css"):
+    for href in (
+        "/experience.css",
+        "/moment-theater.css",
+        "/coach-intelligence.css",
+        "/spellbook-lab.css",
+    ):
         if href not in html:
             html = html.replace("</head>", f'<link rel="stylesheet" href="{href}">\n</head>')
     scripts = (
@@ -51,6 +56,12 @@ def index():
         "/experience.js",
         "/moment-theater.js",
         "/coach-intelligence.js",
+        "/spellbook-core.js",
+        "/spellbook-performance.js",
+        "/spellbook-evolution.js",
+        "/spellbook-signals.js",
+        "/spellbook-sources.js",
+        "/spellbook-curriculum.js",
     )
     for src in scripts:
         if src not in html:
@@ -99,7 +110,7 @@ def _version_tuple(value: str):
 
 
 def _latest_release():
-    req = urllib.request.Request(RELEASES_API, headers={"User-Agent": "SC2-Master-Coach/1.4.0"})
+    req = urllib.request.Request(RELEASES_API, headers={"User-Agent": "SC2-Master-Coach/1.5.0"})
     with urllib.request.urlopen(req, timeout=4) as response:
         return json.loads(response.read().decode("utf-8"))
 
