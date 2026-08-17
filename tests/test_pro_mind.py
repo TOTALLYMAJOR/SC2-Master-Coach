@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = ROOT / "static"
@@ -21,7 +22,7 @@ def test_pvt_teaches_capability_choice_scouting_and_third_permission():
     assert 'X("Third Nexus"' in data
     assert "Correct information expires" in data
     assert "Pre-third permission scout" in data
-    assert "YOU BOUGHT THIS" not in data  # UI language belongs to the renderer.
+    assert "YOU BOUGHT THIS" not in data
 
 
 def test_pro_mind_ui_exposes_unspoken_reasoning_and_manual_evidence_boundary():
@@ -46,12 +47,16 @@ def test_quick_signals_are_timestamped_and_notify_pro_mind():
     assert "Signals are time-stamped" in script
 
 
-def test_v16_loads_pro_mind_and_installer_version_matches():
+def test_pro_mind_assets_load_and_installer_version_matches_app():
     app = (ROOT / "app.py").read_text(encoding="utf-8")
     installer = (ROOT / "installer" / "sc2-master-coach.nsi").read_text(encoding="utf-8")
-    assert 'CURRENT_VERSION = "1.6.0"' in app
+    app_match = re.search(r'^CURRENT_VERSION = "([0-9]+\.[0-9]+\.[0-9]+)"$', app, re.MULTILINE)
+    installer_match = re.search(r'^!define VERSION "([0-9]+\.[0-9]+\.[0-9]+)"$', installer, re.MULTILINE)
+    product_match = re.search(r'^VIProductVersion "([0-9]+\.[0-9]+\.[0-9]+)\.0"$', installer, re.MULTILINE)
+    assert app_match and installer_match and product_match
+    assert app_match.group(1) == installer_match.group(1) == product_match.group(1)
     assert '"/pro-mind.css"' in app
     assert '"/pro-mind-data.js"' in app
+    assert '"/pro-mind-stories.js"' in app
     assert '"/pro-mind.js"' in app
-    assert '!define VERSION "1.6.0"' in installer
-    assert 'VIProductVersion "1.6.0.0"' in installer
+    assert app.index('"/pro-mind-stories.js"') < app.index('"/pro-mind.js"')
