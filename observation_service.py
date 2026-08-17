@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from observation_engine import reconstruct_observation_model
+from strategy_narrative import build_strategy_narrative
 
 
 def _structure_catalog():
@@ -14,6 +15,22 @@ def _structure_catalog():
     }
 
 
+def _attach_narratives(result: dict) -> dict:
+    for pid, analysis in (result.get("analysis_by_player") or {}).items():
+        try:
+            analysis["strategy_narrative"] = build_strategy_narrative(result, int(pid))
+        except Exception as exc:
+            analysis["strategy_narrative"] = {
+                "headline": "Replay strategy narrative unavailable",
+                "chapters": [{"label": "Review", "text": f"Narrative generation failed safely: {type(exc).__name__}: {exc}"}],
+                "turning_points": [],
+                "next_game_actions": [],
+                "spoken_text": "Replay narrative generation was unavailable for this game.",
+                "evidence_boundary": "Raw replay analysis remains available even when narrative generation fails.",
+            }
+    return result
+
+
 def enrich_replay_analysis(path: str | Path, result: dict) -> dict:
     import sc2reader
 
@@ -21,14 +38,14 @@ def enrich_replay_analysis(path: str | Path, result: dict) -> dict:
     models = reconstruct_observation_model(replay, result.get("players", []), structures=_structure_catalog())
     for pid, analysis in (result.get("analysis_by_player") or {}).items():
         analysis["observation_model"] = models.get(str(pid), {})
-    result["schema_version"] = "1.1"
+    result["schema_version"] = "1.2"
     source = result.setdefault("source", {})
     source["confidence_note"] = (
         "Resource/unit/tracker state plus camera, selection and command events are replay-derived. "
         "Plausible visibility is approximated from sparse unit-position samples and a conservative sight-radius model; "
         "inference timing is a behavioral proxy, not a claim about the player's private thought process."
     )
-    return result
+    return _attach_narratives(result)
 
 
 def enrich_demo_analysis(result: dict) -> dict:
@@ -45,5 +62,5 @@ def enrich_demo_analysis(result: dict) -> dict:
     }
     for analysis in (result.get("analysis_by_player") or {}).values():
         analysis["observation_model"] = dict(demo)
-    result["schema_version"] = "1.1"
-    return result
+    result["schema_version"] = "1.2"
+    return _attach_narratives(result)
