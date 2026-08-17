@@ -32,6 +32,15 @@ jobs:
         run: |
           python -c "import google.protobuf; from s2clientprotocol import sc2api_pb2; print(f'protobuf={google.protobuf.__version__}; sc2api_pb2=ok')"
 
+      - name: Verify HUD JavaScript syntax
+        shell: pwsh
+        run: |
+          Get-ChildItem static -Filter *.js | ForEach-Object {
+            Write-Host "Checking $($_.Name)"
+            node --check $_.FullName
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
       - name: Run unit tests
         shell: pwsh
         run: |
