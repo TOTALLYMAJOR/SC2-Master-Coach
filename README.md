@@ -8,39 +8,46 @@ SC2 Master Coach is a local-first StarCraft II coaching application built around
 
 > **Play → Observe → Infer → Decide → Execute → Replay → Diagnose → Train again**
 
-It combines a race-reactive Command HUD, matchup doctrine, timed build execution, replay reconstruction, cognitive observation analysis, actual SC2 engine-rendered replay frames, and a tactical intelligence theater.
+It combines a race-reactive Command HUD, matchup doctrine, timed build execution, scenario strategy library, replay reconstruction, player-identity selection, plain-language strategy narratives, cognitive observation analysis, actual SC2 engine-rendered replay frames, and a tactical intelligence theater.
 
 The current strategy/build baseline targets **StarCraft II 5.0.16b**, including the eight-worker starting economy and the hotfix changes to Protoss Gateway/Warpgate timings, Terran Command Center cost, and Ghost supply. Build timings remain benchmark windows: scouting evidence outranks a memorized script.
 
 ## Release Notes
+
+### v1.4.0 — Coach Narrative + Strategy Library + Replay Identity
+
+- Added a **Coach Narrative** to the center of the HUD so strategy is communicated in plain language rather than primarily through an abstract diagram.
+- Replay analysis now produces a deterministic, local **five-chapter strategy story**: the plan, what information was plausibly available, economy/conversion, where the game bent, and what to do next.
+- Added **Read briefing** so the replay strategy narrative can be spoken aloud with Windows/browser speech synthesis.
+- Added a **Build & Strategy Library** with matchup-specific plans for all nine 1v1 matchups.
+- Each matchup includes both a **Standard** plan and an **Opponent Fast Third / 3 Bases** scenario plan.
+- Added **Read plan** to hear a selected strategy and its timings before a game.
+- Added **Load into coach** to replace the live Build / Decision Queue with the selected plan and preserve five-second preparation cues.
+- Fixed replay identity handling: the UI no longer silently assumes that the first replay player is the user.
+- Added an explicit **Viewing replay as…** selector. A confirmed replay name is stored locally and reused on future games.
+- Identity resolution now tries, in order: explicit selection, remembered replay name, matching local profile name, unique preferred race, then a clearly labeled temporary first-player fallback.
+- The selected player ID now flows through narrative, observation analysis, engagement review, and Player POV rendering.
+- The old center tactical diagram is hidden by default. **Show decision map** remains available with an explanation that it is a conceptual coaching model, not literal SC2 terrain.
 
 ### v1.3.2 — Exact Replay Build Selection + Build-First HUD
 
 - Fixed **“Unknown game version: 5.0.16. Known versions: ['latest']”** during SC2 frame capture.
 - Uses the replay's authoritative `BaseBuild` and `DataVersion` to launch the exact locally installed `Versions/BaseXXXXX` binary, even when PySC2's static version catalog has not yet added the current patch name.
 - Fixed the Windows **“Required library 'icuuc52.dll' does not exist”** launch failure by explicitly discovering StarCraft II's `Support64` runtime, validating the ICU runtime trio, using it as the child SC2 working directory, and prepending it to the child process `PATH`.
-- If the bundled SC2 ICU runtime is genuinely incomplete, the app now stops before launch and directs the user to Battle.net **Scan and Repair** rather than suggesting third-party DLL downloads.
-- Reports the locally installed SC2 Base builds when a replay-compatible binary is genuinely missing.
-- Allows SC2 to try its local map cache before declaring map data unavailable.
-- Moved **Build / Decision Queue** directly below **Execute Now**.
-- Keeps the build queue visually prioritized and sticky while scrolling.
-- Keeps the Build Log above doctrine, tactical-map, and Moment Intelligence Theater content.
+- If the bundled SC2 ICU runtime is genuinely incomplete, the app stops before launch and directs the user to Battle.net **Scan and Repair** rather than suggesting third-party DLL downloads.
+- Moved **Build / Decision Queue** directly below **Execute Now** and kept the Build Log above replay-intelligence surfaces.
 
 ### v1.3.1 — SC2 Frame Renderer Protocol Hotfix
 
 - Fixed the **“Descriptors cannot be created directly”** failure in the actual SC2 frame renderer.
 - Pinned the bundled Protobuf runtime to `3.20.3`, compatible with PySC2 and `s2clientprotocol`.
-- Added a Windows CI smoke test that imports `s2clientprotocol.sc2api_pb2` before packaging.
-- Preserved Tactical Map fallback when actual frame capture is unavailable.
-- Updated the strategy baseline label to **5.0.16b**.
+- Added a Windows CI smoke test for the SC2 protocol import boundary.
 
 ### v1.3.0 — Actual SC2 Frames + Moment Intelligence Theater
 
 - Added real replay-frame capture through the local StarCraft II RGB rendering API.
-- Added **Player POV** captures with fog enabled.
-- Added **Observer Truth** captures at the same timestamp and camera with fog disabled.
+- Added **Player POV** with fog enabled and **Observer Truth** with fog disabled.
 - Added click-to-cycle display: **Player POV → Observer Truth → Tactical Map**.
-- Added a large **Moment Intelligence Theater** with an Observation → Camera → Inference → Decision evidence chain.
 - Added a critical-moment filmstrip, SC2 minimap inset, persistent replay case folders, and **Open case folder**.
 
 ### v1.2.0 — Build Execution + In-App Snapshot View
@@ -76,6 +83,72 @@ The installer:
 
 The executable is unsigned under the zero-cost release constraint, so Windows SmartScreen can initially show an **Unknown Publisher** warning.
 
+## How the app knows which replay player is you
+
+A `.SC2Replay` contains every player in the game. SC2 Master Coach analyzes each player separately, so it does not need to guess permanently.
+
+When a replay opens, the app shows:
+
+> **Viewing replay as: [player name · race · result]**
+
+Identity resolution is:
+
+1. a player you explicitly selected;
+2. a replay name remembered from a prior selection;
+3. an exact match to the local profile name;
+4. a unique player matching your preferred race;
+5. only then, a temporary first-player fallback that is visibly labeled as unconfirmed.
+
+Selecting yourself once stores the replay name only in local application storage. The chosen player ID drives replay narrative, observation timing, engagement metrics, and Player POV rendering.
+
+## Coach Narrative
+
+The center of the application now prioritizes a readable strategy explanation instead of the old abstract path diagram.
+
+During live training it answers:
+
+- **What should I do right now?**
+- **Why does this state matter?**
+- **What transition is coming next?**
+
+After a replay it becomes a five-part story:
+
+1. **The plan** — matchup, opponent, map and doctrine.
+2. **What you could know** — scouting/visibility opportunities and observation latency.
+3. **Economy and conversion** — workers, expansions, bank and production conversion.
+4. **Where the game bent** — the highest-value doctrine or engagement review point.
+5. **What to do next** — concrete changes for the next game.
+
+**Read briefing** speaks the narrative aloud. Narrative generation is local and deterministic; it does not require a paid AI service.
+
+The legacy decision diagram can still be opened with **Show decision map**, but it is explicitly labeled as an abstract coaching model rather than literal map terrain.
+
+## Build & Strategy Library
+
+The library filters by:
+
+- your race
+- opponent race
+- scenario
+- strategy/build
+
+Every 1v1 matchup currently includes:
+
+- **Standard** — a flexible matchup framework with benchmark timing windows.
+- **Opponent Fast Third / 3 Bases** — a specific response to early economic expansion.
+
+Examples include:
+
+- PvT — **Blink Pressure into Third**
+- PvT fast third — **Pin the Third, Don't Dive the Main**
+- PvZ fast third — **Pin the Larva Cycle**
+- TvZ — **1-1-1 Scheduled Taxation**
+- TvT — **Tank-Raven Vision Chess**
+- ZvT — **Three-Hatch Elastic Ling-Bane**
+- ZvZ fast third — **Two-Base Speedling Tax**
+
+**Load into coach** makes the chosen plan the active Build / Decision Queue. **Read plan** speaks the concept, timings, and purpose of each milestone before the game. The normal five-second cues continue to prepare the player immediately before scheduled actions.
+
 ## Requirements for actual game frames
 
 Replay parsing works without launching StarCraft II. **Player POV / Observer Truth frames require StarCraft II to be installed locally and launched at least once.**
@@ -88,7 +161,7 @@ This is not a Playwright screenshot. Playwright can capture the web application 
 
 ### Frame evidence boundary
 
-- **Player POV** — engine-rendered replay frame with fog enabled for the analyzed player.
+- **Player POV** — engine-rendered replay frame with fog enabled for the selected replay player.
 - **Observer Truth** — same timestamp/camera with fog disabled.
 - **Tactical Map** — SC2 Master Coach's explanatory map for geometry, attention, and decision context.
 - Rendering resolution is selected by SC2 Master Coach and may not exactly match the original monitor resolution, UI scale, or graphics settings.
@@ -127,7 +200,7 @@ Then it offers:
 - **ANALYZE REPLAY** — locate the newest replay automatically or select one manually
 - **TRY DEMO MATCH** — see the analysis flow without locating a replay
 
-Profiles and coaching history stay on the local machine.
+Profiles, replay identity, chosen strategies and coaching history stay on the local machine.
 
 ## Command HUD
 
@@ -166,6 +239,7 @@ For supported `.SC2Replay` versions, the parser extracts and derives:
 - economy inflection points
 - inferred decision windows
 - doctrine-review flags
+- plain-language strategy narrative for every replay player
 
 ## Observation Reconstruction
 
@@ -179,7 +253,7 @@ Camera + selections + unit-position evidence + conservative vision model
 → decision timing
 ```
 
-This is not presented as exact fog-of-war reconstruction. The application distinguishes replay-derived facts from plausible observation and behavioral proxies.
+This is not presented as exact fog-of-war reconstruction. The application distinguishes replay-derived facts from plausible observation and behavioral proxies, and the strategy narrative preserves the same evidence boundary.
 
 ## Free release pipeline
 
