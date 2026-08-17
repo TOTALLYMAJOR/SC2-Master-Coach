@@ -29,7 +29,7 @@ from sc2_frame_capture import (
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
 MAX_REPLAY_BYTES = 40 * 1024 * 1024
-CURRENT_VERSION = "1.5.0"
+CURRENT_VERSION = "1.6.0"
 RELEASES_API = "https://api.github.com/repos/TOTALLYMAJOR/SC2-Master-Coach/releases/latest"
 
 app = Flask(__name__, static_folder=str(STATIC), static_url_path="")
@@ -46,6 +46,7 @@ def index():
         "/moment-theater.css",
         "/coach-intelligence.css",
         "/spellbook-lab.css",
+        "/pro-mind.css",
     ):
         if href not in html:
             html = html.replace("</head>", f'<link rel="stylesheet" href="{href}">\n</head>')
@@ -62,6 +63,8 @@ def index():
         "/spellbook-signals.js",
         "/spellbook-sources.js",
         "/spellbook-curriculum.js",
+        "/pro-mind-data.js",
+        "/pro-mind.js",
     )
     for src in scripts:
         if src not in html:
@@ -110,7 +113,7 @@ def _version_tuple(value: str):
 
 
 def _latest_release():
-    req = urllib.request.Request(RELEASES_API, headers={"User-Agent": "SC2-Master-Coach/1.5.0"})
+    req = urllib.request.Request(RELEASES_API, headers={"User-Agent": f"SC2-Master-Coach/{CURRENT_VERSION}"})
     with urllib.request.urlopen(req, timeout=4) as response:
         return json.loads(response.read().decode("utf-8"))
 
