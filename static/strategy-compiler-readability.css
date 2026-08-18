@@ -1,0 +1,231 @@
+/*
+ * SC2 Master Coach v1.8.1 — readability and spacing pass.
+ *
+ * This file intentionally loads after strategy-compiler.css. It raises the
+ * minimum readable type size, creates a consistent vertical rhythm, and
+ * reduces card density without changing the Strategy Compiler behavior.
+ */
+
+.strategy-shell{
+  --sc-space-1:6px;
+  --sc-space-2:10px;
+  --sc-space-3:14px;
+  --sc-space-4:18px;
+  --sc-space-5:24px;
+  --sc-space-6:32px;
+  --sc-space-7:42px;
+  padding:24px clamp(16px,2.5vw,38px) 104px;
+}
+
+.strategy-stage,.strategy-topbar{max-width:1480px}
+.strategy-topbar{margin-bottom:24px;gap:24px}
+.strategy-brand b{font-size:1.16rem;line-height:1.2;letter-spacing:.105em}
+.strategy-brand span{font-size:.82rem;line-height:1.45;margin-top:7px}
+.strategy-top-actions{gap:10px}
+
+.strategy-btn{
+  min-height:44px;
+  padding:12px 16px;
+  font-size:.76rem;
+  line-height:1.2;
+  letter-spacing:.065em;
+}
+.strategy-btn.strategy-mega{min-width:310px;min-height:58px;padding:18px 26px;font-size:.92rem}
+.strategy-btn span{margin-left:9px}
+
+.strategy-workflow{max-width:1060px;margin:22px auto 34px;gap:12px}
+.strategy-workflow-step{min-height:54px;padding:12px 14px;gap:11px}
+.strategy-workflow-step span{width:30px;height:30px;font-size:.72rem}
+.strategy-workflow-step b{font-size:.72rem;line-height:1.25;letter-spacing:.07em}
+
+.strategy-hero{max-width:1020px;margin:34px auto 36px}
+.strategy-kicker,
+.strategy-section-head>div>span,
+.strategy-live-question>span,
+.strategy-live-action>span,
+.strategy-confidence>span,
+.strategy-plan-hero-copy>span,
+.strategy-alternatives>div>span,
+.strategy-source-note b{
+  font-size:.72rem;
+  line-height:1.35;
+  letter-spacing:.13em;
+}
+.strategy-hero h1{font-size:clamp(2.4rem,5vw,4.7rem);line-height:1.02;margin:13px 0 18px}
+.strategy-hero p{max-width:830px;font-size:1rem;line-height:1.7}
+
+.strategy-duel{grid-template-columns:1fr 88px 1fr;gap:20px;max-width:1240px;margin-bottom:32px}
+.strategy-race-card{min-height:380px}
+.strategy-race-copy{left:24px;right:24px;bottom:23px;gap:7px 18px}
+.strategy-race-copy>span{font-size:.72rem;line-height:1.25}
+.strategy-race-copy>strong{font-size:2.15rem;line-height:1.02}
+.strategy-race-copy label{font-size:.68rem;line-height:1.35;margin-top:10px}
+.strategy-race-copy select{
+  min-width:180px;
+  min-height:46px;
+  padding:12px 38px 12px 14px;
+  font-size:.94rem;
+}
+.strategy-vs{gap:11px}
+.strategy-vs span{width:72px;height:72px;font-size:1.22rem}
+.strategy-vs small{font-size:.66rem;line-height:1.3}
+
+.strategy-section{padding:clamp(21px,2vw,29px)}
+.strategy-section-head{gap:18px;margin-bottom:20px}
+.strategy-section-head h2{font-size:1.48rem;line-height:1.2;margin:5px 0 7px}
+.strategy-section-head p{max-width:72ch;font-size:.88rem;line-height:1.58}
+.strategy-help{width:32px;height:32px;font-size:.78rem}
+
+.strategy-goal-section{margin-bottom:18px}
+.strategy-goal-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.strategy-goal-card{min-height:205px;padding:20px}
+.strategy-goal-icon{width:43px;height:43px;margin-bottom:16px}
+.strategy-goal-card b{font-size:.94rem;line-height:1.3}
+.strategy-goal-card>span{font-size:.76rem;line-height:1.52;margin-top:8px}
+.strategy-goal-card i{font-size:.64rem;line-height:1.3;margin-top:13px}
+
+.strategy-preferences{gap:16px;margin-top:18px}
+.strategy-pref-block{padding:16px}
+.strategy-pref-title{gap:10px;margin-bottom:11px}
+.strategy-pref-title b{font-size:.76rem;line-height:1.3}
+.strategy-pref-title .strategy-help{width:26px;height:26px;font-size:.64rem}
+.strategy-pref-block select{min-height:44px;padding:11px 12px;font-size:.88rem}
+.strategy-segmented{gap:7px}
+.strategy-segmented button{min-height:44px;padding:11px 12px;font-size:.72rem}
+
+.strategy-cta-panel{gap:24px;padding:22px 24px;margin-top:18px}
+.strategy-cta-panel>div>span{font-size:.68rem;line-height:1.35}
+.strategy-cta-panel strong{font-size:1.18rem;line-height:1.35;margin-top:6px}
+.strategy-cta-panel p{font-size:.82rem;line-height:1.5;margin-top:6px}
+
+.strategy-plan-hero{grid-template-columns:minmax(430px,.95fr) 1.05fr;gap:30px;padding:28px;margin-bottom:18px}
+.strategy-art-duel{grid-template-columns:1fr 60px 1fr;gap:9px;height:325px}
+.strategy-art-duel>div span{left:16px;bottom:14px;font-size:.76rem;line-height:1.3}
+.strategy-art-duel>b{width:56px;height:56px;font-size:.78rem}
+.strategy-plan-hero-copy .strategy-verdict{padding:7px 10px;font-size:.66rem;line-height:1.3;margin-bottom:12px}
+.strategy-plan-hero-copy h1{font-size:clamp(2rem,4vw,3.55rem);line-height:1.04;margin:10px 0 14px}
+.strategy-plan-hero-copy p{font-size:.96rem;line-height:1.68}
+.strategy-hero-ctas{gap:11px;margin-top:22px}
+
+.strategy-story-board{margin-bottom:18px}
+.strategy-story-board>p{font-size:.96rem;line-height:1.68;max-width:95ch}
+.strategy-causal-flow{grid-template-columns:1fr 34px 1fr 34px 1fr 34px 1fr;gap:10px;margin-top:20px}
+.strategy-causal-flow>div{padding:15px;min-height:132px}
+.strategy-causal-flow>div>b{width:28px;height:28px;font-size:.68rem}
+.strategy-causal-flow span{font-size:.86rem;line-height:1.35;margin-top:11px}
+.strategy-causal-flow small{font-size:.72rem;line-height:1.5;margin-top:6px}
+.strategy-causal-flow>i{font-size:1.2rem}
+
+.strategy-plan-grid{grid-template-columns:1.35fr .85fr;gap:18px}
+.strategy-plan-side{gap:18px}
+.strategy-window-list{gap:10px;padding-right:5px}
+.strategy-window{grid-template-columns:108px 1fr 32px;gap:14px;padding:13px}
+.strategy-window time{font-size:.76rem;line-height:1.35}
+.strategy-window>div>span{font-size:.64rem;line-height:1.35}
+.strategy-window b{font-size:.86rem;line-height:1.35;margin-top:4px}
+.strategy-window p{font-size:.73rem;line-height:1.5;margin-top:6px}
+.strategy-window em{width:28px;height:28px;font-size:.66rem}
+.strategy-compact-list{gap:10px}
+.strategy-compact-list>div{padding:13px}
+.strategy-compact-list b{font-size:.84rem;line-height:1.35}
+.strategy-compact-list span{font-size:.73rem;line-height:1.5;margin-top:5px}
+.strategy-compact-list i{font-size:.62rem;padding:4px 7px;margin-top:8px}
+
+.strategy-alternatives{gap:24px;margin-top:18px}
+.strategy-alternatives h2{font-size:1.38rem;line-height:1.25;margin:6px 0}
+.strategy-alternatives p{font-size:.82rem;line-height:1.55;max-width:68ch}
+.strategy-alt-actions{gap:10px}
+.strategy-source-note{margin-top:12px;padding:10px 13px;font-size:.72rem;line-height:1.5}
+
+.strategy-live-head{max-width:1180px;margin-bottom:16px;gap:20px}
+.strategy-live-head>div>b{font-size:1.18rem;line-height:1.3;margin-top:7px}
+.strategy-live-head>div>span{font-size:.76rem;line-height:1.4;margin-top:4px}
+.strategy-live-head time{font-size:3rem;line-height:1}
+.strategy-live-status{gap:8px;font-size:.68rem;line-height:1.35}
+.strategy-live-status i{width:10px;height:10px}
+.strategy-live-focus{max-width:1180px;grid-template-columns:1fr 1.65fr 1fr}
+.strategy-live-focus>div{padding:26px}
+.strategy-live-question strong{font-size:1.05rem;line-height:1.45;margin-top:10px}
+.strategy-live-action h1{font-size:clamp(2rem,4.2vw,3.65rem);line-height:1.06;margin:11px 0 13px}
+.strategy-live-action p{font-size:.92rem;line-height:1.62;max-width:720px}
+.strategy-confidence b{font-size:1.05rem;line-height:1.35;margin-top:10px}
+.strategy-confidence small{font-size:.72rem;line-height:1.5;margin-top:7px}
+.strategy-live-next,.strategy-live-intel,.strategy-live-cta-bar{max-width:1180px;margin-top:16px}
+.strategy-next-grid{gap:11px}
+.strategy-next-grid>div{padding:14px}
+.strategy-next-grid time{font-size:.72rem;line-height:1.35}
+.strategy-next-grid b{font-size:.82rem;line-height:1.4;margin-top:6px}
+
+.strategy-intel-grid{gap:11px}
+.strategy-intel{min-height:72px;padding:14px 13px}
+.strategy-intel span{font-size:.84rem;line-height:1.35}
+.strategy-intel small{font-size:.62rem;line-height:1.35;margin-top:6px}
+.strategy-more-intel{margin-top:11px}
+.strategy-more-intel summary{padding:11px 13px;font-size:.7rem;line-height:1.35}
+.strategy-more-intel .strategy-intel-grid{padding:0 12px 12px}
+.strategy-voice-row{gap:12px;margin-top:16px}
+.strategy-mic{grid-template-columns:32px 1fr;column-gap:13px;padding:15px 17px!important}
+.strategy-mic .mic-dot{width:25px;height:25px}
+.strategy-mic b{font-size:.84rem;line-height:1.35}
+.strategy-mic small{font-size:.7rem;line-height:1.45}
+.strategy-voice-result{padding:14px;font-size:.76rem;line-height:1.5}
+.strategy-voice-result>div{gap:8px;margin-top:10px}
+.strategy-live-cta-bar{gap:10px;padding:14px;bottom:12px}
+
+[data-tip]:hover:after,[data-tip]:focus-visible:after{
+  width:min(380px,82vw);
+  padding:12px 13px;
+  font-size:.76rem;
+  line-height:1.55;
+}
+.strategy-modal{padding:22px}
+.strategy-modal-card{width:min(720px,95vw);padding:28px}
+.strategy-modal-card>span{font-size:.68rem;line-height:1.35}
+.strategy-modal-card h2{font-size:1.65rem;line-height:1.25;margin:10px 38px 12px 0}
+.strategy-modal-card p{font-size:.94rem;line-height:1.7}
+.strategy-modal-close{right:12px;top:11px;width:38px;height:38px;font-size:1.15rem}
+
+@media(max-width:1220px){
+  .strategy-goal-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .strategy-plan-hero,.strategy-plan-grid{grid-template-columns:1fr}
+  .strategy-art-duel{height:285px}
+  .strategy-live-focus{grid-template-columns:1fr}
+  .strategy-live-focus>div{border-right:0;border-bottom:1px solid var(--sc-line)}
+  .strategy-live-focus>div:last-child{border-bottom:0}
+}
+
+@media(max-width:900px){
+  .strategy-shell{padding:16px 12px 92px}
+  .strategy-topbar,.strategy-cta-panel,.strategy-alternatives,.strategy-live-head{align-items:stretch;flex-direction:column}
+  .strategy-top-actions,.strategy-alt-actions{justify-content:flex-start}
+  .strategy-workflow{grid-template-columns:1fr 1fr;margin-bottom:28px}
+  .strategy-duel{grid-template-columns:1fr;max-width:680px}
+  .strategy-vs{height:48px}
+  .strategy-vs span{width:50px;height:50px;font-size:.82rem}
+  .strategy-vs small{display:none}
+  .strategy-race-card{min-height:320px}
+  .strategy-goal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .strategy-preferences{grid-template-columns:1fr}
+  .strategy-causal-flow{grid-template-columns:1fr}
+  .strategy-causal-flow>i{transform:rotate(90deg)}
+  .strategy-intel-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .strategy-voice-row{grid-template-columns:1fr}
+  .strategy-btn.strategy-mega{width:100%;min-width:0}
+}
+
+@media(max-width:600px){
+  .strategy-hero{margin:26px auto 28px}
+  .strategy-hero h1{font-size:2.35rem}
+  .strategy-hero p{font-size:.94rem}
+  .strategy-workflow,.strategy-goal-grid,.strategy-next-grid{grid-template-columns:1fr}
+  .strategy-race-copy{grid-template-columns:1fr}
+  .strategy-race-copy select{grid-column:1;grid-row:auto;width:100%;margin-top:8px}
+  .strategy-art-duel{grid-template-columns:1fr;height:auto}
+  .strategy-art-duel>div{height:230px}
+  .strategy-art-duel>b{margin:-30px auto;position:relative;z-index:3}
+  .strategy-intel-grid{grid-template-columns:1fr}
+  .strategy-section{padding:19px}
+  .strategy-live-head time{font-size:2.25rem}
+  .strategy-live-action h1{font-size:2rem}
+  .strategy-plan-hero{padding:19px}
+}
