@@ -32,6 +32,18 @@ Official patch reference: <https://news.blizzard.com/en-us/article/24291949/star
 
 ## Release notes
 
+### v1.8.1 — Readability and Spacing Pass
+
+- Increased the Strategy Compiler's default type scale throughout setup, plan review, live coaching, Quick Intel, hover help, and workflow modals.
+- Raised routine button and selector targets to a minimum comfortable height of 44 pixels; the main **Forge My Strategy** CTA is now 58 pixels high.
+- Rebalanced desktop spacing around the race artwork, workflow rail, strategic goals, preference controls, build windows, plan assumptions, and live-action panels.
+- Reduced the strategic-goal grid from five columns to four on wide displays so labels and explanations have room to breathe.
+- Increased section padding, card gaps, live-panel padding, and modal spacing while preserving the low-information live contract.
+- Enlarged the most important live elements: current question, current action, reason, confidence, game clock, upcoming windows, voice input, and Quick Intel buttons.
+- Increased tooltip and popup text so workflow explanations can be read without leaning toward the screen.
+- Added responsive spacing/type rules for desktop, tablet, narrow window, and phone-width layouts.
+- Kept Strategy Compiler behavior unchanged; this release is a visual hierarchy and readability improvement.
+
 ### v1.8.0 — Strategy Compiler + Guided Visual Workflow
 
 - Added the **1v1 Strategy Compiler** as the default application experience.
