@@ -1,4 +1,4 @@
-# SC2 Master Coach — Command HUD + Replay Intelligence
+# SC2 Master Coach — Team Composer + Command HUD + Replay Intelligence
 
 <img width="1536" height="1024" alt="SC2 Master Coach marketing artwork" src="https://github.com/user-attachments/assets/606eed8f-538c-40b8-b3b3-cac639a2ecf6" />
 
@@ -6,59 +6,71 @@
 
 SC2 Master Coach is a local-first StarCraft II coaching application built around one learning loop:
 
-> **Choose a plan → understand why → scout → adapt → execute → replay → diagnose → refine → train again**
+> **State the match → choose a plan → understand the story → execute → scout → adapt → replay → diagnose → refine**
 
-It combines a race-reactive Command HUD, matchup strategy library, spoken build timing, **PRO MIND // Unwritten Game**, Coach Lab // Spellbook, player-specific replay analysis, strategy narratives, and actual SC2 engine-rendered replay frames.
+The default experience is now a **2v2 Team Composer**. The original dense Command HUD remains available as **Advanced Command Center** for deeper Pro Mind, Spellbook, replay, and tactical analysis.
 
-The current strategy/build baseline targets **StarCraft II 5.0.16b**. This includes the 5.0.16 eight-worker starting economy and the later 5.0.16b balance hotfix. Build timings are benchmark windows: **scouting evidence outranks a memorized script**.
+The current strategy/build baseline targets **StarCraft II 5.0.16b**, including the 5.0.16 eight-worker starting economy and the later 5.0.16b balance hotfix. Build timings are benchmark windows: **scouting evidence outranks a memorized script**.
 
 ## Release Notes
 
+### v1.7.0 — Team Composer Default Experience
+
+- Replaced the dense Command HUD as the default first screen with a calmer **Team Composer** workflow.
+- The first decision is now the actual match: **my race + ally race + opponent 1 + opponent 2**. Opponents can remain **Unknown** until scouting identifies them.
+- Added the current 5.0.16 2v2 map pool as optional context rather than a required setup burden.
+- Added optional skill and coordination inputs so highly synchronized or mechanically demanding plans can be ranked appropriately.
+- Added **exactly 10 ranked team-plan archetypes** rather than presenting every system at once:
+  1. Shield & Scale
+  2. The False Front
+  3. Hammer & Anvil
+  4. Lantern & Blade
+  5. Fortress & Flank
+  6. The Hidden Hand
+  7. Hold the Door
+  8. Siege & Harvest
+  9. Two Doors
+  10. The Wild Card
+- Strategy ranking uses race-role fit, mechanical load, opponent information, and coordination requirement. It does **not** present popularity as global win-rate evidence.
+- Every plan includes a **Battle Story**, **your role**, **ally role**, **your build windows**, **ally build windows**, **critical scout**, **abort condition**, and team rhythm.
+- Team roles include **Screen, Anchor, Scout, Harasser, Expander, and Closer**. The same strategy can assign those roles differently depending on the two allied races.
+- Added a dedicated **Battle Plan** view so the plan can be understood without opening Pro Mind, Spellbook, threat matrices, or replay tools.
+- Added a stripped-down **Live Coach** with only the current personal action, ally objective, strategic reason, next timing windows, high-value scouting signals, opponent-race updates, timer controls, and optional speech.
+- Live build cues use tolerant timing windows and five-second preparation speech. They remain coaching prompts, not proof that the action happened in-game.
+- Added **Advanced Command Center** as an explicit escape hatch back to the original full application. No existing Pro Mind, Spellbook, replay, renderer, or tactical-analysis capability was removed.
+
 ### v1.6.1 — Persistent Branches + Battle Stories + Hover Help
 
-- Fixed the Pro Mind branch-details bug where a branch could open and then immediately close because the live game clock caused the entire panel to be rebuilt.
-- Open strategic branches and investment-responsibility cards now keep their state across normal clock updates and structural re-renders.
-- Pro Mind no longer performs a full structural rebuild every second when only the information-age number changed; it updates the dynamic age label in place until the actual strategic state changes.
-- Added contextual **hover help** to strategic branches, Pro Mind questions, scouting windows, Expansion Permission, manual protection gates, investment responsibilities, and branch concepts such as **What you buy**, **Hidden cost**, and **What breaks it**.
-- Added **Battle Story** explanations for all nine matchups. These narrate how the strategy creates time, attention, distance, defensive movement, production tax, or positional advantage.
-- PvT includes **The False Front**: show credible pressure on one side, make Terran rotate attention and army, establish the third on the safer opposite side, then bring the mobile force home before the distraction becomes a donation.
-- Each PvT branch also gets a branch-specific narrative for Blink, Stargate, or Colossus so the same strategic story is expressed differently by each capability.
-- The Battle Story explicitly teaches that pressure can be successful without damage when it buys attention, army displacement, information, or time for a new expansion.
+- Fixed the Pro Mind branch-details bug where a branch could open and immediately close because the live clock rebuilt the panel.
+- Open strategic branches and investment-responsibility cards keep state across normal clock updates.
+- Added contextual hover help to branch concepts, scouting, Expansion Permission, manual protection gates, and investment responsibilities.
+- Added Battle Story explanations for all nine 1v1 matchups.
+- PvT includes **The False Front**: show credible pressure, make Terran rotate, establish the third on the safer side, then bring the mobile force home before the distraction becomes a donation.
+- Battle Stories teach that pressure can succeed without damage when it buys attention, army displacement, information, or time.
 
 ### v1.6.0 — PRO MIND // Unwritten Game
 
-Added the professional-reasoning layer behind the build order.
-
-- Added deep **Pro Mind decision models for all nine 1v1 matchups**: PvT, PvZ, PvP, TvZ, TvP, TvT, ZvT, ZvP, and ZvZ.
-- Added **What Would a Pro Ask Right Now?** The active question changes with the game clock and matchup rather than presenting one static doctrine.
-- Added purposeful **scouting windows** that explain the question the scout is meant to answer, why the information matters, and which decisions change afterward.
-- Added **open strategic branches** framed as capabilities rather than technology names. Every branch explains what it buys, when to choose it, its hidden cost, how to protect the investment, and what invalidates it.
-- PvT explicitly teaches the trade between **Blink mobility**, **Stargate information/reach**, and **Robo/Colossus ground stability** rather than declaring one universally correct tech path.
-- Added **Expansion Permission**. Third/fourth bases are evaluated as investments that need fresh opponent information plus manually confirmed vision, army coverage, and reinforcement geometry.
-- Added **information age**. Quick scouting signals are time-stamped so a previously correct read can become visibly fresh, aging, or stale.
-- Added **You Bought This — Now Protect the Investment** for major economy and tech commitments. A Nexus, Command Center, Hatchery, Blink, Colossus, Tank line, Spire, etc. each creates new responsibilities.
-- Quick Signals publish live evidence events to Pro Mind and retain their game-time timestamp.
-- If opponent race is still **Unknown**, Pro Mind does not fabricate a matchup model. It explicitly keeps options open until the player reports the race.
-- The evidence boundary remains strict: without live SC2 integration, Master Coach cannot know exact army positions, production counts, camera state, vision, or whether a prompted action was actually executed unless the player reports it or replay analysis later establishes it.
+- Added deep Pro Mind decision models for all nine 1v1 matchups.
+- Added **What Would a Pro Ask Right Now?**
+- Added purposeful scouting windows that explain what question the scout is meant to answer.
+- Added strategic branches framed as capabilities rather than technology labels.
+- Added Expansion Permission, information age, and investment-protection reasoning.
+- Maintained the strict live evidence boundary: without game integration, Master Coach cannot know exact army positions, production counts, camera state, vision, or whether a prompted action was actually executed unless the player reports it or replay analysis later establishes it.
 
 ### v1.5.0 — Coach Lab // Spellbook
 
-Added five systems around the Spellbook concept:
-
-1. **Personal Spell Effectiveness** — explicitly link your replays to a selected strategy and track your own W/L record, coach score, review flags, and sample maturity. The app does not invent a global strategy win rate.
-2. **Replay-Driven Spell Evolution** — replay evidence proposes refinements such as earlier supply, production-conversion checkpoints, engagement gates, greed abort triggers, scouting checkpoints, and decision deadlines. Canonical strategies are never silently rewritten; accepted changes become local personal variants.
-3. **Second-Screen Quick Signals** — one-tap live reporting for opponent race, fast third, extra production, move-out, air/tech, turtle, hidden tech, and no natural. A compact live mode removes nonessential replay/UI surfaces while playing.
-4. **Knowledge Sources & Staleness** — separates official balance sources, curated strategy knowledge, and user-added web references. Every source is patch-tagged or marked as a stable principle / review-needed source.
-5. **Post-Game Spell Prescription** — converts replay diagnosis into a bounded five-game experiment with measurable training spells such as Scout on Schedule, Production Conversion, Engagement Gate, Greed Abort, or Worker Rhythm.
+- Personal Spell Effectiveness based only on explicitly linked replays.
+- Replay-Driven Spell Evolution with local personal variants.
+- Second-Screen Quick Signals and Compact Live mode.
+- Knowledge Sources & Staleness.
+- Post-Game Spell Prescription with bounded five-game experiments.
 
 ### v1.4.0 — Coach Narrative + Strategy Library + Replay Identity
 
-- Replaced the confusing center diagram with a plain-language **Coach Narrative** by default.
-- Added a deterministic five-chapter replay strategy story and **Read briefing**.
-- Added a **Build & Strategy Library** for all nine 1v1 matchups with Standard and Opponent Fast Third / 3 Bases scenarios.
-- Added **Read plan** and **Load into coach**.
-- Added explicit **Viewing replay as…** player selection and remembered local replay identity.
-- Hid the conceptual decision map by default; it remains optional and clearly labeled as non-literal.
+- Replaced the confusing center diagram with a plain-language Coach Narrative by default.
+- Added deterministic replay strategy stories and **Read briefing**.
+- Added a 1v1 Build & Strategy Library for all nine matchups.
+- Added **Read plan**, **Load into coach**, and explicit replay-player identity selection.
 
 ### Earlier releases
 
@@ -79,43 +91,136 @@ The installer is per-user, creates shortcuts, installs WebView2 when necessary, 
 
 The executable remains unsigned under the zero-cost release constraint, so Windows SmartScreen can initially show an **Unknown Publisher** warning.
 
-## The live workflow
-
-The intended live interaction is deliberately small:
+## Default workflow — Team Composer
 
 ```text
-MY RACE
-  ↓
-OPPONENT UNKNOWN
-  ↓
-Identify opponent race
-  ↓
-Matchup Pro Mind activates
-  ↓
-Choose strategy / spell
-  ↓
-Understand the capability and hidden cost
-  ↓
-Load into coach
-  ↓
-Build timing + five-second voice cues
-  ↓
-Report only high-value scouting signals
-  ↓
-Pro Mind updates questions, branches, and expansion permission
+ME + ALLY + OPPONENT 1 + OPPONENT 2
+                ↓
+        OPTIONAL MAP / SKILL
+                ↓
+       SHOW 10 TEAM STRATEGIES
+                ↓
+          CHOOSE ONE PLAN
+                ↓
+             STORY
+          YOUR ROLE
+          ALLY ROLE
+        TIMING WINDOWS
+       SCOUT / ABORT RULE
+                ↓
+          START LIVE COACH
+                ↓
+       REPORT ONLY BIG SIGNALS
+                ↓
+            REPLAY REVIEW
 ```
 
-The **Quick Signals** panel exists because Master Coach does not read the live SC2 process. It only knows live information supplied by the player plus the selected plan and timer.
+Opponent races can remain **Unknown**. Unknown information lowers recommendation confidence rather than causing the app to invent a matchup.
 
-Normal live callouts are intentionally short. Deep explanation belongs in Pro Mind expansion cards and replay review.
+## The 10 team-plan families
+
+### Shield & Scale
+
+Safe macro. Both allies preserve a defensive spine, scout for exceptions, and compound economy only when the opponents fail to demonstrate a punish window.
+
+### The False Front
+
+One ally shows a credible threat and forces movement; the partner spends that attention window on economy and reinforcement access. Damage is optional. Time and army displacement are the real resource.
+
+### Hammer & Anvil
+
+One player fixes the opposing army in place while the second arrives through a different lane or timing. The strategy fails when the two attacks become independent rather than synchronized.
+
+### Lantern & Blade
+
+One player owns information and keeps tech/movement visible; the partner concentrates resources into the composition that exploits those reads.
+
+### Fortress & Flank
+
+One army creates the stable front. The other refuses to stack behind it and instead pressures edges, reinforcements, drops, run-bys, or exposed expansions.
+
+### The Hidden Hand
+
+One ally presents a conventional shell while the other hides or accelerates a tech payoff. The surprise must arrive before the opponents can cheaply adapt.
+
+### Hold the Door
+
+Anti-rush posture. The team shares early warning and compact reinforcement until both opponent economies are confirmed, then converts an overcommitted rush into a counterattack or economic lead.
+
+### Siege & Harvest
+
+One player contains roads, ramps, air lanes, creep edges, or reinforcement paths while the partner expands behind restricted enemy movement.
+
+### Two Doors
+
+Both allies threaten different places close enough in time that the opponents must divide a concentrated response.
+
+### The Wild Card
+
+High-risk, high-learning asymmetric play: transport, proxy, hidden tech, Nydus-style access, or another unusual route. Designed to create rare game states rather than pretend to be universally safe.
+
+## Team roles
+
+Each strategy assigns a role to each ally:
+
+- **Screen** — creates a credible threat or denies movement.
+- **Anchor** — builds the stable army that can hold territory.
+- **Scout** — maintains information and detects transitions.
+- **Harasser** — creates attention, economic tax, or positional pressure.
+- **Expander** — converts the partner's pressure window into future power.
+- **Closer** — builds the composition intended to finish favorable fights.
+
+Role assignment is race-aware. Protoss, Terran, and Zerg express the same strategic role through different units, reinforcement systems, and information tools.
+
+## Minimal Live Coach
+
+Live mode intentionally suppresses most analysis surfaces. It prioritizes:
+
+- your current action;
+- ally objective;
+- why the team maneuver matters;
+- the next three timing windows;
+- opponent-race updates;
+- high-value scouting signals;
+- timer controls;
+- optional five-second spoken build preparation cues.
+
+High-value live signals include:
+
+- No natural
+- Fast third
+- Extra production
+- Move-out
+- Air / tech
+- Turtle
+- Hidden tech
+
+The coach does not read the live SC2 process. Those signals are player-reported evidence.
+
+## Advanced Command Center
+
+The original full HUD remains available through **Advanced Command Center**. It contains:
+
+- Build & Strategy Library
+- PRO MIND // Unwritten Game
+- Coach Lab // Spellbook
+- scouting evidence
+- threat model
+- tactical priority queue
+- resource telemetry
+- Build Log
+- replay analysis
+- Moment Intelligence Theater
+- Player POV / Observer Truth rendering
+- replay identity and narrative analysis
+
+Nothing in v1.7 removes those systems; it changes **when** the player is asked to look at them.
 
 ## PRO MIND // Unwritten Game
 
 PRO MIND teaches the reasoning that strong players often leave unstated.
 
-### What Would a Pro Ask Right Now?
-
-The central question changes as the game develops. Examples include:
+It asks questions such as:
 
 - Is the opponent actually expanding?
 - Where is the first gas / production investment going?
@@ -124,139 +229,43 @@ The central question changes as the game develops. Examples include:
 - What has the opponent built to answer my current army?
 - Has the last scouting read become stale?
 
-Each question includes an **Unspoken Rule** explaining the deeper strategic principle.
+Strategic branches explain:
 
-### Strategic branches are capabilities
-
-The UI does not reduce decisions to “pick Air” or “pick Colossus.” A branch explains:
-
-- **What you buy** — mobility, information, stable splash, siege control, reinforcement speed, etc.
-- **Choose when** — evidence that makes the capability valuable.
-- **Hidden cost** — what resources, tempo, flexibility, or attention are surrendered.
-- **How to protect it** — responsibilities created by the investment.
-- **What breaks it** — evidence that invalidates the branch.
-
-For PvT, for example:
-
-- **Blink / mobility** buys map presence, preservation, drop response, and flexibility.
-- **Stargate / air information** buys repeatable vision, harassment, and map reach.
-- **Robo / Colossus stability** buys a protected ground-army anchor and ranged splash geometry.
-
-Strategic branches remain open while the clock advances. Hovering the branch, question, scouting, or investment help markers explains what each concept means without forcing another panel open.
+- what capability you buy;
+- when to choose it;
+- hidden cost;
+- how to protect the investment;
+- what evidence breaks the branch.
 
 ### Battle Stories
 
-The strategy layer also tells a short battlefield story so the player can picture *how* the advantage is created.
-
-Example PvT — **The False Front**:
+A strategy also carries a memorable causal story. Example PvT — **The False Front**:
 
 ```text
-Blink Stalkers show pressure on the right.
+Blink Stalkers show pressure.
 Terran rotates Bio to respect the threat.
 A Probe places the third Nexus on the safer opposite side.
 The Stalkers disengage before the rotation becomes a real fight.
 The army returns to screen the Nexus while it begins paying back.
 ```
 
-The important lesson is not “attack right.” It is:
+The lesson is not “attack right.” It is:
 
 > **A credible threat can protect economy by buying attention, army displacement, and time even when it deals no damage.**
-
-Other matchup stories teach the same causal style through different mechanics: forcing defensive larva in PvZ, creating local-superiority uncertainty in PvP, taxing Zerg with Terran mobility, splitting Protoss attention in TvP, controlling siege roads in TvT, using creep as warning time in ZvT, reserving larva around Protoss power spikes in ZvP, and threatening Drones to buy your own Drone cycle in ZvZ.
-
-### Scouting has a purpose
-
-A scout is not displayed merely as a timestamp. It carries:
-
-```text
-SCOUT WINDOW
-What question am I answering?
-Why does it matter?
-Which decisions change after the answer?
-```
-
-Quick Signals are timestamped. As time passes, Pro Mind labels the latest reported information as **fresh**, **aging**, or **stale**.
-
-### Expansion Permission
-
-Expansions are treated as investments in future power rather than automatic build-order steps.
-
-The coach evaluates:
-
-- whether a fresh threat / production read exists;
-- whether current evidence indicates pressure or an all-in;
-- manually confirmed warning / vision;
-- manually confirmed army coverage;
-- manually confirmed reinforcement / rally geometry.
-
-The result is:
-
-- **OPEN** — current evidence and manual protection gates support the expansion;
-- **CAUTION** — one or more important conditions remain unresolved;
-- **HOLD** — reported evidence indicates an immediate punish window.
-
-Manual gates are intentional. Without live integration the application must not pretend it can see your army or Pylon/creep/siege geometry.
-
-### You Bought This — Now Protect the Investment
-
-Major purchases create responsibilities. Examples:
-
-- A **third Nexus** creates a larger defensive footprint and requires warning, warp access, army coverage, and a plan for when not to defend it.
-- **Colossi** require body units, vision, retreat space, and awareness of the Viking transition.
-- **Blink** should create scouting, preservation, drop defense, edge pressure, or rotation value; otherwise its mobility is unrealized.
-- A **Tank line** requires vision, flank protection, and safe repositioning.
-- A **Drone cycle** is future income purchased by temporarily giving up immediate army larva.
-
-## Build & Strategy Library
-
-The library filters by:
-
-- your race;
-- opponent race;
-- scenario;
-- strategy/build.
-
-Opponent race can remain **Unknown** until you identify it. Once known, matchup-specific strategies populate.
-
-All nine 1v1 matchups include at least:
-
-- **Standard** — flexible matchup framework with benchmark timing windows.
-- **Opponent Fast Third / 3 Bases** — response to early economic expansion.
-
-**Read plan** speaks the concept and timing milestones. **Load into coach** replaces the active Build / Decision Queue while preserving five-second preparation cues.
 
 ## Coach Lab // Spellbook
 
 Coach Lab makes the application's epistemic boundary visible and lets the player tune the coaching system.
 
-### Personal Spell Effectiveness
+It includes:
 
-A strategy's effectiveness is based only on replays explicitly linked to it. The UI reports wins/losses, linked games, average replay score, review flags, and sample maturity. Popularity is not presented as win-rate evidence.
+- Personal Spell Effectiveness
+- Replay-Driven Spell Evolution
+- Quick Signals / second-screen mode
+- Knowledge Sources & Staleness
+- Post-Game Spell Prescription
 
-### Replay-Driven Spell Evolution
-
-Replay patterns can propose local personal variants:
-
-- sustained supply block → move supply earlier;
-- bank conversion lag → add production checkpoint;
-- bad exchange → add engagement gate;
-- greed-under-pressure → add greed abort condition;
-- slow observation → add scouting/camera checkpoint;
-- slow response → add decision deadline.
-
-The canonical spell remains unchanged until the player deliberately creates a personal variant.
-
-### Quick Signals / second-screen mode
-
-Available signals include Fast third, Extra production, Move-out, Air / tech, Turtle, Hidden tech, and No natural. Compact live mode suppresses nonessential review UI while playing.
-
-### Knowledge Sources & Staleness
-
-The source panel separates official Blizzard balance information, MBMapps curated strategy synthesis, and user-added web/build/replay references. Sources are patch-tagged or classified as stable principle / verify patch / review stale.
-
-### Post-Game Spell Prescription
-
-Replay diagnosis can be converted into a five-game experiment: baseline, focus, repeat, stress, verify. The point is to improve one important behavior rather than continually changing builds.
+A strategy's effectiveness is based only on replays explicitly linked to it. Popularity is not presented as win-rate evidence.
 
 ## How the app knows which replay player is you
 
@@ -272,7 +281,7 @@ The selected player ID drives strategy narrative, observation timing, engagement
 
 ## Replay Strategy Narrative
 
-After a replay, the center Coach Narrative tells the game as five chapters:
+After a replay, the Coach Narrative tells the game as five chapters:
 
 1. **The plan** — matchup, map and doctrine.
 2. **What you could know** — information opportunities and observation latency.
@@ -349,4 +358,4 @@ chmod +x run_wsl.sh
 
 **Better information and better decisions beat raw numbers.**
 
-The Spellbook teaches the spell. **PRO MIND teaches why the player should cast it, what it costs, how it creates time, and when it stops being correct.**
+The Team Composer chooses the battle plan. The Spellbook teaches the spell. **PRO MIND teaches why to cast it, what it costs, how it creates time, and when it stops being correct.**
