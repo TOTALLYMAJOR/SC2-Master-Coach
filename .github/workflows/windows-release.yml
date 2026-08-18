@@ -11,6 +11,12 @@ on:
 permissions:
   contents: write
 
+# Rapid UI work can produce several main pushes in a few minutes. Only the
+# newest main state should consume a full Windows/PyInstaller/NSIS release run.
+concurrency:
+  group: windows-release-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-windows:
     runs-on: windows-latest
