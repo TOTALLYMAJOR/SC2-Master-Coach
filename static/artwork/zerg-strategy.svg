@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Zerg-inspired organic strategy artwork</title>
+  <desc id="desc">Original vector illustration of an alien hive intelligence and advancing swarm. Not official Blizzard artwork.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#05060a"/><stop offset=".46" stop-color="#160d20"/><stop offset="1" stop-color="#09160e"/></linearGradient>
+    <radialGradient id="bio" cx="50%" cy="45%"><stop stop-color="#a8ff6d" stop-opacity=".45"/><stop offset=".35" stop-color="#62c948" stop-opacity=".12"/><stop offset="1" stop-color="#62c948" stop-opacity="0"/></radialGradient>
+    <linearGradient id="carapace" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6f365f"/><stop offset=".38" stop-color="#32172f"/><stop offset=".72" stop-color="#160b18"/><stop offset="1" stop-color="#713e61"/></linearGradient>
+    <linearGradient id="bone" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d8d69c"/><stop offset=".45" stop-color="#81794c"/><stop offset="1" stop-color="#332f1e"/></linearGradient>
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="12" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="26"/></filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <ellipse cx="790" cy="410" rx="650" ry="470" fill="url(#bio)"/>
+  <g opacity=".5">
+    <path d="M0 746Q130 604 271 692t267-45 254 32 287-79 521 125v175H0Z" fill="#152416"/>
+    <path d="M0 785Q170 653 329 748t300-13 316 25 339-47 316 76v111H0Z" fill="#28142a"/>
+    <path d="M60 760Q91 568 203 478q-48 151 8 282M1425 760q-29-221-154-305 64 153 25 305" fill="#32172f" stroke="#6b3b60" stroke-width="9"/>
+  </g>
+  <g transform="translate(780 454)">
+    <ellipse cx="0" cy="291" rx="350" ry="67" fill="#000" opacity=".58"/>
+    <path d="M-126-181Q0-293 126-181L88-95 0-61l-88-34Z" fill="url(#carapace)" stroke="#985d83" stroke-width="10"/>
+    <path d="M-75-173Q0-236 75-173l-30 56L0-91l-45-26Z" fill="#121015"/>
+    <ellipse cx="-30" cy="-142" rx="15" ry="25" fill="#a8ff70" filter="url(#glow)"/>
+    <ellipse cx="30" cy="-142" rx="15" ry="25" fill="#a8ff70" filter="url(#glow)"/>
+    <path d="M-132-72Q-245-10-223 106l45 128 112 62 45-46-29-258Z" fill="url(#carapace)" stroke="#7e456e" stroke-width="11"/>
+    <path d="M132-72Q245-10 223 106l-45 128-112 62-45-46L50-8Z" fill="url(#carapace)" stroke="#7e456e" stroke-width="11"/>
+    <path d="M-83-49 0-80 83-49l57 198-73 117H-67l-73-117Z" fill="#251227" stroke="#7f456f" stroke-width="12"/>
+    <path d="M-49-17 0-41 49-17 37 101 0 129-37 101Z" fill="#294126" stroke="#8cd95f" stroke-width="6"/>
+    <path d="M-118-23-251 92l29 54 144-92Z" fill="url(#bone)" stroke="#9a915b" stroke-width="9"/>
+    <path d="M118-23 251 92l-29 54-144-92Z" fill="url(#bone)" stroke="#9a915b" stroke-width="9"/>
+    <path d="M-225 131Q-338 164-391 263M225 131q113 33 166 132" fill="none" stroke="#b4e26d" stroke-width="12" stroke-linecap="round"/>
+    <path d="M-84 182-144 327h85L0 247Z" fill="url(#carapace)" stroke="#764165" stroke-width="10"/>
+    <path d="M84 182 144 327H59L0 247Z" fill="url(#carapace)" stroke="#764165" stroke-width="10"/>
+    <path d="M-95-205-184-306l32 130M95-205l89-101-32 130" fill="none" stroke="url(#bone)" stroke-width="17" stroke-linecap="round"/>
+  </g>
+  <g fill="#263f21" stroke="#7ec85c" stroke-width="5" opacity=".78">
+    <path d="M217 718q48-137 118-95l38 95Z"/>
+    <path d="M335 734q29-108 103-84l29 84Z"/>
+    <path d="M1191 724q35-132 109-86l41 86Z"/>
+    <path d="M1311 742q24-99 92-64l29 64Z"/>
+  </g>
+  <g fill="#9cf16f" opacity=".75" filter="url(#glow)"><circle cx="296" cy="659" r="8"/><circle cx="407" cy="685" r="7"/><circle cx="1261" cy="665" r="8"/><circle cx="1371" cy="703" r="7"/></g>
+  <path d="M94 289q112-90 223 4t213-5M1080 279q132-96 298 13" fill="none" stroke="#6b315f" stroke-width="12" opacity=".55"/>
+  <path d="M0 795Q400 730 800 790t800-5v115H0Z" fill="#050608"/>
+</svg>

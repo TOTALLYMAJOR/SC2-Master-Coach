@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Unknown opponent strategy artwork</title>
+  <desc id="desc">Original vector illustration of an unresolved battlefield hidden in fog and scanner lines.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#03070c"/><stop offset=".55" stop-color="#0b1720"/><stop offset="1" stop-color="#080b14"/></linearGradient>
+    <radialGradient id="fog"><stop stop-color="#65ddff" stop-opacity=".25"/><stop offset="1" stop-color="#65ddff" stop-opacity="0"/></radialGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="13" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <ellipse cx="800" cy="420" rx="610" ry="430" fill="url(#fog)"/>
+  <g fill="none" stroke="#62dfff" opacity=".35">
+    <circle cx="800" cy="425" r="250" stroke-width="3"/>
+    <circle cx="800" cy="425" r="335" stroke-width="2" stroke-dasharray="14 20"/>
+    <circle cx="800" cy="425" r="420" stroke-width="1" stroke-dasharray="5 18"/>
+    <path d="M800 40V810M405 425h790" stroke-width="1" stroke-dasharray="8 16"/>
+  </g>
+  <g transform="translate(800 420)" filter="url(#glow)">
+    <path d="M-48-173q20-77 94-77 82 0 108 62 22 55-14 104-24 31-78 69-40 28-42 73v27h-91V35q0-76 65-121 55-38 60-67 4-31-30-38-43-8-63 42Z" fill="#66e5ff" opacity=".8"/>
+    <circle cx="-19" cy="173" r="48" fill="#66e5ff" opacity=".8"/>
+  </g>
+  <g fill="#bdefff" opacity=".55"><circle cx="245" cy="191" r="3"/><circle cx="1330" cy="211" r="3"/><circle cx="1450" cy="612" r="2"/><circle cx="182" cy="640" r="2"/></g>
+  <path d="M0 780Q390 722 800 780t800-8v128H0Z" fill="#020508"/>
+</svg>

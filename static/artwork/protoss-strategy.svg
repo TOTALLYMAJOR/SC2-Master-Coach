@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Protoss-inspired psionic strategy artwork</title>
+  <desc id="desc">Original vector illustration of a golden psionic guardian before crystalline structures. Not official Blizzard artwork.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#02070f"/>
+      <stop offset="0.48" stop-color="#061529"/>
+      <stop offset="1" stop-color="#130d2a"/>
+    </linearGradient>
+    <radialGradient id="aura" cx="50%" cy="42%" r="54%">
+      <stop offset="0" stop-color="#7cf4ff" stop-opacity=".42"/>
+      <stop offset=".42" stop-color="#3bbfe8" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#3bbfe8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff0a6"/>
+      <stop offset=".35" stop-color="#e5bb54"/>
+      <stop offset=".72" stop-color="#8c5d16"/>
+      <stop offset="1" stop-color="#f6dc7b"/>
+    </linearGradient>
+    <linearGradient id="armor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9d98b"/>
+      <stop offset=".45" stop-color="#8a671f"/>
+      <stop offset="1" stop-color="#34220d"/>
+    </linearGradient>
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="13" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="28"/></filter>
+    <pattern id="grid" width="72" height="72" patternUnits="userSpaceOnUse">
+      <path d="M72 0H0V72" fill="none" stroke="#73d7f2" stroke-opacity=".045" stroke-width="2"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <ellipse cx="800" cy="395" rx="610" ry="455" fill="url(#aura)"/>
+  <g fill="#b9f6ff" opacity=".55">
+    <circle cx="170" cy="135" r="2"/><circle cx="301" cy="238" r="3"/><circle cx="1332" cy="168" r="2"/>
+    <circle cx="1450" cy="330" r="3"/><circle cx="1100" cy="86" r="2"/><circle cx="492" cy="92" r="2"/>
+    <circle cx="124" cy="490" r="2"/><circle cx="1517" cy="589" r="2"/>
+  </g>
+  <g opacity=".7">
+    <path d="M112 760 272 403l108 357Z" fill="#071827" stroke="#35bce7" stroke-opacity=".28" stroke-width="6"/>
+    <path d="M1220 760 1340 330l165 430Z" fill="#071827" stroke="#35bce7" stroke-opacity=".28" stroke-width="6"/>
+    <path d="M286 760 404 250l154 510Z" fill="#091b2b" stroke="url(#gold)" stroke-opacity=".52" stroke-width="7"/>
+    <path d="M1043 760 1183 235l166 525Z" fill="#091b2b" stroke="url(#gold)" stroke-opacity=".52" stroke-width="7"/>
+    <path d="M440 760 534 390l104 370Z" fill="#071827" stroke="#5eeaff" stroke-opacity=".22" stroke-width="5"/>
+    <path d="M930 760 1006 388l100 372Z" fill="#071827" stroke="#5eeaff" stroke-opacity=".22" stroke-width="5"/>
+  </g>
+  <g opacity=".7" filter="url(#soft)">
+    <ellipse cx="405" cy="735" rx="240" ry="40" fill="#10bfe7"/>
+    <ellipse cx="1190" cy="735" rx="240" ry="40" fill="#10bfe7"/>
+  </g>
+  <g transform="translate(800 440)">
+    <ellipse cx="0" cy="307" rx="330" ry="55" fill="#000" opacity=".55"/>
+    <path d="M-86-222Q0-300 86-222L62-122 0-78l-62-44Z" fill="url(#armor)" stroke="url(#gold)" stroke-width="10"/>
+    <path d="M-30-205Q0-232 30-205L17-145 0-128l-17-17Z" fill="#66eaff" opacity=".95" filter="url(#glow)"/>
+    <path d="M-104-112Q-175-52-154 46l34 147 82 88 38-24V-76Z" fill="url(#armor)" stroke="#d6a83e" stroke-width="10"/>
+    <path d="M104-112Q175-52 154 46l-34 147-82 88-38-24V-76Z" fill="url(#armor)" stroke="#d6a83e" stroke-width="10"/>
+    <path d="M-62-70 0-103 62-70 78 134 0 206-78 134Z" fill="#13253a" stroke="url(#gold)" stroke-width="10"/>
+    <path d="M-44-44 0-69 44-44 36 98 0 126-36 98Z" fill="#1a4b63" opacity=".75"/>
+    <path d="M-136 8-225 112l30 32 92-76Z" fill="url(#armor)" stroke="#c4922f" stroke-width="9"/>
+    <path d="M136 8 225 112l-30 32-92-76Z" fill="url(#armor)" stroke="#c4922f" stroke-width="9"/>
+    <path d="M-205 129Q-285 192-310 277" fill="none" stroke="#66f2ff" stroke-width="18" stroke-linecap="round" filter="url(#glow)"/>
+    <path d="M205 129Q285 192 310 277" fill="none" stroke="#66f2ff" stroke-width="18" stroke-linecap="round" filter="url(#glow)"/>
+    <path d="M-83 132-145 299h75L0 205Z" fill="url(#armor)" stroke="#bc8a2d" stroke-width="10"/>
+    <path d="M83 132 145 299H70L0 205Z" fill="url(#armor)" stroke="#bc8a2d" stroke-width="10"/>
+    <circle cx="0" cy="25" r="29" fill="#58e8ff" opacity=".85" filter="url(#glow)"/>
+    <path d="M-152-72Q-238-164-262-260M152-72Q238-164 262-260" fill="none" stroke="#e1b64a" stroke-width="13" stroke-linecap="round"/>
+    <path d="M-262-260l-34 78 60-31ZM262-260l34 78-60-31Z" fill="url(#gold)"/>
+  </g>
+  <g stroke="#65efff" fill="none" opacity=".6">
+    <circle cx="800" cy="452" r="285" stroke-width="2"/>
+    <circle cx="800" cy="452" r="340" stroke-width="1" stroke-dasharray="10 18"/>
+    <path d="M480 452H1120M800 120V790" stroke-width="1" stroke-dasharray="8 15"/>
+  </g>
+  <path d="M0 790Q390 720 800 775t800 5v120H0Z" fill="#02070c"/>
+</svg>

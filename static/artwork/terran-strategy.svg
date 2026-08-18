@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Terran-inspired industrial strategy artwork</title>
+  <desc id="desc">Original vector illustration of an armored expeditionary commander before an orbital industrial base. Not official Blizzard artwork.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#05080d"/><stop offset=".55" stop-color="#111b25"/><stop offset="1" stop-color="#190a09"/></linearGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d5e0e5"/><stop offset=".28" stop-color="#667989"/><stop offset=".63" stop-color="#222d37"/><stop offset="1" stop-color="#0d151c"/></linearGradient>
+    <linearGradient id="darksteel" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#536371"/><stop offset="1" stop-color="#101820"/></linearGradient>
+    <radialGradient id="heat"><stop stop-color="#fff2aa"/><stop offset=".28" stop-color="#ff9b44"/><stop offset=".7" stop-color="#e4382c" stop-opacity=".65"/><stop offset="1" stop-color="#e4382c" stop-opacity="0"/></radialGradient>
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="11" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse"><path d="M64 0H0V64" fill="none" stroke="#b9d6e5" stroke-opacity=".035"/></pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <circle cx="1290" cy="125" r="280" fill="#d64230" opacity=".07"/>
+  <g opacity=".55">
+    <path d="M75 685V355l126-83 116 75v338Z" fill="#101a23" stroke="#67869a" stroke-width="5"/>
+    <path d="M1267 695V289l129-67 126 83v390Z" fill="#111a22" stroke="#67869a" stroke-width="5"/>
+    <path d="M248 686V462h173v224ZM1120 688V449h170v239Z" fill="#18242f" stroke="#49677c" stroke-width="5"/>
+    <path d="M105 385h184M1290 320h208" stroke="#ff6c48" stroke-width="9" filter="url(#glow)"/>
+    <path d="M197 272v-93M1394 222v-96" stroke="#7d9bac" stroke-width="12"/>
+    <circle cx="197" cy="164" r="23" fill="#ff6541" filter="url(#glow)"/>
+    <circle cx="1394" cy="112" r="23" fill="#ff6541" filter="url(#glow)"/>
+  </g>
+  <g transform="translate(1040 165)">
+    <path d="M0 66 150 8l195 38 113 84-72 43-173-29-145 29-92-47Z" fill="url(#steel)" stroke="#90a6b3" stroke-width="7"/>
+    <path d="m118 35 77-79 115 29 55 75-132-20Z" fill="#1e2b36" stroke="#6f8796" stroke-width="6"/>
+    <path d="M92 152 54 238M350 155l46 82" stroke="#c9d2d8" stroke-width="18"/>
+    <ellipse cx="48" cy="253" rx="74" ry="88" fill="url(#heat)" opacity=".8"/>
+    <ellipse cx="404" cy="253" rx="74" ry="88" fill="url(#heat)" opacity=".8"/>
+  </g>
+  <g transform="translate(760 456)">
+    <ellipse cx="0" cy="296" rx="330" ry="58" fill="#000" opacity=".65"/>
+    <path d="M-111-207Q0-288 111-207L129-80 82-30H-82l-47-50Z" fill="url(#steel)" stroke="#7d929e" stroke-width="11"/>
+    <path d="M-63-164Q0-200 63-164L70-91 32-64h-64l-38-27Z" fill="#0b1822" stroke="#cf593a" stroke-width="8"/>
+    <rect x="-46" y="-142" width="92" height="35" rx="7" fill="#f15c40" opacity=".78" filter="url(#glow)"/>
+    <path d="M-154-85Q-250-40-244 73l31 139 103 73 54-37-12-252Z" fill="url(#darksteel)" stroke="#778b96" stroke-width="12"/>
+    <path d="M154-85Q250-40 244 73l-31 139-103 73-54-37L68-4Z" fill="url(#darksteel)" stroke="#778b96" stroke-width="12"/>
+    <path d="M-96-50 0-83 96-50l45 220-72 102H-69l-72-102Z" fill="url(#steel)" stroke="#6f8492" stroke-width="12"/>
+    <path d="M-58-20 0-41 58-20 46 110 0 137-46 110Z" fill="#1b2d39" stroke="#df6546" stroke-width="8"/>
+    <circle cx="0" cy="49" r="26" fill="#ff6b46" filter="url(#glow)"/>
+    <path d="M-221 46-353 161l39 51 150-101Z" fill="url(#steel)" stroke="#758a97" stroke-width="11"/>
+    <path d="M221 46 353 161l-39 51-150-101Z" fill="url(#steel)" stroke="#758a97" stroke-width="11"/>
+    <path d="M-351 160h-126l-15 52 172 8Z" fill="#182630" stroke="#8aa0ac" stroke-width="8"/>
+    <path d="M-88 197-139 331h85L0 254Z" fill="url(#darksteel)" stroke="#708692" stroke-width="11"/>
+    <path d="M88 197 139 331H54L0 254Z" fill="url(#darksteel)" stroke="#708692" stroke-width="11"/>
+    <path d="M-450 188h96" stroke="#ff7a4e" stroke-width="9" filter="url(#glow)"/>
+  </g>
+  <g fill="none" stroke="#f06a47" opacity=".42">
+    <path d="M85 120h390v85H85zM1160 610h310v118h-310z" stroke-width="3" stroke-dasharray="10 8"/>
+    <path d="M115 161h145M1213 653h180" stroke-width="8"/>
+  </g>
+  <path d="M0 780Q420 728 840 780t760-13v133H0Z" fill="#05080c"/>
+</svg>
