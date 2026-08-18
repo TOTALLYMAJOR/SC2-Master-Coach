@@ -29,7 +29,7 @@ from sc2_frame_capture import (
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
 MAX_REPLAY_BYTES = 40 * 1024 * 1024
-CURRENT_VERSION = "1.7.0"
+CURRENT_VERSION = "1.8.0"
 RELEASES_API = "https://api.github.com/repos/TOTALLYMAJOR/SC2-Master-Coach/releases/latest"
 
 app = Flask(__name__, static_folder=str(STATIC), static_url_path="")
@@ -38,8 +38,8 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_REPLAY_BYTES
 
 @app.get("/")
 def index():
-    # Keep the full Command HUD available as Advanced Command Center while
-    # Team Composer becomes the calmer default experience.
+    # The Strategy Compiler is the calm default. Team Composer and the full
+    # Command HUD remain available as secondary/advanced modes.
     html = (STATIC / "index.html").read_text(encoding="utf-8")
     for href in (
         "/experience.css",
@@ -48,6 +48,7 @@ def index():
         "/spellbook-lab.css",
         "/pro-mind.css",
         "/team-composer.css",
+        "/strategy-compiler.css",
     ):
         if href not in html:
             html = html.replace("</head>", f'<link rel="stylesheet" href="{href}">\n</head>')
@@ -69,6 +70,9 @@ def index():
         "/pro-mind.js",
         "/team-composer-data.js",
         "/team-composer.js",
+        "/strategy-compiler-data.js",
+        "/strategy-compiler-engine.js",
+        "/strategy-compiler-ui.js",
     )
     for src in scripts:
         if src not in html:
