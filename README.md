@@ -1,29 +1,33 @@
-# SC2 Master Coach — Strategy Compiler + Live Coach
+# SC2 Master Coach — Strategic OS
 
 **Created by MBMapps**
 
-SC2 Master Coach is a local-first StarCraft II strategy teaching application built around one goal:
+SC2 Master Coach is a local-first StarCraft II strategy operating system built around one goal:
 
-> **Reduce live cognitive load while teaching the player why the next decision is correct.**
+> **Maintain the strategic truth of the match so the player can focus on execution.**
+
+The application does not need direct access to the live game to provide useful real-time guidance. The player states the mission, the system compiles a policy from documented rules and matchup knowledge, and the player reports only the few observations that change the operation.
 
 The default workflow is now:
 
 ```text
-Choose race + opponent
+MISSION CONTROL
+Race + opponent + objective + risk + constraints
         ↓
-Choose strategic goal
+WAR ROOM
+Policy + assumptions + threats + permissions + obligations
         ↓
-Compile one executable plan
+COMMAND SURFACE
+One question + one action + one reason + three windows
         ↓
-Understand its story, assumptions, and punish routes
+QUICK INTEL
+Report only decision-changing facts
         ↓
-Run a minimal live coach
+TRANSITION
+Continue / Modify / Hold / Abort / Fallback
         ↓
-Report only decision-changing intel
-        ↓
-Modify, hold, or fall back when evidence changes
-        ↓
-Optionally validate with replay review
+AFTER ACTION
+Player debrief + optional replay validation
 ```
 
 The strategy baseline targets **StarCraft II 5.0.16b**, including the eight-worker economy introduced in 5.0.16 and the later 5.0.16b hotfix. Timing windows are coaching benchmarks rather than proof that an in-game action occurred. Scouting evidence outranks a memorized script.
@@ -32,56 +36,77 @@ Official patch reference: <https://news.blizzard.com/en-us/article/24291949/star
 
 ## Release notes
 
+### v1.9.0 — Strategic OS
+
+- Promoted the application from a Strategy Compiler interface into a **Strategic Operating System**.
+- Added six canonical strategic objects:
+  - **Mission** — what the player is trying to create;
+  - **Policy** — the executable route;
+  - **Intel** — player-reported, confidence-scored, expiring evidence;
+  - **Permission** — which investments are currently legal;
+  - **Obligation** — responsibilities created by the mission and policy;
+  - **Decision** — the one question, action, and reason that deserves attention now.
+- Added **Mission Control** as the default first screen.
+- Added player constraints and doctrine preferences:
+  - simpler execution;
+  - low spellcaster micro;
+  - stable-ground preference;
+  - mobility preference;
+  - avoid multi-prong;
+  - information-first play.
+- Added the **War Room** planning surface with:
+  - original race-inspired SVG artwork;
+  - mission and policy summaries;
+  - operational story;
+  - build windows;
+  - assumption ledger;
+  - threat model;
+  - permission matrix;
+  - obligation ledger;
+  - safer and greedier policy variants;
+  - manual confirmation for facts the application cannot observe live.
+- Added the **Command Surface** for real-time use.
+- Enforced the live cognitive-load contract:
+
+```text
+ONE QUESTION
+ONE ACTION
+ONE REASON
+MAXIMUM THREE UPCOMING WINDOWS
+```
+
+- Added a deterministic Permission Engine:
+  - expansion: `OPEN / CAUTION / HOLD`;
+  - technology: `OPEN / CAUTION / HOLD`;
+  - attack: `OPEN / CAUTION / HOLD`;
+  - workers: `CONTINUE / CAUTION / COMPRESS`;
+  - harassment: `ACTIVE / LIMITED / DISENGAGE`.
+- Added an Obligation Engine for every strategic objective.
+- Added the **NOW / SOON / NOT YET** scheduler.
+- Added Quick Intel controls directly to the Command Surface.
+- Added explicit microphone diagnostics instead of silently swallowing voice-start errors.
+- Preserved Strategy Compiler, 2v2 Team Composer, PRO MIND, Spellbook, replay intelligence, and Advanced Command Center as secondary modes.
+- Replay remains an optional after-action audit rather than the primary workflow.
+
 ### v1.8.1 — Readability and Spacing Pass
 
 - Increased the Strategy Compiler's default type scale throughout setup, plan review, live coaching, Quick Intel, hover help, and workflow modals.
-- Raised routine button and selector targets to a minimum comfortable height of 44 pixels; the main **Forge My Strategy** CTA is now 58 pixels high.
-- Rebalanced desktop spacing around the race artwork, workflow rail, strategic goals, preference controls, build windows, plan assumptions, and live-action panels.
-- Reduced the strategic-goal grid from five columns to four on wide displays so labels and explanations have room to breathe.
-- Increased section padding, card gaps, live-panel padding, and modal spacing while preserving the low-information live contract.
-- Enlarged the most important live elements: current question, current action, reason, confidence, game clock, upcoming windows, voice input, and Quick Intel buttons.
-- Increased tooltip and popup text so workflow explanations can be read without leaning toward the screen.
-- Added responsive spacing/type rules for desktop, tablet, narrow window, and phone-width layouts.
-- Kept Strategy Compiler behavior unchanged; this release is a visual hierarchy and readability improvement.
+- Raised routine button and selector targets to a minimum comfortable height of 44 pixels.
+- Rebalanced desktop and responsive spacing.
 
-### v1.8.0 — Strategy Compiler + Guided Visual Workflow
+### v1.8.0 — Strategy Compiler
 
-- Added the **1v1 Strategy Compiler** as the default application experience.
-- Added a goal-first workflow: **my race → opponent → strategic objective → risk level → compiled plan**.
-- Added ten strategic objectives across all nine 1v1 matchups:
-  - safe expansion;
-  - three-base economy;
-  - balanced macro;
-  - early pressure;
-  - timing attack;
-  - air control;
-  - stable ground army;
-  - map control;
-  - defensive macro;
-  - surprise strategy.
-- Added a detailed PvT **Information-First Triple Nexus** policy with safe, balanced, and greedy routes.
-- A Reaper is treated as early scouting/pressure evidence—not automatic proof of a rush. The coach asks for the Terran follow-up before changing the entire plan.
-- Added event-sourced session state, time-limited evidence, declarative plan branches, fallbacks, voice intents, teaching mastery, and an attention queue.
-- Added constrained voice commands such as **Reaper**, **No natural**, **Three Barracks**, **Factory**, **Starport**, **Move out**, **Safer plan**, and **Can I still expand?**
-- Added **CONTINUE / MODIFY / HOLD / ABORT** plan states.
-- Added the live cognitive-load contract:
-  - one primary question;
-  - one current action;
-  - one concise reason;
-  - no more than three future windows.
-- Added explicit CTAs: **Forge My Strategy**, **Start Guided Coach**, **Can I still do my plan?**, **Try safer plan**, and **Try greedier plan**.
-- Added accessible hover help and workflow popups throughout setup, plan review, assumptions, punish routes, build windows, voice input, and live evidence reporting.
-- Added four self-contained original SVG illustrations for Protoss, Terran, Zerg, and Unknown. These are race-inspired MBMapps artwork, not official Blizzard assets.
-- Preserved **2v2 Team Composer** and **Advanced Command Center** as secondary modes.
-- Replay analysis remains available but is no longer the product's primary workflow.
+- Added a goal-first 1v1 Strategy Compiler across all nine matchups.
+- Added current-patch plans, assumptions, punish routes, scouting questions, fallbacks, and constrained voice input.
+- Added `CONTINUE / MODIFY / HOLD / ABORT` plan states.
 
 ### v1.7.0 — Team Composer
 
-- Added four-race 2v2 setup, exactly ten team-plan archetypes, role assignment, battle stories, timing windows, and a minimal team live coach.
+- Added four-race 2v2 setup, ten role-based team operations, battle stories, timing windows, and a minimal team live coach.
 
 ### v1.6.x — PRO MIND
 
-- Added all-nine-matchup professional questions, scouting purpose, capability branches, expansion permission, information age, investment protection, persistent branch state, hover help, and battle stories.
+- Added professional questions, scouting purpose, capability branches, expansion permission, information age, investment protection, hover help, and battle stories.
 
 ### v1.5.x and earlier
 
@@ -104,15 +129,21 @@ The installer:
 
 The application is unsigned under the zero-cost release constraint, so Windows SmartScreen can initially display **Unknown Publisher**.
 
-## Strategy Compiler workflow
+# Strategic OS workflow
 
-### 1. Choose the matchup
+## 1. Mission Control
 
-Select your race and the opponent race. The app displays original SVG race artwork to make the choice immediately visible.
+Select:
 
-### 2. Choose the goal
+- your race;
+- opponent race;
+- strategic mission;
+- safe, balanced, or greedy risk;
+- coach style;
+- skill level;
+- execution constraints.
 
-Select what you want to accomplish—not merely a unit or technology:
+Available missions include:
 
 ```text
 Expand safely
@@ -127,68 +158,294 @@ Defend and scale
 Surprise the opponent
 ```
 
-### 3. Review the compiled plan
+The main action is:
 
-The plan includes:
+> **COMPILE OPERATION**
 
-- a feasibility verdict;
-- the battle story;
-- tolerant build windows;
-- assumptions;
-- opponent punish routes;
-- purposeful scouting questions;
-- safer and greedier alternatives;
-- evidence-driven branch rules;
-- a fallback that tries to preserve the original strategic objective.
+## 2. War Room
 
-### 4. Start Guided Coach
+The War Room explains the complete operation before the match.
 
-Live mode is intentionally small:
+It shows:
 
 ```text
-ONE QUESTION
-ONE ACTION
-ONE REASON
-THREE UPCOMING WINDOWS
+MISSION
+What outcome the player wants
+
+POLICY
+The current executable route
+
+INTEL
+What is known, reported, fresh, aging, or missing
+
+PERMISSION
+Which investments are currently legal
+
+OBLIGATION
+What the operation must protect or maintain
+
+DECISION
+The current question, action, reason, and confidence
 ```
 
-The coach does not attempt to display every available system during the match.
+The War Room also contains:
 
-## Example: Protoss vs Terran, three-base economy
+- battle story;
+- operation windows;
+- assumptions;
+- opponent punish routes;
+- safer and greedier variants;
+- manual confirmations;
+- permission matrix;
+- obligation list;
+- `NOW / SOON / NOT YET` scheduler.
 
-The balanced compiler route is **Information-First Triple Nexus**.
+## 3. Command Surface
 
-The strategic story is:
+The Command Surface is the live interface.
 
-> Early Gateway units buy information and time. If Terran shows a normal economic floor and no concentrated move-out, convert that window into a third Nexus. Preserve the mobile screen and prepare reinforcement access so the new economy does not become an undefendable footprint.
+It deliberately excludes replay analytics, full doctrine tables, source registries, and dense telemetry.
 
-Representative branches:
+It displays:
+
+```text
+PLAN STATE
+CONTINUE / MODIFY / HOLD / ABORT
+
+ONE QUESTION
+The fact that matters before the next decision
+
+DO NOW
+The current action
+
+WHY
+The strategic reason
+
+PRIMARY PERMISSION
+The highest-priority legality check
+
+NEXT
+No more than three upcoming windows
+```
+
+## 4. Quick Intel
+
+The Strategic OS does not read the live SC2 process.
+
+The player reports important observations through large buttons or constrained voice phrases:
+
+```text
+Reaper
+Normal natural
+No natural
+Fast third
+Extra production
+Factory
+Starport
+Move-out
+Turtle
+Hidden tech
+```
+
+Each report records:
+
+- observation type;
+- source;
+- game time;
+- confidence;
+- freshness and expiry.
+
+Old information is not treated as permanently true.
+
+# Canonical strategic objects
+
+## Mission
+
+The outcome the player is trying to create.
+
+Example:
+
+```text
+Protoss vs Terran
+Mission: three-base economy
+Risk: balanced
+Doctrine: information first, stable ground preference
+```
+
+## Policy
+
+The executable route selected for the mission.
+
+Example:
+
+```text
+Information-First Triple Nexus
+```
+
+## Intel
+
+Player-reported facts that remain unexpired.
+
+Example:
+
+```text
+Natural confirmed · 18 seconds old
+Three Barracks · 7 seconds old
+```
+
+## Permission
+
+A strategic legality decision.
+
+Example:
+
+```text
+THIRD NEXUS
+CAUTION
+
+Reason:
+Production increased and movement remains unknown.
+
+Resolver:
+Refresh move-out information before committing.
+```
+
+## Obligation
+
+A responsibility created by the operation.
+
+Example for a third base:
+
+```text
+Fresh threat read
+Reinforcement access
+Army coverage
+Production conversion
+Retreat plan
+```
+
+## Decision
+
+The one current output allowed to dominate the Command Surface.
+
+```text
+QUESTION
+Is Terran moving out?
+
+ACTION
+Delay the third and add units.
+
+REASON
+The mission remains valid, but the fast implementation lost safety margin.
+```
+
+# Permission Engine
+
+The initial deterministic permission model maintains:
+
+| Domain | States |
+|---|---|
+| Expansion | OPEN / CAUTION / HOLD |
+| Technology | OPEN / CAUTION / HOLD |
+| Attack | OPEN / CAUTION / HOLD |
+| Workers | CONTINUE / CAUTION / COMPRESS |
+| Harassment | ACTIVE / LIMITED / DISENGAGE |
+
+These states are based on the current mission, policy status, and unexpired evidence.
+
+They are not guarantees.
+
+# Obligation Engine
+
+Every mission creates responsibilities.
+
+## Three-base economy
+
+- fresh threat and production read;
+- reinforcement access;
+- army coverage;
+- production conversion;
+- retreat plan.
+
+## Stable ground army
+
+- frontline screen;
+- vision;
+- retreat geometry;
+- counter monitoring.
+
+## Early pressure
+
+- credible threat;
+- exit plan;
+- follow-up investment;
+- counterattack coverage.
+
+## Air control
+
+- recurring vision;
+- ground safety;
+- counter monitoring;
+- expensive-unit preservation.
+
+The application cannot verify all obligations live. Manual confirmation remains explicit.
+
+# NOW / SOON / NOT YET
+
+The Strategic Scheduler reduces cognitive load by classifying decisions.
+
+Example:
+
+```text
+NOW
+Refresh Terran production.
+
+SOON
+Third Nexus decision
+Reinforcement Pylon
+Additional Gateway production
+
+NOT YET
+Fourth Nexus
+Second splash technology
+Late-game upgrade split
+```
+
+`NOT YET` does not mean unimportant.
+
+It means the player is permitted to defer the decision until its prerequisites become relevant.
+
+# Example: Protoss vs Terran, three-base economy
+
+The balanced route remains **Information-First Triple Nexus**.
+
+Representative transitions:
 
 ```text
 Reaper seen
-→ Continue
+→ CONTINUE
 → Confirm what follows it
 
 No natural
-→ Abort the fast third
-→ Load the defensive two-base bridge
+→ ABORT fast third
+→ Load defensive two-base bridge
 
 Extra production
-→ Modify
-→ Delay the third and add immediate units
+→ MODIFY
+→ Delay third and add immediate units
 
 Move-out
-→ Hold
-→ Defend first, then return to the three-base goal
+→ HOLD
+→ Defend first, then return to the three-base mission
 
 Fast Terran third
-→ Continue
+→ CONTINUE
 → Match economy and pressure exposed territory
 ```
 
-## Voice input
+# Voice input and microphone behavior
 
-Voice input is deliberately constrained and deterministic.
+Voice input is constrained and deterministic.
 
 Supported phrases include:
 
@@ -213,20 +470,30 @@ Pause coach
 Resume coach
 ```
 
-Recognition confidence and strategic confidence are separate. Ambiguous high-impact phrases require confirmation before changing plan state.
+Recognition confidence and strategic confidence remain separate.
 
-When browser/WebView speech recognition is unavailable, the Quick Intel buttons provide the same structured evidence without a paid service.
+The v1.9 Command Surface reports specific errors for:
 
-## What the coach knows live
+- speech API unavailable;
+- microphone permission denied;
+- no audio-capture device;
+- speech service unavailable;
+- no speech detected;
+- microphone startup failure.
 
-Without direct game integration, the app knows:
+Quick Intel buttons remain the reliable zero-cost fallback when WebView2 does not expose browser speech recognition.
+
+# What the Strategic OS knows live
+
+Without direct game integration, it knows:
 
 - selected races;
-- selected objective;
-- compiled strategy;
+- selected mission;
+- compiled policy;
 - strategy rules and current-patch knowledge;
 - manually synchronized game time;
-- facts the player reports through buttons or voice.
+- facts reported by the player;
+- which reported facts have expired.
 
 It does **not** know:
 
@@ -237,11 +504,62 @@ It does **not** know:
 - fog-of-war truth;
 - whether a prompted action was completed.
 
-The application must never present inference as player-confirmed fact.
+Inference must never be presented as player-confirmed fact.
 
-## Event and teaching architecture
+# Secondary modes
 
-The live engine records deterministic events such as:
+## Strategy Compiler
+
+The v1.8 Strategy Compiler remains available from the top navigation.
+
+## 2v2 Operations
+
+Team Composer remains available for:
+
+- four-race setup;
+- ten role-based team operations;
+- ally responsibilities;
+- battle stories;
+- synchronized timing windows.
+
+## Advanced Command Center
+
+Advanced mode retains:
+
+- PRO MIND;
+- Spellbook / Coach Lab;
+- Expansion Permission;
+- tactical doctrines;
+- replay analysis;
+- Player POV / Observer Truth;
+- observation reconstruction;
+- critical moments;
+- advanced telemetry.
+
+## Replay review
+
+Replay is an optional after-action audit.
+
+It can validate:
+
+- execution timing;
+- observation timing;
+- decision latency;
+- engagements;
+- policy branch actually taken;
+- whether manual reports matched replay evidence.
+
+# Architecture
+
+The Strategic OS architecture is documented in:
+
+```text
+docs/strategic-os-architecture.md
+```
+
+The live kernel derives its state from the event-sourced Strategy Compiler engine.
+
+Relevant browser events include:
 
 ```text
 match.configured
@@ -256,73 +574,30 @@ attention.cue_spoken
 mastery.updated
 ```
 
-Evidence can expire, be retracted, or be replaced by newer information. Replaying the event log reconstructs the session state.
+Replaying the event log reconstructs the underlying Strategy Compiler state.
 
-The teaching ladder is:
+# Developer run
 
-```text
-Tell → Prompt → Question → Hint → Silent
-```
-
-As mastery improves, the coach becomes shorter and quieter. Emergency coaching always remains direct.
-
-## Original SVG artwork
-
-The application includes self-contained SVG scenes under `static/artwork/`:
-
-- `protoss-strategy.svg`
-- `terran-strategy.svg`
-- `zerg-strategy.svg`
-- `unknown-strategy.svg`
-
-They are original MBMapps race-inspired illustrations created for this interface. They are not official Blizzard artwork and do not reuse official logos or packaged game assets.
-
-## Secondary modes
-
-### 2v2 Team Composer
-
-The Team Composer remains available from the top-right CTA. It supports four race selectors, ten role-based team strategies, battle stories, ally responsibilities, and team timing windows.
-
-### Advanced Command Center
-
-The full Command HUD remains available for:
-
-- PRO MIND;
-- Spellbook / Coach Lab;
-- Expansion Permission;
-- tactical doctrines;
-- replay analysis;
-- Player POV / Observer Truth;
-- observation reconstruction;
-- critical moments;
-- advanced telemetry.
-
-### Replay review
-
-Replay remains a secondary quality-control and personalization layer. It can validate execution, observation timing, decision latency, engagements, and the strategy branch actually taken.
-
-## Developer run
-
-### Desktop
+## Desktop
 
 ```text
 run_desktop_windows.bat
 ```
 
-### Browser/service mode
+## Browser/service mode
 
 ```text
 run_windows.bat
 ```
 
-### WSL / Linux
+## WSL / Linux
 
 ```bash
 chmod +x run_wsl.sh
 ./run_wsl.sh
 ```
 
-## Test and release pipeline
+# Test and release pipeline
 
 The Windows workflow:
 
@@ -335,6 +610,6 @@ The Windows workflow:
 7. creates the portable ZIP;
 8. publishes the current semantic-version release.
 
-## Product thesis
+# Product thesis
 
-> **StarCraft strategy can be taught as a rules-driven policy under uncertainty. Master Coach should not pretend to see the game; it should help the player report the few facts that matter, understand why they matter, and choose the next action with less cognitive load.**
+> **A build-order tool tells you what to build. A coach tells you what it thinks you should do. A Strategic Operating System maintains your mission, intelligence, legal decisions, obligations, and fallback routes throughout the match.**
