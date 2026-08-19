@@ -1,0 +1,10 @@
+.os-return{
+  --os-line-2:#3a6d89;
+  --os-accent:#65e4fb;
+  --os-text:#edf8ff;
+  color:#edf8ff!important;
+  background:#061722!important;
+  border-color:#65e4fb!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.45)
+}
+body.team-default .strategy-return,body.team-advanced .strategy-return{display:none!important}
