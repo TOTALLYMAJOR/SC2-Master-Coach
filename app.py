@@ -51,6 +51,7 @@ def index():
         "/strategy-compiler.css",
         "/strategy-compiler-readability.css",
         "/strategic-os.css",
+        "/strategic-os-fixes.css",
     ):
         if href not in html:
             html = html.replace("</head>", f'<link rel="stylesheet" href="{href}">\n</head>')
@@ -76,6 +77,7 @@ def index():
         "/strategy-compiler-engine.js",
         "/strategy-compiler-ui.js",
         "/strategic-os-kernel.js",
+        "/strategic-os-runtime-guard.js",
         "/strategic-os-ui.js",
     )
     for src in scripts:
