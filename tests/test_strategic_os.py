@@ -8,8 +8,10 @@ STATIC = ROOT / "static"
 def test_strategic_os_assets_exist():
     for name in (
         "strategic-os-kernel.js",
+        "strategic-os-runtime-guard.js",
         "strategic-os-ui.js",
         "strategic-os.css",
+        "strategic-os-fixes.css",
     ):
         assert (STATIC / name).is_file(), name
 
@@ -43,6 +45,13 @@ def test_permissions_obligations_and_not_yet_scheduler_are_implemented():
         "production_conversion",
     ):
         assert phrase in kernel
+
+
+def test_runtime_guard_deduplicates_same_second_clock_events():
+    guard = (STATIC / "strategic-os-runtime-guard.js").read_text(encoding="utf-8")
+    assert "normalized===lastSecond" in guard
+    assert "lastEvaluatedSecond!==normalized" in guard
+    assert "return K.snapshot()" in guard
 
 
 def test_war_room_and_command_surface_have_clear_cognitive_contract():
@@ -101,8 +110,10 @@ def test_app_loads_strategic_os_after_compiler_and_versions_match():
     assert app_match.group(1) == installer_match.group(1) == product_match.group(1)
     for asset in (
         '"/strategic-os.css"',
+        '"/strategic-os-fixes.css"',
         '"/strategic-os-kernel.js"',
+        '"/strategic-os-runtime-guard.js"',
         '"/strategic-os-ui.js"',
     ):
         assert asset in app
-    assert app.index('"/strategy-compiler-engine.js"') < app.index('"/strategic-os-kernel.js"') < app.index('"/strategic-os-ui.js"')
+    assert app.index('"/strategy-compiler-engine.js"') < app.index('"/strategic-os-kernel.js"') < app.index('"/strategic-os-runtime-guard.js"') < app.index('"/strategic-os-ui.js"')
