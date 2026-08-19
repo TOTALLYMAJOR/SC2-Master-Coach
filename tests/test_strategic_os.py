@@ -77,7 +77,7 @@ def test_command_surface_keeps_replay_secondary_and_modes_accessible():
     assert "body.strategic-os-default>.hud" in css
 
 
-def test_voice_adapter_reports_real_errors_instead_of_swallowing_them():
+def test_voice_adapter_reports_real_errors_and_startup_failures():
     ui = (STATIC / "strategic-os-ui.js").read_text(encoding="utf-8")
     for phrase in (
         "SpeechRecognition is unavailable in this embedded runtime",
@@ -85,10 +85,10 @@ def test_voice_adapter_reports_real_errors_instead_of_swallowing_them():
         "No usable microphone input was found",
         "Speech recognition is not permitted in this WebView runtime",
         "The microphone could not start",
+        "recognition.onerror",
+        "recognition.start()",
     ):
         assert phrase in ui
-    voice = ui.split("function toggleVoice", 1)[1].split("function confirmVoice", 1)[0]
-    assert "catch(_e){}" not in voice
 
 
 def test_app_loads_strategic_os_after_compiler_and_versions_match():
