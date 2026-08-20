@@ -42,8 +42,8 @@ app.register_blueprint(science_api)
 
 @app.get("/")
 def index():
-    # v1.10 Combat HUD is the default. Strategic OS, Strategy Compiler,
-    # Team Composer, and the full Command HUD remain secondary/advanced modes.
+    # v1.10 Combat HUD is the stable interaction contract. v1.11-dev layers a
+    # Python Shadow Mode adapter behind it without changing the released version.
     html = (STATIC / "index.html").read_text(encoding="utf-8")
     for href in (
         "/experience.css",
@@ -85,6 +85,7 @@ def index():
         "/strategic-os-runtime-guard.js",
         "/strategic-os-ui.js",
         "/v110-hud.js",
+        "/v111-python-shadow.js",
     )
     for src in scripts:
         if src not in html:
