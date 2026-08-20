@@ -113,6 +113,30 @@ def test_digital_twin_exposes_transparent_opportunity_cost_without_claiming_exac
     assert any(row["label"] == "Two Stalkers" for row in ledger["alternatives"])
 
 
+def test_digital_twin_attack_hazard_is_qualitative_and_evidence_driven(tmp_path: Path):
+    runtime = ScienceRuntime(
+        ScienceSettings(
+            mode=ScienceMode.SHADOW,
+            discovery_enabled=False,
+            database_path=str(tmp_path / "science.db"),
+        )
+    )
+
+    economic = runtime.run(request_payload("normal_natural"))["advisory"]["metadata"]["threat_hazard"]
+    assert economic["bands"][0]["level"] == "LOW"
+    assert "no calibrated attack probability" in economic["boundary"]
+
+    production = runtime.run(request_payload("normal_natural", "extra_production"))["advisory"]["metadata"]["threat_hazard"]
+    assert production["bands"][0]["level"] == "MODERATE"
+    assert production["bands"][1]["level"] == "HIGH"
+    assert "moving out or protecting Terran economy" in production["next_resolving_intel"]
+
+    moveout = runtime.run(request_payload("normal_natural", "move_out"))["advisory"]["metadata"]["threat_hazard"]
+    assert moveout["bands"][0]["level"] == "HIGH"
+    assert moveout["bands"][1]["level"] == "HIGH"
+    assert any("direct timing evidence" in driver for driver in moveout["drivers"])
+
+
 def test_native_audio_diagnostics_has_stable_cross_platform_contract():
     row = audio_diagnostics()
     for key in (
@@ -158,6 +182,7 @@ def test_flask_science_health_audio_and_run_endpoints(monkeypatch, tmp_path: Pat
     assert run_body["runtime"]["canonical_state_mutated"] is False
     assert run_body["advisory"]["metadata"]["recommended_plan_state"] == "modify"
     assert "commitment_window" in run_body["advisory"]["metadata"]
+    assert "threat_hazard" in run_body["advisory"]["metadata"]
 
     stored = client.get(f"/api/science/runs/{run_body['run_id']}")
     assert stored.status_code == 200
