@@ -18,6 +18,7 @@ from .twin import (
     RULESET_VERSION,
     SUPPORTED_PATCH,
     build_pvt_three_base_advisory,
+    estimate_pvt_attack_hazard,
 )
 
 
@@ -103,7 +104,7 @@ class ScienceRuntime:
                 "patch": SUPPORTED_PATCH,
                 "ruleset_version": RULESET_VERSION,
                 "deterministic": True,
-                "scope": "Protoss vs Terran three-base strategic timing, evidence, and transparent opportunity-cost commitments",
+                "scope": "Protoss vs Terran three-base strategic timing, evidence, opportunity-cost commitments, and qualitative near-term attack hazard",
                 "mode": self.settings.mode.value,
             }
         ]
@@ -173,14 +174,27 @@ class ScienceRuntime:
                 game_second = max(0, int(parameters.get("game_second", parameters.get("gameSecond", 0)) or 0))
             except (TypeError, ValueError):
                 game_second = 0
+
+            policy = dict(immutable_payload.get("policy") or {})
+            intel = tuple(
+                dict(row)
+                for row in (immutable_payload.get("intel") or [])
+                if isinstance(row, Mapping)
+            )
             commitment_window = estimate_policy_commitments(
-                dict(immutable_payload.get("policy") or {}),
+                policy,
                 game_second=game_second,
                 horizon_seconds=75,
             )
+            threat_hazard = estimate_pvt_attack_hazard(
+                intel,
+                game_second=game_second,
+            )
             metadata = dict(advisory_dict.get("metadata") or {})
             metadata["commitment_window"] = commitment_window
+            metadata["threat_hazard"] = threat_hazard
             advisory_dict["metadata"] = metadata
+
             self.repository.complete_run(
                 run_id=run_id,
                 advisory=advisory_dict,
