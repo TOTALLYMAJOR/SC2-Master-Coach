@@ -10,6 +10,7 @@ from .capability_registry import CAPABILITIES, get_capability
 from .contracts import CapabilityId
 from .errors import ScienceError
 from .feature_flags import ScienceMode, ScienceSettings, load_settings
+from .rules import estimate_policy_commitments
 from .storage import ScienceRepository, database_health
 from .twin import (
     MODEL_NAME,
@@ -102,7 +103,7 @@ class ScienceRuntime:
                 "patch": SUPPORTED_PATCH,
                 "ruleset_version": RULESET_VERSION,
                 "deterministic": True,
-                "scope": "Protoss vs Terran three-base strategic timing and evidence",
+                "scope": "Protoss vs Terran three-base strategic timing, evidence, and transparent opportunity-cost commitments",
                 "mode": self.settings.mode.value,
             }
         ]
@@ -167,6 +168,19 @@ class ScienceRuntime:
             advisory, _evidence = build_pvt_three_base_advisory(immutable_payload)
             duration_ms = max(0, round((time.perf_counter() - started) * 1000))
             advisory_dict = advisory.to_dict()
+            parameters = dict(immutable_payload.get("parameters") or {})
+            try:
+                game_second = max(0, int(parameters.get("game_second", parameters.get("gameSecond", 0)) or 0))
+            except (TypeError, ValueError):
+                game_second = 0
+            commitment_window = estimate_policy_commitments(
+                dict(immutable_payload.get("policy") or {}),
+                game_second=game_second,
+                horizon_seconds=75,
+            )
+            metadata = dict(advisory_dict.get("metadata") or {})
+            metadata["commitment_window"] = commitment_window
+            advisory_dict["metadata"] = metadata
             self.repository.complete_run(
                 run_id=run_id,
                 advisory=advisory_dict,
