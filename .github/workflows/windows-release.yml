@@ -5,14 +5,15 @@ on:
   push:
     branches:
       - main
+      - v1.11-dev
     tags:
       - 'v*'
 
 permissions:
   contents: write
 
-# Rapid UI work can produce several main pushes in a few minutes. Only the
-# newest main state should consume a full Windows/PyInstaller/NSIS release run.
+# Rapid UI work can produce several pushes in a few minutes. Only the newest
+# state for each branch should consume a full Windows/PyInstaller/NSIS run.
 concurrency:
   group: windows-release-${{ github.ref }}
   cancel-in-progress: true
@@ -60,8 +61,11 @@ jobs:
           # PyInstaller correctly rejects on modern Python. PySC2 itself uses
           # the standard-library enum module under Python 3.
           python -m pip uninstall -y enum34
-          python -m PyInstaller --noconfirm --clean --windowed --onedir --name "SC2 Master Coach" --add-data "static:static" --collect-all sc2reader --collect-all mpyq --collect-all webview --collect-all pysc2 --collect-all s2clientprotocol --collect-all s2protocol --collect-all google.protobuf --collect-all portpicker --hidden-import webview.platforms.edgechromium --hidden-import pysc2.run_configs.platforms --hidden-import pysc2.lib.features desktop_app.py
+          python -m PyInstaller --noconfirm --clean --windowed --onedir --name "SC2 Master Coach" --add-data "static:static" --collect-data python_strategy_science --collect-all sc2reader --collect-all mpyq --collect-all webview --collect-all pysc2 --collect-all s2clientprotocol --collect-all s2protocol --collect-all google.protobuf --collect-all portpicker --hidden-import webview.platforms.edgechromium --hidden-import pysc2.run_configs.platforms --hidden-import pysc2.lib.features desktop_app.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $scienceSchema = Get-ChildItem -Path "dist\SC2 Master Coach" -Recurse -Filter schema.sql | Where-Object { $_.FullName -match "python_strategy_science" } | Select-Object -First 1
+          if (-not $scienceSchema) { throw "Packaged Strategy Science schema.sql was not found." }
+          Write-Host "Packaged Strategy Science schema: $($scienceSchema.FullName)"
           Compress-Archive -Path "dist\SC2 Master Coach\*" -DestinationPath "dist\SC2-Master-Coach-Portable.zip" -Force
 
       - name: Prepare zero-cost NSIS installer
