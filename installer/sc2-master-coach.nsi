@@ -4,7 +4,7 @@ Unicode true
 
 !define APPNAME "SC2 Master Coach"
 !define COMPANY "MBMapps"
-!define VERSION "1.9.0"
+!define VERSION "1.10.0"
 !define EXE "SC2 Master Coach.exe"
 !define APPID "SC2MasterCoach"
 
@@ -13,10 +13,10 @@ OutFile "${__FILEDIR__}\out\SC2-Master-Coach-Setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\${APPNAME}"
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
-VIProductVersion "1.9.0.0"
+VIProductVersion "1.10.0.0"
 VIAddVersionKey "ProductName" "${APPNAME}"
 VIAddVersionKey "CompanyName" "${COMPANY}"
-VIAddVersionKey "FileDescription" "SC2 Strategic OS, strategy compiler, live coaching, and replay intelligence"
+VIAddVersionKey "FileDescription" "SC2 combat HUD, Strategic OS, live coaching, and replay intelligence"
 VIAddVersionKey "FileVersion" "${VERSION}"
 VIAddVersionKey "ProductVersion" "${VERSION}"
 
@@ -65,7 +65,6 @@ Section "Install"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPID}" "UninstallString" '"$INSTDIR\Uninstall.exe"'
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPID}" "InstallLocation" "$INSTDIR"
 
-  ; Double-clicking a .SC2Replay launches directly into Replay Intelligence.
   WriteRegStr HKCU "Software\Classes\.SC2Replay" "" "SC2MasterCoach.Replay"
   WriteRegStr HKCU "Software\Classes\SC2MasterCoach.Replay" "" "StarCraft II Replay"
   WriteRegStr HKCU "Software\Classes\SC2MasterCoach.Replay\shell\open\command" "" '"$INSTDIR\${EXE}" "%1"'
