@@ -30,7 +30,7 @@ def request_payload(*intel: str) -> dict:
             "title": "Information-First Triple Nexus",
             "buildWindows": [
                 {"start": 180, "end": 230, "action": "Third Nexus", "purpose": "Economic commitment"},
-                {"start": 220, "end": 280, "action": "Production", "purpose": "Convert economy"},
+                {"start": 220, "end": 280, "action": "Gateway + Shield Battery", "purpose": "Convert economy into defense"},
             ],
         },
         "intel": [
@@ -93,6 +93,26 @@ def test_digital_twin_moveout_and_no_natural_are_bounded_safety_branches(tmp_pat
     assert "defensive two-base bridge" in no_natural["action"]
 
 
+def test_digital_twin_exposes_transparent_opportunity_cost_without_claiming_exact_bank(tmp_path: Path):
+    runtime = ScienceRuntime(
+        ScienceSettings(
+            mode=ScienceMode.SHADOW,
+            discovery_enabled=False,
+            database_path=str(tmp_path / "science.db"),
+        )
+    )
+    advisory = runtime.run(request_payload("normal_natural"))["advisory"]
+    ledger = advisory["metadata"]["commitment_window"]
+    assert ledger["patch"] == SUPPORTED_PATCH
+    assert ledger["totals"]["mineral"] >= 650  # Nexus + Gateway + Battery
+    assert ledger["totals"]["gas"] == 0
+    assert any(row["key"] == "nexus" for row in ledger["items"])
+    assert any(row["key"] == "gateway" for row in ledger["items"])
+    assert any(row["key"] == "shield_battery" for row in ledger["items"])
+    assert "does not know the player's exact live mineral/gas balance" in ledger["boundary"]
+    assert any(row["label"] == "Two Stalkers" for row in ledger["alternatives"])
+
+
 def test_native_audio_diagnostics_has_stable_cross_platform_contract():
     row = audio_diagnostics()
     for key in (
@@ -137,6 +157,7 @@ def test_flask_science_health_audio_and_run_endpoints(monkeypatch, tmp_path: Pat
     run_body = run.get_json()
     assert run_body["runtime"]["canonical_state_mutated"] is False
     assert run_body["advisory"]["metadata"]["recommended_plan_state"] == "modify"
+    assert "commitment_window" in run_body["advisory"]["metadata"]
 
     stored = client.get(f"/api/science/runs/{run_body['run_id']}")
     assert stored.status_code == 200
