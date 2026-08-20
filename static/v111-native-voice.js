@@ -68,16 +68,33 @@
     applyParsed(parsed,false);
   }
 
+  function permissionFor(status){
+    if(status==="abort"||status==="hold")return {status:"HOLD",reason:"Immediate threat or invalidated assumptions outrank the scheduled investment."};
+    if(status==="modify")return {status:"CAUTION",reason:"The mission remains valid, but the fast implementation needs a fresh read or more immediate power."};
+    return {status:"OPEN",reason:"Current player-reported evidence does not invalidate the operation; renew information before the next irreversible spend."};
+  }
+
+  function refreshHud(evidenceType){
+    const output=E.currentOutput()||E.evaluate();if(!output)return;
+    const set=(id,value)=>{const node=document.getElementById(id);if(node)node.textContent=value||""};
+    set("v110Question",output.primaryQuestion);
+    set("v110Action",output.primaryAction);
+    set("v110Reason",output.reason);
+    const permission=permissionFor(output.planStatus||"continue");
+    set("v110Permission",permission.status);set("v110PermissionWhy",permission.reason);
+    const permissionNode=document.getElementById("v110Permission");if(permissionNode)permissionNode.className=`v110-permission ${permission.status==="OPEN"?"open":permission.status==="HOLD"?"hold":""}`;
+    const planState=document.querySelector("#v110HudShell .v110-plan-state");if(planState){const statusText=String(output.planStatus||"continue").toLowerCase();planState.className=`v110-plan-state ${statusText}`;planState.innerHTML=`<i></i>${safe(statusText.toUpperCase())}`}
+    const next=document.getElementById("v110Next");if(next)next.innerHTML=(output.nextWindows||[]).slice(0,3).map(row=>`<div><time>${formatSeconds(row.earliestSecond)}–${formatSeconds(row.latestSecond)}</time><b>${safe(row.label)}</b></div>`).join("")||"<div><b>No upcoming window compiled.</b></div>";
+    document.querySelectorAll("#v110HudShell [data-signal]").forEach(button=>button.classList.toggle("active",button.dataset.signal===evidenceType));
+  }
+
+  function formatSeconds(value){const seconds=Math.max(0,Math.floor(Number(value)||0));return `${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,"0")}`}
+
   function applyParsed(parsed,confirmed){
     for(const intent of parsed.intents||[]){
       if(intent.intent==="report_evidence"){
-        const button=document.querySelector(`#v110HudShell [data-signal="${CSS.escape(intent.evidenceType)}"]`);
-        if(button){button.click();continue}
-        // If the observation is valid but not one of the six current FPS-HUD
-        // buttons, preserve it in the canonical evidence ledger and immediately
-        // open the Shadow comparison so the player sees its consequence.
         E.reportEvidence(intent.evidenceType,intent.payload||{},"player_voice",parsed.recognitionConfidence||1);
-        window.SC2PythonShadow?.comparePlan?.();
+        refreshHud(intent.evidenceType);
       }else if(intent.intent==="ask_status"||intent.intent==="ask_why"||intent.intent==="ask_next"){
         window.SC2PythonShadow?.comparePlan?.();
       }else if(intent.intent==="pause"){
@@ -87,16 +104,24 @@
       }
     }
     if(confirmed){
-      // Confirmation applies the same explicit player report; it never accepts
-      // Python strategic advice into canonical state.
+      // Confirmation applies only the player's explicit report. It never
+      // accepts a Python advisory into canonical Strategic OS state.
     }
   }
 
+  function syncEvidenceHighlight(){
+    const active=E.activeEvidence?.()||[];if(!active.length)return;
+    const latest=active.slice().sort((a,b)=>(b.observedGameSecond||0)-(a.observedGameSecond||0))[0];
+    if(!latest?.type)return;
+    document.querySelectorAll("#v110HudShell [data-signal]").forEach(button=>button.classList.toggle("active",button.dataset.signal===latest.type));
+  }
+
   function boot(){
-    const observer=new MutationObserver(()=>ensureButton());observer.observe(document.documentElement,{subtree:true,childList:true});
+    const observer=new MutationObserver(()=>{ensureButton();syncEvidenceHighlight()});observer.observe(document.documentElement,{subtree:true,childList:true});
+    window.addEventListener("sc2:strategy-state",()=>syncEvidenceHighlight());
     getStatus().catch(()=>{});ensureButton();
   }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
-  window.SC2NativeVoice={getStatus,listen,applyTranscript};
+  window.SC2NativeVoice={getStatus,listen,applyTranscript,refreshHud};
 })();
