@@ -86,6 +86,7 @@ def index():
         "/strategic-os-ui.js",
         "/v110-hud.js",
         "/v111-python-shadow.js",
+        "/v111-opportunity-cost.js",
     )
     for src in scripts:
         if src not in html:
