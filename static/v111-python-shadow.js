@@ -169,7 +169,7 @@
   }
 
   function intercept(event){
-    const target=event.target?.closest?.("#v110CheckPlan");if(!target)return;
+    const target=event.target?.closest?.("#v110Check");if(!target)return;
     event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();comparePlan();
   }
 
