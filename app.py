@@ -43,7 +43,8 @@ app.register_blueprint(science_api)
 @app.get("/")
 def index():
     # v1.10 Combat HUD is the stable interaction contract. v1.11-dev layers a
-    # Python Shadow Mode adapter behind it without changing the released version.
+    # Python Shadow Mode adapter and offline tactical voice behind it without
+    # changing the released version.
     html = (STATIC / "index.html").read_text(encoding="utf-8")
     for href in (
         "/experience.css",
@@ -87,6 +88,7 @@ def index():
         "/v110-hud.js",
         "/v111-python-shadow.js",
         "/v111-opportunity-cost.js",
+        "/v111-native-voice.js",
     )
     for src in scripts:
         if src not in html:
