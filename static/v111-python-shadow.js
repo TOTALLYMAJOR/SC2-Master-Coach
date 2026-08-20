@@ -11,6 +11,7 @@
   let health=null;
   let healthError=null;
   let healthPromise=null;
+  let audioStatus=null;
   let lastRun=null;
   let busy=false;
 
@@ -27,7 +28,7 @@
       .v111-science-card{width:min(980px,96vw);max-height:88vh;overflow:auto;border:1px solid #66e7ff;background:#06131d;color:#eefaff;border-radius:7px;box-shadow:0 30px 110px #000;padding:24px}
       .v111-science-card h2{font-size:30px;margin:0 0 8px}.v111-science-card h3{font-size:15px;text-transform:uppercase;letter-spacing:.1em;color:#66e7ff;margin:0 0 7px}.v111-science-card p,.v111-science-card li{font-size:17px;line-height:1.55}.v111-science-card .muted{color:#9cb4c2}
       .v111-science-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}.v111-science-badge{display:inline-block;border:1px solid #3f9b70;color:#75e7ae;padding:5px 8px;border-radius:3px;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.07em}
-      .v111-science-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.v111-science-panel{border:1px solid #23495f;background:#071722;padding:17px;border-radius:5px}.v111-science-panel strong{display:block;font-size:20px;line-height:1.35}.v111-science-panel .status{font-size:25px;font-weight:950;margin:7px 0}.v111-science-panel .status.open,.v111-science-panel .status.continue{color:#6de4a4}.v111-science-panel .status.caution,.v111-science-panel .status.modify{color:#ffd166}.v111-science-panel .status.hold,.v111-science-panel .status.abort{color:#ff7373}
+      .v111-science-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.v111-science-panel{border:1px solid #23495f;background:#071722;padding:17px;border-radius:5px}.v111-science-panel strong{display:block;font-size:20px;line-height:1.35}.v111-science-panel .status{font-size:25px;font-weight:950;margin:7px 0}.v111-science-panel .status.open,.v111-science-panel .status.continue{color:#6de4a4}.v111-science-panel .status.caution,.v111-science-panel .status.modify{color:#ffd166}.v111-science-panel .status.hold,.v111-science-panel .status.abort{color:#ff7373}
       .v111-science-proof{margin-top:14px;border-top:1px solid #23495f;padding-top:14px}.v111-science-proof ul{padding-left:22px}.v111-science-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.v111-science-actions button{min-height:44px;padding:10px 15px;border:1px solid #3a7896;background:#071722;color:#eefaff;border-radius:4px;font-weight:850;font-size:16px}.v111-science-actions button:hover{border-color:#66e7ff}
       @media(max-width:760px){.v111-science-grid{grid-template-columns:1fr}}
     `;
@@ -46,6 +47,14 @@
       .catch(error=>{health=null;healthError=error?.message||String(error);throw error})
       .finally(()=>{healthPromise=null;ensureStatusChip()});
     return healthPromise;
+  }
+
+  async function getAudioStatus(){
+    try{
+      const response=await fetch("/api/science/audio/status",{cache:"no-store"});
+      audioStatus=await response.json().catch(()=>({ok:false,message:"Audio diagnostics returned invalid JSON."}));
+    }catch(error){audioStatus={ok:false,message:error?.message||String(error),devices:[]}}
+    return audioStatus;
   }
 
   function scienceState(){
@@ -137,10 +146,15 @@
     ensureStyle();let overlay=document.getElementById(OVERLAY_ID);if(overlay)overlay.remove();overlay=document.createElement("div");overlay.id=OVERLAY_ID;overlay.className="v111-science-overlay";overlay.innerHTML=`<section class="v111-science-card"><div class="v111-science-head"><div><span class="v111-science-badge">Experimental · v1.11-dev</span><h2>${safe(title)}</h2></div></div>${content}<div class="v111-science-actions"><button id="v111ScienceClose">Close</button></div></section>`;document.body.appendChild(overlay);overlay.addEventListener("click",event=>{if(event.target===overlay)overlay.remove()});document.getElementById("v111ScienceClose")?.addEventListener("click",()=>overlay.remove());
   }
 
+  function audioHtml(){
+    const row=audioStatus||{};const devices=row.devices||[];const names=devices.slice(0,4).map(device=>`<li>${safe(device.name||`Input ${device.device_id}`)} · ${Number(device.channels||0)} ch</li>`).join("");
+    return `<section class="v111-science-panel"><h3>Native microphone</h3><div class="status ${row.ok?'continue':'caution'}">${row.ok?'DEVICE FOUND':'CHECK INPUT'}</div><p>Backend: <b>${safe(row.backend||"unavailable")}</b></p><p>Windows-visible inputs: <b>${Number(row.device_count||0)}</b></p>${names?`<ul>${names}</ul>`:""}<p class="muted">${safe(row.message||"Native microphone diagnostics have not run.")}</p><p class="muted">This verifies Windows device visibility only. Offline tactical speech recognition is the next layer.</p></section>`;
+  }
+
   async function openDiagnostics(){
-    try{await getHealth(true)}catch(_e){}
+    await Promise.allSettled([getHealth(true),getAudioStatus()]);
     const state=scienceState();const db=health?.database||{};const caps=health?.capabilities||{};
-    openOverlay("Python Intelligence Diagnostics",`<div class="v111-science-grid"><section class="v111-science-panel"><h3>Runtime</h3><div class="status ${state.cls==='ready'?'continue':'caution'}">${safe(state.label)}</div><p>Mode: <b>${safe(health?.mode||"unavailable")}</b></p><p>Strategic authority: <b>${safe(health?.state_authority||"strategic_os")}</b></p><p>May influence live HUD: <b>${health?.may_influence_live_surface?"yes":"no"}</b></p></section><section class="v111-science-panel"><h3>Rules & storage</h3><p>Patch: <b>${safe(health?.patch||D.PATCH)}</b></p><p>Ruleset: <b>${safe(health?.ruleset_version||"unavailable")}</b></p><p>SQLite: <b>${db.ok?"healthy":"unavailable"}</b></p><p>Digital Twin: <b>${safe(caps.digital_twin||"unknown")}</b></p></section></div>${healthError?`<section class="v111-science-proof"><p class="muted">Runtime error: ${safe(healthError)}</p></section>`:""}`);
+    openOverlay("Python Intelligence Diagnostics",`<div class="v111-science-grid"><section class="v111-science-panel"><h3>Runtime</h3><div class="status ${state.cls==='ready'?'continue':'caution'}">${safe(state.label)}</div><p>Mode: <b>${safe(health?.mode||"unavailable")}</b></p><p>Strategic authority: <b>${safe(health?.state_authority||"strategic_os")}</b></p><p>May influence live HUD: <b>${health?.may_influence_live_surface?"yes":"no"}</b></p></section><section class="v111-science-panel"><h3>Rules & storage</h3><p>Patch: <b>${safe(health?.patch||D.PATCH)}</b></p><p>Ruleset: <b>${safe(health?.ruleset_version||"unavailable")}</b></p><p>SQLite: <b>${db.ok?"healthy":"unavailable"}</b></p><p>Digital Twin: <b>${safe(caps.digital_twin||"unknown")}</b></p></section>${audioHtml()}</div>${healthError?`<section class="v111-science-proof"><p class="muted">Runtime error: ${safe(healthError)}</p></section>`:""}`);
   }
 
   async function comparePlan(){
@@ -169,5 +183,5 @@
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 
-  window.SC2PythonShadow={getHealth,runShadow,comparePlan,openDiagnostics,get lastRun(){return lastRun}};
+  window.SC2PythonShadow={getHealth,getAudioStatus,runShadow,comparePlan,openDiagnostics,get lastRun(){return lastRun}};
 })();
