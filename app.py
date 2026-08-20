@@ -29,7 +29,7 @@ from sc2_frame_capture import (
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
 MAX_REPLAY_BYTES = 40 * 1024 * 1024
-CURRENT_VERSION = "1.9.0"
+CURRENT_VERSION = "1.10.0"
 RELEASES_API = "https://api.github.com/repos/TOTALLYMAJOR/SC2-Master-Coach/releases/latest"
 
 app = Flask(__name__, static_folder=str(STATIC), static_url_path="")
@@ -38,8 +38,8 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_REPLAY_BYTES
 
 @app.get("/")
 def index():
-    # Strategic OS is the default. Strategy Compiler, Team Composer, and the
-    # full Command HUD remain available as secondary/advanced modes.
+    # v1.10 Combat HUD is the default. Strategic OS, Strategy Compiler,
+    # Team Composer, and the full Command HUD remain secondary/advanced modes.
     html = (STATIC / "index.html").read_text(encoding="utf-8")
     for href in (
         "/experience.css",
@@ -52,6 +52,7 @@ def index():
         "/strategy-compiler-readability.css",
         "/strategic-os.css",
         "/strategic-os-fixes.css",
+        "/v110-hud.css",
     ):
         if href not in html:
             html = html.replace("</head>", f'<link rel="stylesheet" href="{href}">\n</head>')
@@ -79,6 +80,7 @@ def index():
         "/strategic-os-kernel.js",
         "/strategic-os-runtime-guard.js",
         "/strategic-os-ui.js",
+        "/v110-hud.js",
     )
     for src in scripts:
         if src not in html:
