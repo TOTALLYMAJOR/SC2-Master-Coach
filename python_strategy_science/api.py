@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from flask import Blueprint, jsonify, request
 
+from .audio import audio_diagnostics
 from .errors import ScienceError
 from .service import get_runtime
 
@@ -50,6 +51,12 @@ def science_models():
         return jsonify({"ok": True, "models": runtime.models()})
     except ScienceError as exc:
         return _error_response(exc)
+
+
+@science_api.get("/audio/status")
+def science_audio_status():
+    """Report native Windows microphone visibility without opening the device."""
+    return jsonify(audio_diagnostics())
 
 
 @science_api.post("/run")
