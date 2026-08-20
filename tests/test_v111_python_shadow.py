@@ -53,7 +53,10 @@ def test_shadow_mode_visibly_preserves_strategic_os_authority():
 
 def test_can_i_still_do_my_plan_is_intercepted_for_side_by_side_comparison():
     ui = (STATIC / "v111-python-shadow.js").read_text(encoding="utf-8")
-    assert 'closest?.("#v110CheckPlan")' in ui
+    released_hud = (STATIC / "v110-hud.js").read_text(encoding="utf-8")
+    assert 'id="v110Check"' in released_hud
+    assert 'closest?.("#v110Check")' in ui
+    assert "#v110CheckPlan" not in ui
     assert "stopImmediatePropagation" in ui
     assert "comparePlan()" in ui
     assert "Can I still do my plan?" in ui
