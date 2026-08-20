@@ -18,6 +18,7 @@ from case_workspace import (
     resolve_case_replay,
 )
 from observation_service import enrich_demo_analysis, enrich_replay_analysis
+from python_strategy_science.api import science_api
 from replay_engine import analyze_replay, demo_analysis
 from sc2_frame_capture import (
     CaptureRequest,
@@ -34,6 +35,9 @@ RELEASES_API = "https://api.github.com/repos/TOTALLYMAJOR/SC2-Master-Coach/relea
 
 app = Flask(__name__, static_folder=str(STATIC), static_url_path="")
 app.config["MAX_CONTENT_LENGTH"] = MAX_REPLAY_BYTES
+# v1.11-dev only: local Python Strategy Science endpoints. The runtime defaults
+# to Shadow Mode and cannot mutate Strategic OS canonical state.
+app.register_blueprint(science_api)
 
 
 @app.get("/")
