@@ -34,6 +34,24 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements-desktop.txt
 
+      - name: Prepare offline tactical speech model
+        if: github.ref == 'refs/heads/v1.11-dev' || startsWith(github.ref, 'refs/tags/v1.11')
+        shell: pwsh
+        run: |
+          $modelName = "vosk-model-small-en-us-0.15"
+          $root = Join-Path $PWD "voice_models"
+          $zip = Join-Path $root "$modelName.zip"
+          $modelDir = Join-Path $root $modelName
+          New-Item -ItemType Directory -Force -Path $root | Out-Null
+          if (-not (Test-Path (Join-Path $modelDir "am\final.mdl"))) {
+            Invoke-WebRequest -Uri "https://alphacephei.com/vosk/models/$modelName.zip" -OutFile $zip
+            Expand-Archive -Path $zip -DestinationPath $root -Force
+          }
+          if (-not (Test-Path (Join-Path $modelDir "am\final.mdl"))) {
+            throw "Offline Vosk model did not unpack correctly."
+          }
+          Write-Host "Offline tactical speech model ready: $modelDir"
+
       - name: Verify SC2 protocol compatibility
         shell: pwsh
         run: |
@@ -61,11 +79,39 @@ jobs:
           # PyInstaller correctly rejects on modern Python. PySC2 itself uses
           # the standard-library enum module under Python 3.
           python -m pip uninstall -y enum34
-          python -m PyInstaller --noconfirm --clean --windowed --onedir --name "SC2 Master Coach" --add-data "static:static" --collect-data python_strategy_science --collect-all sc2reader --collect-all mpyq --collect-all webview --collect-all pysc2 --collect-all s2clientprotocol --collect-all s2protocol --collect-all google.protobuf --collect-all portpicker --hidden-import webview.platforms.edgechromium --hidden-import pysc2.run_configs.platforms --hidden-import pysc2.lib.features desktop_app.py
+          $voiceData = @()
+          if (Test-Path "voice_models\vosk-model-small-en-us-0.15") {
+            $voiceData = @("--add-data", "voice_models/vosk-model-small-en-us-0.15:voice_models/vosk-model-small-en-us-0.15")
+          }
+          $args = @(
+            "--noconfirm", "--clean", "--windowed", "--onedir",
+            "--name", "SC2 Master Coach",
+            "--add-data", "static:static",
+            "--collect-data", "python_strategy_science",
+            "--collect-all", "vosk",
+            "--collect-all", "sounddevice",
+            "--collect-all", "sc2reader",
+            "--collect-all", "mpyq",
+            "--collect-all", "webview",
+            "--collect-all", "pysc2",
+            "--collect-all", "s2clientprotocol",
+            "--collect-all", "s2protocol",
+            "--collect-all", "google.protobuf",
+            "--collect-all", "portpicker",
+            "--hidden-import", "webview.platforms.edgechromium",
+            "--hidden-import", "pysc2.run_configs.platforms",
+            "--hidden-import", "pysc2.lib.features"
+          ) + $voiceData + @("desktop_app.py")
+          python -m PyInstaller @args
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $scienceSchema = Get-ChildItem -Path "dist\SC2 Master Coach" -Recurse -Filter schema.sql | Where-Object { $_.FullName -match "python_strategy_science" } | Select-Object -First 1
           if (-not $scienceSchema) { throw "Packaged Strategy Science schema.sql was not found." }
           Write-Host "Packaged Strategy Science schema: $($scienceSchema.FullName)"
+          if (Test-Path "voice_models\vosk-model-small-en-us-0.15") {
+            $voiceModel = Get-ChildItem -Path "dist\SC2 Master Coach" -Recurse -Filter final.mdl | Where-Object { $_.FullName -match "vosk-model-small-en-us-0.15" } | Select-Object -First 1
+            if (-not $voiceModel) { throw "Packaged offline Vosk model was not found." }
+            Write-Host "Packaged offline tactical speech model: $($voiceModel.FullName)"
+          }
           Compress-Archive -Path "dist\SC2 Master Coach\*" -DestinationPath "dist\SC2-Master-Coach-Portable.zip" -Force
 
       - name: Prepare zero-cost NSIS installer
