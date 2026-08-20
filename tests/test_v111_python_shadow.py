@@ -90,7 +90,7 @@ def test_python_diagnostics_are_compact_and_include_native_microphone_boundary()
     assert "v110-live-grid" not in ui
 
 
-def test_opportunity_cost_context_is_on_demand_and_preserves_exact_bank_boundary():
+def test_opportunity_cost_and_threat_hazard_are_on_demand_only():
     ui = (STATIC / "v111-opportunity-cost.js").read_text(encoding="utf-8")
     for phrase in (
         "Opportunity-cost window",
@@ -98,6 +98,12 @@ def test_opportunity_cost_context_is_on_demand_and_preserves_exact_bank_boundary
         "What those resources compete with",
         "commitment_window",
         "not an estimate of the player's exact live bank",
+        "Near-term attack hazard · qualitative",
+        "threat_hazard",
+        "Next resolving intel",
+        "no calibrated attack probability is claimed",
     ):
         assert phrase in ui
     assert "v111ScienceOverlay" in ui
+    assert "data-v111-threat-hazard" in ui
+    assert "data-v111-opportunity-cost" in ui
