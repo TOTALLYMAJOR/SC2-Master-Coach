@@ -5,6 +5,8 @@ from flask import Blueprint, jsonify, request
 from .audio import audio_diagnostics
 from .errors import ScienceError
 from .service import get_runtime
+from .voice import listen_once, voice_status
+from .voice.offline import OfflineVoiceError
 
 
 science_api = Blueprint("strategy_science", __name__, url_prefix="/api/science")
@@ -57,6 +59,47 @@ def science_models():
 def science_audio_status():
     """Report native Windows microphone visibility without opening the device."""
     return jsonify(audio_diagnostics())
+
+
+@science_api.get("/voice/status")
+def science_voice_status():
+    return jsonify(voice_status())
+
+
+@science_api.post("/voice/listen")
+def science_voice_listen():
+    payload = request.get_json(silent=True) or {}
+    try:
+        timeout_seconds = float(payload.get("timeout_seconds", 4.0))
+    except (TypeError, ValueError):
+        timeout_seconds = 4.0
+    device_id = payload.get("device_id")
+    try:
+        if device_id is not None:
+            device_id = int(device_id)
+        result = listen_once(timeout_seconds=timeout_seconds, device_id=device_id)
+        status = 200 if result.get("ok") else 204
+        if status == 204:
+            # 204 bodies are discarded by clients; use 200 with an explicit
+            # no-speech state so the HUD can explain what happened.
+            status = 200
+        return jsonify(result), status
+    except OfflineVoiceError as exc:
+        return jsonify({
+            "ok": False,
+            "error": {
+                "code": "offline_voice_unavailable",
+                "message": str(exc),
+            },
+        }), 503
+    except Exception:
+        return jsonify({
+            "ok": False,
+            "error": {
+                "code": "offline_voice_failed",
+                "message": "Offline tactical voice recognition failed.",
+            },
+        }), 500
 
 
 @science_api.post("/run")
