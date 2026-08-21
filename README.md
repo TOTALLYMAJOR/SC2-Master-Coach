@@ -15,6 +15,17 @@ The live strategy baseline targets **StarCraft II 5.0.16b**, including the eight
 
 Official patch reference: <https://news.blizzard.com/en-us/article/24291949/starcraft-ii-5-0-16b-hotfix-patch-notes>
 
+## v1.12.0 - Interaction Reliability
+
+v1.12 restores reliable input across the Combat HUD by eliminating a Python Shadow status-observer feedback loop that could keep the browser main thread busy after startup.
+
+### Major changes
+
+- Fixed the startup condition that made the app render while buttons remained unresponsive.
+- Made Python Shadow status-chip rendering idempotent so its DOM observer reaches quiescence.
+- Added executable observer regression coverage and real-browser pointer verification for onboarding and operation deployment.
+- Advanced the Windows release workflow and validation marker to the v1.12 line.
+
 ## v1.11.0 - Strategy Science Shadow Mode
 
 v1.11 adds a bounded Python advisory runtime behind the Combat HUD while preserving the Strategic OS as canonical state authority.

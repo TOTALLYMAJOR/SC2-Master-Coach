@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - v1.11-dev
+      - v1.12-dev
     tags:
       - 'v*'
 
@@ -35,7 +35,7 @@ jobs:
           python -m pip install -r requirements-desktop.txt
 
       - name: Prepare offline tactical speech model
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/v1.11-dev' || startsWith(github.ref, 'refs/tags/v1.11')
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/v1.12-dev' || startsWith(github.ref, 'refs/tags/v1.12')
         shell: pwsh
         run: |
           $modelName = "vosk-model-small-en-us-0.15"
@@ -136,14 +136,14 @@ jobs:
             installer/out/SC2-Master-Coach-Setup.exe
             dist/SC2-Master-Coach-Portable.zip
 
-      - name: Mark validated v1.11 development commit
-        if: github.ref == 'refs/heads/v1.11-dev'
+      - name: Mark validated v1.12 development commit
+        if: github.ref == 'refs/heads/v1.12-dev'
         shell: pwsh
         run: |
           # This non-release ref is our durable acceptance marker. Reaching this
           # step means protocol, JS syntax, pytest, PyInstaller, model packaging,
           # NSIS, and artifact upload all succeeded for the current SHA.
-          git push origin "HEAD:refs/heads/v1.11-ci-green" --force
+          git push origin "HEAD:refs/heads/v1.12-ci-green" --force
           Write-Host "Validated dev SHA: $env:GITHUB_SHA"
 
       - name: Publish tagged GitHub Release
