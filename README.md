@@ -15,6 +15,13 @@ The live strategy baseline targets **StarCraft II 5.0.16b**, including the eight
 
 Official patch reference: <https://news.blizzard.com/en-us/article/24291949/starcraft-ii-5-0-16b-hotfix-patch-notes>
 
+## v1.11.1 - Startup interaction hotfix
+
+- Fixed a self-triggering Python Shadow DOM observer that could prevent `DOMContentLoaded` and make every control unresponsive.
+- Fixed the equivalent native-voice observer loop when the live HUD mounted.
+- Scoped both observers to the Combat HUD and made their text updates idempotent.
+- Added regression coverage and browser-tested the full onboarding, deploy, countdown, native-mic, and Pause interaction path.
+
 ## v1.11.0 - Strategy Science Shadow Mode
 
 v1.11 adds a bounded Python advisory runtime behind the Combat HUD while preserving the Strategic OS as canonical state authority.

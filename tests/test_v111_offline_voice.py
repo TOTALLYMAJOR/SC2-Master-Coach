@@ -113,6 +113,14 @@ def test_native_voice_frontend_loads_after_shadow_helpers_and_preserves_voice_pr
     assert "button.click();continue" not in ui
 
 
+def test_native_voice_observer_is_hud_scoped_and_idempotent():
+    ui = (STATIC / "v111-native-voice.js").read_text(encoding="utf-8")
+    assert "setTextIfChanged(button,label)" in ui
+    assert "if(node.textContent!==text)node.textContent=text" in ui
+    assert 'observer.observe(hud,{subtree:true,childList:true})' in ui
+    assert "observer.observe(document.documentElement" not in ui
+
+
 def test_release_workflow_packages_vosk_model_and_native_voice_dependencies():
     workflow = (ROOT / ".github" / "workflows" / "windows-release.yml").read_text(encoding="utf-8")
     requirements = (ROOT / "requirements-desktop.txt").read_text(encoding="utf-8")

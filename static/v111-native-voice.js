@@ -10,6 +10,7 @@
   let listening=false;
 
   const safe=value=>String(value??"").replace(/[<>&\"]/g,ch=>({"<":"&lt;",">":"&gt;","&":"&amp;",'\"':"&quot;"}[ch]));
+  const setTextIfChanged=(node,text)=>{if(node.textContent!==text)node.textContent=text};
 
   async function getStatus(force=false){
     if(status&&!force)return status;
@@ -29,7 +30,8 @@
       host.appendChild(button);
     }
     button.disabled=listening;
-    button.textContent=listening?"Native Mic · Listening…":status?.ok?"Native Mic · Ready":"Native Mic · Setup";
+    const label=listening?"Native Mic · Listening…":status?.ok?"Native Mic · Ready":"Native Mic · Setup";
+    setTextIfChanged(button,label);
     button.title=status?.ok?"Listen for one short offline tactical phrase. Raw audio is not retained.":"Open offline voice diagnostics.";
   }
 
@@ -117,7 +119,8 @@
   }
 
   function boot(){
-    const observer=new MutationObserver(()=>{ensureButton();syncEvidenceHighlight()});observer.observe(document.documentElement,{subtree:true,childList:true});
+    const observer=new MutationObserver(()=>{ensureButton();syncEvidenceHighlight()});
+    const hud=document.getElementById("v110HudShell");if(hud)observer.observe(hud,{subtree:true,childList:true});
     window.addEventListener("sc2:strategy-state",()=>syncEvidenceHighlight());
     getStatus().catch(()=>{});ensureButton();
   }
