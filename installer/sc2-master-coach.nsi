@@ -4,7 +4,7 @@ Unicode true
 
 !define APPNAME "SC2 Master Coach"
 !define COMPANY "MBMapps"
-!define VERSION "1.10.0"
+!define VERSION "1.11.0"
 !define EXE "SC2 Master Coach.exe"
 !define APPID "SC2MasterCoach"
 
@@ -13,10 +13,10 @@ OutFile "${__FILEDIR__}\out\SC2-Master-Coach-Setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\${APPNAME}"
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
-VIProductVersion "1.10.0.0"
+VIProductVersion "1.11.0.0"
 VIAddVersionKey "ProductName" "${APPNAME}"
 VIAddVersionKey "CompanyName" "${COMPANY}"
-VIAddVersionKey "FileDescription" "SC2 combat HUD, Strategic OS, live coaching, and replay intelligence"
+VIAddVersionKey "FileDescription" "SC2 combat HUD, Strategy Science, offline voice, and replay intelligence"
 VIAddVersionKey "FileVersion" "${VERSION}"
 VIAddVersionKey "ProductVersion" "${VERSION}"
 

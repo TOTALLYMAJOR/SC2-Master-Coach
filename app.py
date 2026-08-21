@@ -30,21 +30,20 @@ from sc2_frame_capture import (
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
 MAX_REPLAY_BYTES = 40 * 1024 * 1024
-CURRENT_VERSION = "1.10.0"
+CURRENT_VERSION = "1.11.0"
 RELEASES_API = "https://api.github.com/repos/TOTALLYMAJOR/SC2-Master-Coach/releases/latest"
 
 app = Flask(__name__, static_folder=str(STATIC), static_url_path="")
 app.config["MAX_CONTENT_LENGTH"] = MAX_REPLAY_BYTES
-# v1.11-dev only: local Python Strategy Science endpoints. The runtime defaults
-# to Shadow Mode and cannot mutate Strategic OS canonical state.
+# v1.11: local Python Strategy Science endpoints. The runtime defaults to
+# Shadow Mode and cannot mutate Strategic OS canonical state.
 app.register_blueprint(science_api)
 
 
 @app.get("/")
 def index():
-    # v1.10 Combat HUD is the stable interaction contract. v1.11-dev layers a
-    # Python Shadow Mode adapter and offline tactical voice behind it without
-    # changing the released version.
+    # The v1.10 Combat HUD remains the stable interaction contract. v1.11 adds
+    # Python Shadow Mode and offline tactical voice without changing authority.
     html = (STATIC / "index.html").read_text(encoding="utf-8")
     for href in (
         "/experience.css",

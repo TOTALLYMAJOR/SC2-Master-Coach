@@ -35,7 +35,7 @@ jobs:
           python -m pip install -r requirements-desktop.txt
 
       - name: Prepare offline tactical speech model
-        if: github.ref == 'refs/heads/v1.11-dev' || startsWith(github.ref, 'refs/tags/v1.11')
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/v1.11-dev' || startsWith(github.ref, 'refs/tags/v1.11')
         shell: pwsh
         run: |
           $modelName = "vosk-model-small-en-us-0.15"

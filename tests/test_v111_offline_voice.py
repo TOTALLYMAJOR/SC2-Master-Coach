@@ -113,7 +113,7 @@ def test_native_voice_frontend_loads_after_shadow_helpers_and_preserves_voice_pr
     assert "button.click();continue" not in ui
 
 
-def test_dev_windows_workflow_packages_vosk_model_and_native_voice_dependencies():
+def test_release_workflow_packages_vosk_model_and_native_voice_dependencies():
     workflow = (ROOT / ".github" / "workflows" / "windows-release.yml").read_text(encoding="utf-8")
     requirements = (ROOT / "requirements-desktop.txt").read_text(encoding="utf-8")
     assert "vosk==0.3.45" in requirements
@@ -123,4 +123,4 @@ def test_dev_windows_workflow_packages_vosk_model_and_native_voice_dependencies(
     assert '"--collect-all", "vosk"' in workflow
     assert '"--collect-all", "sounddevice"' in workflow
     assert "Packaged offline Vosk model was not found" in workflow
-    assert "github.ref == 'refs/heads/v1.11-dev'" in workflow
+    assert "if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/v1.11-dev' || startsWith(github.ref, 'refs/tags/v1.11')" in workflow

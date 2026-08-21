@@ -10,6 +10,22 @@ The live strategy baseline targets **StarCraft II 5.0.16b**, including the eight
 
 Official patch reference: <https://news.blizzard.com/en-us/article/24291949/starcraft-ii-5-0-16b-hotfix-patch-notes>
 
+## v1.11.0 - Strategy Science Shadow Mode
+
+v1.11 adds a bounded Python advisory runtime behind the Combat HUD while preserving the Strategic OS as canonical state authority.
+
+### Major changes
+
+- Added Python Shadow Mode with a local SQLite runtime and immutable run/proof records.
+- Added the first bounded PvT three-base Digital Twin advisory.
+- Added proof and uncertainty output, opportunity-cost reasoning, and a qualitative 30/60/90-second attack-hazard horizon.
+- Added native Windows microphone diagnostics.
+- Added constrained offline Vosk tactical recognition with voice provenance and confidence.
+- Packaged the offline speech model, Strategy Science schema, Vosk, and sounddevice into the Windows build.
+- Added regression coverage for runtime authority, microphone boundaries, offline voice, opportunity cost, hazard output, and release packaging.
+
+Shadow output remains advisory. It cannot mutate the deterministic Strategic OS plan, and microphone diagnostics do not claim access to unreported battlefield truth.
+
 ## v1.10.0 — Combat HUD
 
 v1.10 replaces the page-oriented default workflow with a game-instrument workflow inspired by a first-person-shooter HUD:
@@ -163,7 +179,7 @@ The repository also contains the Python Strategy Science architecture foundation
 - architecture and backlog documents;
 - architecture tests.
 
-Those models remain experimental architecture until the `v1.11-dev` runtime work makes them operational. Python must remain advisory; the Strategic OS remains canonical state authority.
+v1.11 operationalizes the bounded PvT Digital Twin and offline tactical voice path. Other registered Strategy Science capabilities remain foundation or design work. Python remains advisory; the Strategic OS remains canonical state authority.
 
 ## Developer run
 

@@ -22,15 +22,14 @@ from .twin import (
 )
 
 
-RUNTIME_VERSION = "0.1.0-dev"
+RUNTIME_VERSION = "0.1.0"
 
 
 class ScienceRuntime:
     """Dependency-light local Strategy Science execution service.
 
     The runtime is advisory only. It never mutates the Strategic OS canonical
-    state and defaults to Shadow Mode while the v1.11 development branch is
-    under calibration.
+    state and defaults to Shadow Mode while the v1.11 runtime is calibrated.
     """
 
     def __init__(self, settings: ScienceSettings | None = None) -> None:
@@ -128,7 +127,7 @@ class ScienceRuntime:
         if capability_id is not CapabilityId.DIGITAL_TWIN:
             raise ScienceError(
                 "model_unavailable",
-                f"{descriptor.title} is registered but not implemented on v1.11-dev yet.",
+                f"{descriptor.title} is registered but not implemented in v1.11.0.",
                 501,
             )
 

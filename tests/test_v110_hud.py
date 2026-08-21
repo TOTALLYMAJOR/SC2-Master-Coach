@@ -17,7 +17,7 @@ def test_v110_hud_is_default_and_versions_match():
     installer_version = re.search(r'^!define VERSION "([0-9]+\.[0-9]+\.[0-9]+)"$', installer, re.MULTILINE)
     product_version = re.search(r'^VIProductVersion "([0-9]+\.[0-9]+\.[0-9]+)\.0"$', installer, re.MULTILINE)
     assert app_version and installer_version and product_version
-    assert app_version.group(1) == installer_version.group(1) == product_version.group(1) == "1.10.0"
+    assert app_version.group(1) == installer_version.group(1) == product_version.group(1) == "1.11.0"
     assert '"/v110-hud.css"' in app
     assert '"/v110-hud.js"' in app
     assert app.index('"/strategy-compiler-data.js"') < app.index('"/strategy-compiler-engine.js"') < app.index('"/v110-hud.js"')
