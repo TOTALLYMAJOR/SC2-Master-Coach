@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import python_strategy_science.api as science_api_module
@@ -111,6 +112,18 @@ def test_native_voice_frontend_loads_after_shadow_helpers_and_preserves_voice_pr
 
     # Spoken intel must not masquerade as a mouse click to update canonical state.
     assert "button.click();continue" not in ui
+
+
+def test_native_voice_status_observer_reaches_quiescence():
+    harness = ROOT / "tests" / "js" / "v111_native_voice_observer_harness.cjs"
+    result = subprocess.run(
+        ["node", str(harness)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
 
 
 def test_release_workflow_packages_vosk_model_and_native_voice_dependencies():

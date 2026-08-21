@@ -15,6 +15,16 @@ The live strategy baseline targets **StarCraft II 5.0.16b**, including the eight
 
 Official patch reference: <https://news.blizzard.com/en-us/article/24291949/starcraft-ii-5-0-16b-hotfix-patch-notes>
 
+## v1.12.1 - Countdown and Click Reliability
+
+v1.12.1 fixes two browser-main-thread loops that could stall the 3-2-1 transition or leave the rendered page unable to accept clicks.
+
+### Changes
+
+- Throttled Strategic OS clock synchronization to once per elapsed game second instead of every animation frame.
+- Made Native Voice button rendering idempotent so its page-wide DOM observer reaches quiescence.
+- Added observer regression coverage and a real-browser flow through onboarding, Deploy, 3-2-1, Pause/Resume, and the Command palette.
+
 ## v1.12.0 - Interaction Reliability
 
 v1.12 restores reliable input across the Combat HUD by eliminating a Python Shadow status-observer feedback loop that could keep the browser main thread busy after startup.

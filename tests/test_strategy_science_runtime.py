@@ -179,5 +179,5 @@ def test_flask_science_health_and_run_endpoints(monkeypatch, tmp_path):
 def test_science_health_source_is_enabled_in_v112_release():
     root = Path(__file__).resolve().parents[1]
     app_source = (root / "app.py").read_text(encoding="utf-8")
-    assert 'CURRENT_VERSION = "1.12.0"' in app_source
+    assert 'CURRENT_VERSION = "1.12.1"' in app_source
     assert "app.register_blueprint(science_api)" in app_source

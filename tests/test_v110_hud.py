@@ -17,7 +17,7 @@ def test_v110_hud_is_default_and_versions_match():
     installer_version = re.search(r'^!define VERSION "([0-9]+\.[0-9]+\.[0-9]+)"$', installer, re.MULTILINE)
     product_version = re.search(r'^VIProductVersion "([0-9]+\.[0-9]+\.[0-9]+)\.0"$', installer, re.MULTILINE)
     assert app_version and installer_version and product_version
-    assert app_version.group(1) == installer_version.group(1) == product_version.group(1) == "1.12.0"
+    assert app_version.group(1) == installer_version.group(1) == product_version.group(1) == "1.12.1"
     assert '"/v110-hud.css"' in app
     assert '"/v110-hud.js"' in app
     assert app.index('"/strategy-compiler-data.js"') < app.index('"/strategy-compiler-engine.js"') < app.index('"/v110-hud.js"')
@@ -46,6 +46,8 @@ def test_v110_timer_sync_and_command_palette_hotkeys():
     for phrase in (
         "Sync 3–2–1 & Start HUD",
         'for(const value of ["3","2","1","LIVE"])',
+        "let lastEngineSecond=null;",
+        "function syncEngineClock(force=false)",
         "Ctrl/⌘ K",
         "sync timer to 4:25",
         'data-shift="-10"',
@@ -58,6 +60,8 @@ def test_v110_timer_sync_and_command_palette_hotkeys():
         'if(key==="h"',
     ):
         assert phrase in ui
+    assert "if(!force&&whole===lastEngineSecond)return;" in ui
+    assert "if(force||whole%5===0)E.evaluate()" in ui
 
 
 def test_v110_player_reports_evidence_and_engine_selects_branch():
