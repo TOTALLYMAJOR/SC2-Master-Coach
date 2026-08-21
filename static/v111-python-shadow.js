@@ -75,7 +75,7 @@
       button.type="button";
       button.className="v110-btn v111-science-chip";
       button.addEventListener("click",()=>openDiagnostics());
-      button.title="Python Intelligence runs in Shadow Mode on v1.12.0. It may calculate a second opinion but cannot mutate the live Strategic OS plan.";
+      button.title="Python Intelligence runs in Shadow Mode on v1.12.1. It may calculate a second opinion but cannot mutate the live Strategic OS plan.";
       host.prepend(button);
     }
     const row=scienceState(),className=`v110-btn v111-science-chip ${row.cls}`;
@@ -145,7 +145,7 @@
   }
 
   function openOverlay(title,content){
-    ensureStyle();let overlay=document.getElementById(OVERLAY_ID);if(overlay)overlay.remove();overlay=document.createElement("div");overlay.id=OVERLAY_ID;overlay.className="v111-science-overlay";overlay.innerHTML=`<section class="v111-science-card"><div class="v111-science-head"><div><span class="v111-science-badge">Experimental · v1.12.0</span><h2>${safe(title)}</h2></div></div>${content}<div class="v111-science-actions"><button id="v111ScienceClose">Close</button></div></section>`;document.body.appendChild(overlay);overlay.addEventListener("click",event=>{if(event.target===overlay)overlay.remove()});document.getElementById("v111ScienceClose")?.addEventListener("click",()=>overlay.remove());
+    ensureStyle();let overlay=document.getElementById(OVERLAY_ID);if(overlay)overlay.remove();overlay=document.createElement("div");overlay.id=OVERLAY_ID;overlay.className="v111-science-overlay";overlay.innerHTML=`<section class="v111-science-card"><div class="v111-science-head"><div><span class="v111-science-badge">Experimental · v1.12.1</span><h2>${safe(title)}</h2></div></div>${content}<div class="v111-science-actions"><button id="v111ScienceClose">Close</button></div></section>`;document.body.appendChild(overlay);overlay.addEventListener("click",event=>{if(event.target===overlay)overlay.remove()});document.getElementById("v111ScienceClose")?.addEventListener("click",()=>overlay.remove());
   }
 
   function audioHtml(){
