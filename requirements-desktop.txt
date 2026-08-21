@@ -3,7 +3,7 @@ waitress
 pywebview
 pyinstaller
 Pillow
-protobuf==3.20.3
+protobuf==5.29.6
 vosk==0.3.45
 sounddevice==0.5.5
 pysc2 @ git+https://github.com/google-deepmind/pysc2.git@master
