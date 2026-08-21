@@ -79,7 +79,7 @@ def test_python_diagnostics_are_compact_and_include_native_microphone_boundary()
         "Python Intelligence Diagnostics",
         "SQLite",
         "Digital Twin",
-        "Python Shadow · Ready",
+        'Python ${health.mode||"shadow"} · Ready',
         "Native microphone",
         "Windows-visible inputs",
         "This verifies Windows device visibility only",
