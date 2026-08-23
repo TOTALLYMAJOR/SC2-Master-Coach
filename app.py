@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-import json
 import os
 import tempfile
 import threading
 import subprocess
 import sys
-import urllib.request
 import webbrowser
 
 from flask import Flask, jsonify, request, send_from_directory
@@ -17,6 +15,7 @@ from case_workspace import (
     resolve_case_frames,
     resolve_case_replay,
 )
+from master_intel import master_intel_api
 from observation_service import enrich_demo_analysis, enrich_replay_analysis
 from python_strategy_science.api import science_api
 from replay_engine import analyze_replay, demo_analysis
@@ -31,65 +30,100 @@ ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
 MAX_REPLAY_BYTES = 40 * 1024 * 1024
 CURRENT_VERSION = "1.11.1"
-RELEASES_API = "https://api.github.com/repos/TOTALLYMAJOR/SC2-Master-Coach/releases/latest"
 
 app = Flask(__name__, static_folder=str(STATIC), static_url_path="")
 app.config["MAX_CONTENT_LENGTH"] = MAX_REPLAY_BYTES
-# v1.11: local Python Strategy Science endpoints. The runtime defaults to
-# Shadow Mode and cannot mutate Strategic OS canonical state.
+app.config["APP_VERSION"] = CURRENT_VERSION
+app.config["OFFLINE_ONLY"] = True
+app.register_blueprint(master_intel_api)
+# Strategy Science remains a local-only advisory service. It does not mutate
+# Strategic OS canonical state and does not require an external provider.
 app.register_blueprint(science_api)
+
+
+LEGACY_STYLES = (
+    "/experience.css",
+    "/moment-theater.css",
+    "/coach-intelligence.css",
+    "/spellbook-lab.css",
+    "/pro-mind.css",
+    "/team-composer.css",
+    "/strategy-compiler.css",
+    "/strategy-compiler-readability.css",
+    "/strategic-os.css",
+    "/strategic-os-fixes.css",
+    "/v110-hud.css",
+)
+
+LEGACY_SCRIPTS = (
+    "/experience-bridge.js",
+    "/replay-identity.js",
+    "/strategy-library.js",
+    "/experience.js",
+    "/moment-theater.js",
+    "/coach-intelligence.js",
+    "/spellbook-core.js",
+    "/spellbook-performance.js",
+    "/spellbook-evolution.js",
+    "/spellbook-signals.js",
+    "/spellbook-sources.js",
+    "/spellbook-curriculum.js",
+    "/pro-mind-data.js",
+    "/pro-mind-stories.js",
+    "/pro-mind.js",
+    "/team-composer-data.js",
+    "/team-composer.js",
+    "/strategy-compiler-data.js",
+    "/strategy-compiler-engine.js",
+    "/strategy-compiler-ui.js",
+    "/strategic-os-kernel.js",
+    "/strategic-os-runtime-guard.js",
+    "/strategic-os-ui.js",
+    "/v110-hud.js",
+    "/v111-python-shadow.js",
+    "/v111-opportunity-cost.js",
+    "/v111-native-voice.js",
+)
+
+
+@app.after_request
+def apply_offline_security_headers(response):
+    # The application is intentionally air-gap compatible. Browser code may
+    # communicate only with the bundled local origin.
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "connect-src 'self'; "
+        "script-src 'self'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: blob:; "
+        "media-src 'self' blob:; "
+        "font-src 'self'; "
+        "object-src 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self'; "
+        "frame-ancestors 'none'"
+    )
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Permissions-Policy"] = "camera=(), geolocation=(), payment=()"
+    response.headers["Cache-Control"] = "no-store" if request.path.startswith("/api/") else "no-cache"
+    return response
 
 
 @app.get("/")
 def index():
-    # The v1.10 Combat HUD remains the stable interaction contract. v1.11 adds
-    # Python Shadow Mode and offline tactical voice without changing authority.
-    html = (STATIC / "index.html").read_text(encoding="utf-8")
-    for href in (
-        "/experience.css",
-        "/moment-theater.css",
-        "/coach-intelligence.css",
-        "/spellbook-lab.css",
-        "/pro-mind.css",
-        "/team-composer.css",
-        "/strategy-compiler.css",
-        "/strategy-compiler-readability.css",
-        "/strategic-os.css",
-        "/strategic-os-fixes.css",
-        "/v110-hud.css",
-    ):
+    # Master Intel is the default. It loads only the shell plus the active route.
+    return (STATIC / "index.html").read_text(encoding="utf-8")
+
+
+@app.get("/hud")
+def legacy_hud():
+    """Preserve the existing Combat HUD as an explicit secondary destination."""
+    html = (STATIC / "legacy-index.html").read_text(encoding="utf-8")
+    for href in LEGACY_STYLES:
         if href not in html:
             html = html.replace("</head>", f'<link rel="stylesheet" href="{href}">\n</head>')
-    scripts = (
-        "/experience-bridge.js",
-        "/replay-identity.js",
-        "/strategy-library.js",
-        "/experience.js",
-        "/moment-theater.js",
-        "/coach-intelligence.js",
-        "/spellbook-core.js",
-        "/spellbook-performance.js",
-        "/spellbook-evolution.js",
-        "/spellbook-signals.js",
-        "/spellbook-sources.js",
-        "/spellbook-curriculum.js",
-        "/pro-mind-data.js",
-        "/pro-mind-stories.js",
-        "/pro-mind.js",
-        "/team-composer-data.js",
-        "/team-composer.js",
-        "/strategy-compiler-data.js",
-        "/strategy-compiler-engine.js",
-        "/strategy-compiler-ui.js",
-        "/strategic-os-kernel.js",
-        "/strategic-os-runtime-guard.js",
-        "/strategic-os-ui.js",
-        "/v110-hud.js",
-        "/v111-python-shadow.js",
-        "/v111-opportunity-cost.js",
-        "/v111-native-voice.js",
-    )
-    for src in scripts:
+    for src in LEGACY_SCRIPTS:
         if src not in html:
             html = html.replace("</body>", f'<script src="{src}"></script>\n</body>')
     return html
@@ -111,34 +145,23 @@ def health():
     except Exception as exc:
         parser_ok = False
         parser_error = str(exc)
-    return jsonify({
-        "ok": True,
-        "parser_ready": parser_ok,
-        "parser_error": parser_error,
-        "max_replay_mb": MAX_REPLAY_BYTES // (1024 * 1024),
-        "version": CURRENT_VERSION,
-        "capture": capture_status(),
-    })
+    return jsonify(
+        {
+            "ok": True,
+            "parser_ready": parser_ok,
+            "parser_error": parser_error,
+            "max_replay_mb": MAX_REPLAY_BYTES // (1024 * 1024),
+            "version": CURRENT_VERSION,
+            "offline_only": True,
+            "automatic_updates": False,
+            "capture": capture_status(),
+        }
+    )
 
 
 @app.get("/api/demo")
 def demo():
     return jsonify(enrich_demo_analysis(demo_analysis()))
-
-
-def _version_tuple(value: str):
-    value = (value or "").strip().lstrip("vV")
-    parts = []
-    for chunk in value.split("."):
-        digits = "".join(ch for ch in chunk if ch.isdigit())
-        parts.append(int(digits or 0))
-    return tuple((parts + [0, 0, 0])[:3])
-
-
-def _latest_release():
-    req = urllib.request.Request(RELEASES_API, headers={"User-Agent": f"SC2-Master-Coach/{CURRENT_VERSION}"})
-    with urllib.request.urlopen(req, timeout=4) as response:
-        return json.loads(response.read().decode("utf-8"))
 
 
 @app.get("/api/launch-context")
@@ -159,34 +182,30 @@ def launch_context():
 
 @app.get("/api/update/check")
 def update_check():
-    try:
-        release = _latest_release()
-        tag = release.get("tag_name") or ""
-        available = _version_tuple(tag) > _version_tuple(CURRENT_VERSION)
-        setup_asset = next((a for a in release.get("assets", []) if str(a.get("name", "")).lower().endswith("setup.exe")), None)
-        return jsonify({
+    # Compatibility endpoint for older surfaces. It never contacts GitHub.
+    return jsonify(
+        {
             "current_version": CURRENT_VERSION,
-            "latest_version": tag,
-            "available": available,
-            "release_url": release.get("html_url"),
-            "installer_url": setup_asset.get("browser_download_url") if setup_asset else None,
-        })
-    except Exception as exc:
-        return jsonify({"current_version": CURRENT_VERSION, "available": False, "error": str(exc)})
+            "automatic": False,
+            "manual_only": True,
+            "available": False,
+            "message": "Automatic update checks are disabled. Import a trusted local installer or portable package from Settings.",
+        }
+    )
 
 
 @app.post("/api/update/open")
 def update_open():
-    try:
-        release = _latest_release()
-        setup_asset = next((a for a in release.get("assets", []) if str(a.get("name", "")).lower().endswith("setup.exe")), None)
-        url = (setup_asset or {}).get("browser_download_url") or release.get("html_url")
-        if not url:
-            return jsonify({"ok": False, "error": "No release URL available."}), 404
-        webbrowser.open(url)
-        return jsonify({"ok": True, "url": url})
-    except Exception as exc:
-        return jsonify({"ok": False, "error": str(exc)}), 502
+    return (
+        jsonify(
+            {
+                "ok": False,
+                "manual_only": True,
+                "error": "Automatic online updates are disabled. Close the application and run a trusted local update package manually.",
+            }
+        ),
+        409,
+    )
 
 
 @app.post("/api/replay/analyze-latest")
@@ -195,17 +214,22 @@ def replay_analyze_latest():
         Path.home() / "Documents" / "StarCraft II" / "Accounts",
         Path.home() / "OneDrive" / "Documents" / "StarCraft II" / "Accounts",
     ]
-    candidates = []
+    candidates: list[Path] = []
     for root in roots:
         if root.exists():
             candidates.extend(root.glob("**/Replays/**/*.SC2Replay"))
-    candidates = [p for p in candidates if p.is_file()]
+    candidates = [path for path in candidates if path.is_file()]
     if not candidates:
-        return jsonify({
-            "error": "No local SC2 replay was found automatically.",
-            "hint": "Use the Replay drop zone to choose a .SC2Replay file manually."
-        }), 404
-    latest = max(candidates, key=lambda p: p.stat().st_mtime)
+        return (
+            jsonify(
+                {
+                    "error": "No local SC2 replay was found automatically.",
+                    "hint": "Use Import replay to choose a .SC2Replay file manually.",
+                }
+            ),
+            404,
+        )
+    latest = max(candidates, key=lambda path: path.stat().st_mtime)
     try:
         return jsonify(_analyze_replay_path(latest))
     except Exception as exc:
@@ -230,16 +254,26 @@ def replay_analyze():
                 return jsonify({"error": "Replay exceeds the 40 MB safety limit."}), 413
             return jsonify(_analyze_replay_path(path))
     except ImportError:
-        return jsonify({
-            "error": "Replay parser is not installed.",
-            "detail": "Install project requirements, then restart the server."
-        }), 503
+        return (
+            jsonify(
+                {
+                    "error": "Replay parser is not installed.",
+                    "detail": "Install project requirements, then restart the server.",
+                }
+            ),
+            503,
+        )
     except Exception as exc:
-        return jsonify({
-            "error": "Replay analysis failed.",
-            "detail": f"{type(exc).__name__}: {exc}",
-            "hint": "If this is a brand-new SC2 patch, update sc2reader from its upstream GitHub branch."
-        }), 422
+        return (
+            jsonify(
+                {
+                    "error": "Replay analysis failed.",
+                    "detail": f"{type(exc).__name__}: {exc}",
+                    "hint": "The replay may be corrupt or from an unsupported version.",
+                }
+            ),
+            422,
+        )
 
 
 @app.get("/api/replay/capture/status")
@@ -285,34 +319,46 @@ def replay_capture():
     try:
         replay_path = resolve_case_replay(case_id)
         output_dir = resolve_case_frames(case_id)
-        captured = capture_replay_views(CaptureRequest(
-            replay_path=replay_path,
-            output_dir=output_dir,
-            second=second,
-            player_id=player_id,
-            camera_x=camera_x,
-            camera_y=camera_y,
-            width=1280,
-            height=720,
-            moment_key=str(payload.get("moment_key") or f"moment-{second:.1f}"),
-        ))
+        captured = capture_replay_views(
+            CaptureRequest(
+                replay_path=replay_path,
+                output_dir=output_dir,
+                second=second,
+                player_id=player_id,
+                camera_x=camera_x,
+                camera_y=camera_y,
+                width=1280,
+                height=720,
+                moment_key=str(payload.get("moment_key") or f"moment-{second:.1f}"),
+            )
+        )
         return jsonify(_frame_urls(case_id, captured))
     except FileNotFoundError as exc:
         return jsonify({"error": str(exc)}), 404
     except CaptureUnavailable as exc:
-        return jsonify({
-            "error": "Actual SC2 frame capture is unavailable.",
-            "detail": str(exc),
-            "fallback": "The in-app tactical reconstruction remains available."
-        }), 503
+        return (
+            jsonify(
+                {
+                    "error": "Actual SC2 frame capture is unavailable.",
+                    "detail": str(exc),
+                    "fallback": "The in-app tactical reconstruction remains available.",
+                }
+            ),
+            503,
+        )
     except Exception as exc:
         detail = f"{type(exc).__name__}: {exc}"
         if "Descriptors cannot be created directly" in detail:
-            return jsonify({
-                "error": "SC2 protocol runtime compatibility error.",
-                "detail": "This installation loaded an unsupported Protobuf runtime. Install SC2 Master Coach v1.3.1 or newer.",
-                "fallback": "The Tactical Map remains available until the application is updated."
-            }), 503
+            return (
+                jsonify(
+                    {
+                        "error": "SC2 protocol runtime compatibility error.",
+                        "detail": "This installation loaded an unsupported Protobuf runtime.",
+                        "fallback": "Replay analysis remains available without rendered frames.",
+                    }
+                ),
+                503,
+            )
         return jsonify({"error": "SC2 frame capture failed.", "detail": detail}), 422
 
 
