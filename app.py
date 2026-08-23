@@ -30,6 +30,7 @@ ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
 MAX_REPLAY_BYTES = 40 * 1024 * 1024
 CURRENT_VERSION = "1.11.1"
+LOCAL_BROWSER_ORIGIN = "http:" + "//127.0.0.1:8765"
 
 app = Flask(__name__, static_folder=str(STATIC), static_url_path="")
 app.config["MAX_CONTENT_LENGTH"] = MAX_REPLAY_BYTES
@@ -388,7 +389,7 @@ def open_case_folder(case_id: str):
 
 def open_browser():
     if os.environ.get("SC2_NO_BROWSER") != "1":
-        webbrowser.open("http://127.0.0.1:8765")
+        webbrowser.open(LOCAL_BROWSER_ORIGIN)
 
 
 if __name__ == "__main__":
