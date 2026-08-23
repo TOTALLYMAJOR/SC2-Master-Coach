@@ -1,0 +1,166 @@
+{
+  "schema_version": "0.1",
+  "pack_id": "mbmapps.synthetic-master-intel-demo",
+  "title": "Master Intel Synthetic Demonstration",
+  "description": "A bundled offline demonstration showing player dossiers, evidence coverage, timing ranges, and comparison gates without making claims about real professional players.",
+  "publisher": "MBMapps",
+  "pack_version": "1.0.0",
+  "patch_coverage": ["5.0.16b"],
+  "synthetic": true,
+  "provenance": {
+    "type": "synthetic_demonstration",
+    "statement": "All player names and statistics in this pack are fictional and exist only to demonstrate the product workflow."
+  },
+  "players": [
+    {
+      "player_id": "aegis-p",
+      "display_name": "Aegis",
+      "race": "Protoss",
+      "aliases": ["Aegis-P"],
+      "synthetic": true,
+      "identity": {
+        "verified": false,
+        "confidence": "unverified"
+      },
+      "coverage": {
+        "replay_count": 18,
+        "matchups": ["PvT", "PvZ", "PvP"],
+        "map_count": 7,
+        "last_observed": "Synthetic 5.0.16b sample"
+      },
+      "dossier": {
+        "opening_preferences": [
+          "Information-first Gateway openings",
+          "Third-base plans protected by mobile scouting",
+          "Stable Robo transitions when the opponent compresses ground production"
+        ],
+        "build_families": [
+          "Blink Screen Triple",
+          "Lantern Into Colossus",
+          "Safe Robo Expansion"
+        ],
+        "timings": [
+          {"label": "Natural Nexus", "median": "1:42", "range": "1:34–1:51 synthetic range"},
+          {"label": "Third Nexus decision", "median": "3:36", "range": "3:18–4:02 synthetic range"},
+          {"label": "First stable splash", "median": "6:18", "range": "5:56–6:44 synthetic range"}
+        ],
+        "economy_tendencies": [
+          "Worker production is preserved until direct timing evidence appears",
+          "Third-base timing is delayed rather than abandoned when production information becomes stale"
+        ],
+        "production_tendencies": [
+          "Adds Gateway throughput before exposed economy on high-pressure branches",
+          "Uses Robo production as the stable-ground anchor"
+        ],
+        "aggression_profile": [
+          "Uses early units to force movement and obtain information rather than seek mandatory damage",
+          "Disengages when the pressure has already forced the desired response"
+        ],
+        "map_adaptations": [
+          "Earlier reinforcement access on wide third-base layouts",
+          "Delays fragile third locations when travel and retreat geometry are unfavorable"
+        ]
+      }
+    },
+    {
+      "player_id": "forge-t",
+      "display_name": "Forge",
+      "race": "Terran",
+      "aliases": ["Forge-T"],
+      "synthetic": true,
+      "identity": {
+        "verified": false,
+        "confidence": "unverified"
+      },
+      "coverage": {
+        "replay_count": 16,
+        "matchups": ["TvP", "TvZ", "TvT"],
+        "map_count": 6,
+        "last_observed": "Synthetic 5.0.16b sample"
+      },
+      "dossier": {
+        "opening_preferences": [
+          "Reaper information into flexible production",
+          "Pressure-supported Command Center growth",
+          "Tank geometry when the opponent's ground power spike is known"
+        ],
+        "build_families": [
+          "Bio Pressure Into Third",
+          "Raven Tank Control",
+          "Scheduled Taxation"
+        ],
+        "timings": [
+          {"label": "Natural Command Center", "median": "2:03", "range": "1:50–2:18 synthetic range"},
+          {"label": "Third Command Center", "median": "4:18", "range": "3:54–4:46 synthetic range"},
+          {"label": "First major move-out", "median": "5:42", "range": "5:18–6:10 synthetic range"}
+        ],
+        "economy_tendencies": [
+          "Uses visible pressure to make economic investment safer",
+          "Stops worker growth only when immediate survival or a decisive timing requires it"
+        ],
+        "production_tendencies": [
+          "Production increases are aligned with a movement or map-control objective",
+          "Avoids adding expensive capability without a scouting reason"
+        ],
+        "aggression_profile": [
+          "Threatens multiple lanes without donating the first pressure force",
+          "Treats mobility as a way to tax attention and reinforcement"
+        ],
+        "map_adaptations": [
+          "Uses air corridors to widen the opponent's defensive footprint",
+          "Chooses Tank lines according to reinforcement and retreat paths"
+        ]
+      }
+    },
+    {
+      "player_id": "swarm-z",
+      "display_name": "Swarm",
+      "race": "Zerg",
+      "aliases": ["Swarm-Z"],
+      "synthetic": true,
+      "identity": {
+        "verified": false,
+        "confidence": "unverified"
+      },
+      "coverage": {
+        "replay_count": 20,
+        "matchups": ["ZvP", "ZvT", "ZvZ"],
+        "map_count": 8,
+        "last_observed": "Synthetic 5.0.16b sample"
+      },
+      "dossier": {
+        "opening_preferences": [
+          "Larva allocation follows the verified opponent power spike",
+          "Creep and Overlord information before large Drone cycles",
+          "Defensive units preserved as a bridge back to economy"
+        ],
+        "build_families": [
+          "Elastic Swarm",
+          "Roach Safety Into Drone Surge",
+          "Ling Tax Into Third"
+        ],
+        "timings": [
+          {"label": "Natural Hatchery", "median": "1:18", "range": "1:12–1:27 synthetic range"},
+          {"label": "Third Hatchery", "median": "2:46", "range": "2:28–3:04 synthetic range"},
+          {"label": "First composition commitment", "median": "4:52", "range": "4:24–5:18 synthetic range"}
+        ],
+        "economy_tendencies": [
+          "Drone cycles are compressed when the next opponent production cycle is unresolved",
+          "Returns to economy quickly after the attack is conclusively held"
+        ],
+        "production_tendencies": [
+          "Uses larva as optionality until the opponent's capability is classified",
+          "Adds composition technology only when the existing army cannot cover the next state"
+        ],
+        "aggression_profile": [
+          "Uses Ling movement to tax attention and reveal defensive allocation",
+          "Avoids converting a successful threat into an unnecessary all-in"
+        ],
+        "map_adaptations": [
+          "Prioritizes creep and warning time on wide defensive footprints",
+          "Uses run-by lanes when the opponent's core army becomes positionally committed"
+        ]
+      }
+    }
+  ]
+}
