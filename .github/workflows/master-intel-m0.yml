@@ -1,0 +1,131 @@
+name: Master Intel Milestone 0
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master-intel-m0
+  pull_request:
+    branches:
+      - v1.11-dev
+    paths:
+      - "app.py"
+      - "master_intel.py"
+      - "case_workspace.py"
+      - "static/index.html"
+      - "static/legacy-index.html"
+      - "static/master-intel/**"
+      - "static/data/master-intel-demo-pack.json"
+      - "tests/test_master_intel_m0.py"
+      - ".github/workflows/master-intel-m0.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: master-intel-m0-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install test and desktop dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-desktop.txt
+          python -m pip install pytest
+
+      - name: Verify SC2 protocol compatibility
+        shell: pwsh
+        run: |
+          python -c "import google.protobuf; from s2clientprotocol import sc2api_pb2; print(f'protobuf={google.protobuf.__version__}; sc2api_pb2=ok')"
+
+      - name: Check legacy JavaScript syntax
+        shell: pwsh
+        run: |
+          Get-ChildItem static -Filter *.js | ForEach-Object {
+            Write-Host "Checking script $($_.FullName)"
+            node --check $_.FullName
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      - name: Check Master Intel ES-module syntax
+        shell: pwsh
+        run: |
+          Get-ChildItem static\master-intel -Filter *.js -Recurse | ForEach-Object {
+            Write-Host "Checking module $($_.FullName)"
+            Get-Content -Raw $_.FullName | node --check --input-type=module
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      - name: Run full regression suite
+        shell: pwsh
+        run: python -m pytest -q
+
+      - name: Build packaged desktop smoke artifact
+        shell: pwsh
+        run: |
+          python -m pip uninstall -y enum34
+          $args = @(
+            "--noconfirm", "--clean", "--windowed", "--onedir",
+            "--name", "SC2 Master Coach",
+            "--add-data", "static:static",
+            "--collect-data", "python_strategy_science",
+            "--collect-all", "vosk",
+            "--collect-all", "sounddevice",
+            "--collect-all", "sc2reader",
+            "--collect-all", "mpyq",
+            "--collect-all", "webview",
+            "--collect-all", "pysc2",
+            "--collect-all", "s2clientprotocol",
+            "--collect-all", "s2protocol",
+            "--collect-all", "google.protobuf",
+            "--collect-all", "portpicker",
+            "--hidden-import", "webview.platforms.edgechromium",
+            "--hidden-import", "pysc2.run_configs.platforms",
+            "--hidden-import", "pysc2.lib.features",
+            "desktop_app.py"
+          )
+          python -m PyInstaller @args
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $bundle = "dist\SC2 Master Coach"
+          $required = @(
+            "master-intel\app.js",
+            "master-intel\base.css",
+            "data\master-intel-demo-pack.json"
+          )
+          foreach ($relative in $required) {
+            $match = Get-ChildItem -Path $bundle -Recurse -File | Where-Object {
+              $_.FullName.Replace('/', '\') -like "*$relative"
+            } | Select-Object -First 1
+            if (-not $match) { throw "Packaged Master Intel asset missing: $relative" }
+            Write-Host "Packaged asset: $($match.FullName)"
+          }
+
+          $scienceSchema = Get-ChildItem -Path $bundle -Recurse -Filter schema.sql | Where-Object {
+            $_.FullName -match "python_strategy_science"
+          } | Select-Object -First 1
+          if (-not $scienceSchema) { throw "Packaged Strategy Science schema.sql was not found." }
+
+          Compress-Archive -Path "$bundle\*" -DestinationPath "dist\SC2-Master-Coach-Master-Intel-M0.zip" -Force
+
+      - name: Upload packaged smoke artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SC2-Master-Coach-Master-Intel-M0
+          path: dist/SC2-Master-Coach-Master-Intel-M0.zip
+          if-no-files-found: error

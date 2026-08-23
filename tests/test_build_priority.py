@@ -15,8 +15,9 @@ def test_build_priority_assets_exist_and_relocate_the_build_ui():
     assert "ALWAYS VISIBLE" in js
 
 
-def test_static_command_hud_loads_build_priority_assets():
-    index = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
+def test_preserved_command_hud_loads_build_priority_assets():
+    index = (ROOT / "static" / "legacy-index.html").read_text(encoding="utf-8")
     assert '<link rel="stylesheet" href="/build-priority.css">' in index
     assert '<script src="/build-priority.js"></script>' in index
     assert index.index('id="buildQueue"') < index.index('class="tactical-map"')
+    assert "Return to Master Intel" in index
