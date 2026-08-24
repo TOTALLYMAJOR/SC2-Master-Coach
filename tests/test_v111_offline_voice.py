@@ -114,6 +114,13 @@ def test_native_voice_frontend_loads_after_shadow_helpers_and_preserves_voice_pr
     assert "button.click();continue" not in ui
 
 
+def test_native_voice_observer_is_hud_scoped_and_idempotent():
+    ui = (STATIC / "v111-native-voice.js").read_text(encoding="utf-8")
+    assert "if(button.textContent!==nextText)button.textContent=nextText" in ui
+    assert 'observer.observe(hud,{subtree:true,childList:true})' in ui
+    assert "observer.observe(document.documentElement" not in ui
+
+
 def test_native_voice_status_observer_reaches_quiescence():
     harness = ROOT / "tests" / "js" / "v111_native_voice_observer_harness.cjs"
     result = subprocess.run(
@@ -136,4 +143,6 @@ def test_release_workflow_packages_vosk_model_and_native_voice_dependencies():
     assert '"--collect-all", "vosk"' in workflow
     assert '"--collect-all", "sounddevice"' in workflow
     assert "Packaged offline Vosk model was not found" in workflow
-    assert "if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/v1.12-dev' || startsWith(github.ref, 'refs/tags/v1.12')" in workflow
+    prepare = workflow.index("- name: Prepare offline tactical speech model")
+    verify = workflow.index("- name: Verify SC2 protocol compatibility")
+    assert "if:" not in workflow[prepare:verify]

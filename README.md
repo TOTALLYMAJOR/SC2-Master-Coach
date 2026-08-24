@@ -15,6 +15,25 @@ The live strategy baseline targets **StarCraft II 5.0.16b**, including the eight
 
 Official patch reference: <https://news.blizzard.com/en-us/article/24291949/starcraft-ii-5-0-16b-hotfix-patch-notes>
 
+## v1.13.0 — Adaptive Live Coach Windows release
+
+The Combat HUD now derives timed practice checkpoints from the concrete matchup plan selected for the operation. A checkpoint can combine a worker range with planned infrastructure, for example `3 Gateways · 29–35 Probes`, and asks the player to report `On track`, `Behind`, or `Plan changed`.
+
+- The concrete nine-matchup strategy library is the primary 1v1 deployment source; generic compiler candidates remain an explicit fallback.
+- Bronze through Grandmaster profiles change timing tolerance, target density, and cue lead time without changing battlefield truth.
+- Player-confirmed worker and production counts produce a bounded recovery instruction.
+- Reported scouting evidence can pause or replace a macro reminder. Reaper, Factory, Starport, move-out, no-natural, production, hidden-tech, fast-third, and turtle reports all have explicit coaching actions.
+- Checkpoint confirmations remain local. The system does not inspect the SC2 process or claim that a scheduled benchmark proves the live game state.
+- The v1.12 once-per-game-second clock synchronization guard is retained so reminder updates do not reintroduce a browser-main-thread loop.
+
+### Adaptive practice and evidence quality
+
+- Coaching intensity can be set to quiet, standard, or intensive, while Bronze through Grandmaster programs change plan pool, reminder cadence, target density, teaching language, and recovery focus.
+- Optional scout detail records count, location, observation time, and confidence. Low-confidence evidence asks for verification instead of freezing the build, and newer expansion evidence resolves contradictory natural/third reports.
+- Versioned local progression events preserve exact target context for new reports, migrate older reports as low-confidence history, detect recurring worker/production/execution weaknesses, and recommend the next no-replay drill.
+- Every generated benchmark is explicitly marked as derived practice guidance with expert review still required. The app does not claim professional validation that has not occurred.
+- The live HUD adds focus preservation, dialog focus trapping/restoration, keyboard semantics, live-region announcements, reduced-motion behavior, and narrow/zoom reflow safeguards. These improve the implementation but do not replace human keyboard, screen-reader, zoom, and motion acceptance testing.
+
 ## v1.12.1 - Countdown and Click Reliability
 
 v1.12.1 fixes two browser-main-thread loops that could stall the 3-2-1 transition or leave the rendered page unable to accept clicks.
@@ -35,6 +54,13 @@ v1.12 restores reliable input across the Combat HUD by eliminating a Python Shad
 - Made Python Shadow status-chip rendering idempotent so its DOM observer reaches quiescence.
 - Added executable observer regression coverage and real-browser pointer verification for onboarding and operation deployment.
 - Advanced the Windows release workflow and validation marker to the v1.12 line.
+
+## v1.11.1 - Startup interaction hotfix
+
+- Fixed a self-triggering Python Shadow DOM observer that could prevent `DOMContentLoaded` and make every control unresponsive.
+- Fixed the equivalent native-voice observer loop when the live HUD mounted.
+- Scoped both observers to the Combat HUD and made their text updates idempotent.
+- Added regression coverage and browser-tested the full onboarding, deploy, countdown, native-mic, and Pause interaction path.
 
 ## v1.11.0 - Strategy Science Shadow Mode
 
@@ -169,6 +195,8 @@ Download the latest release assets:
 
 The installer is per-user, creates Start Menu and desktop shortcuts, installs WebView2 when required, supports uninstall, and associates `.SC2Replay` files with SC2 Master Coach.
 
+The Windows desktop application opens directly into the Live Coach. Master Intel and the deeper research surfaces remain available from inside the app.
+
 The application remains unsigned under the zero-cost release constraint, so Windows SmartScreen may initially display **Unknown Publisher**.
 
 ## Secondary systems retained
@@ -214,6 +242,14 @@ v1.11 operationalizes the bounded PvT Digital Twin and offline tactical voice pa
 ```text
 run_desktop_windows.bat
 ```
+
+This launches the desktop shell from source. To create a portable Windows application that does not require Python on the destination PC, run:
+
+```text
+build_windows_portable.bat
+```
+
+The output executable is `dist\SC2 Master Coach\SC2 Master Coach.exe`. The optional `build_windows_onefile.bat` creates a slower-starting single-file executable.
 
 ### Browser/service mode
 

@@ -1,163 +1,83 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="author" content="MBMapps">
-<meta name="creator" content="MBMapps">
-<title>SC2 Master Coach — Command HUD</title>
-<link rel="stylesheet" href="/command-hud.css">
-<link rel="stylesheet" href="/build-priority.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="author" content="MBMapps">
+  <meta name="creator" content="MBMapps">
+  <meta name="color-scheme" content="dark">
+  <title>SC2 Master Coach — Master Intel</title>
+  <link rel="stylesheet" href="/master-intel/base.css">
 </head>
-<body data-race="Zerg">
-<div class="hud">
-  <header class="top-rail">
-    <section class="frame brand">
-      <div class="brand-mark">SC2</div>
-      <div><h1>Master Coach // Command HUD</h1><p>Observe → infer → decide → execute → verify → adapt</p></div>
-    </section>
-    <div class="rail-cell"><span class="rail-label">Race</span><strong class="rail-value accent" id="railRace">Zerg</strong></div>
-    <div class="rail-cell"><span class="rail-label">Matchup</span><strong class="rail-value" id="railMatchup">ZvT</strong></div>
-    <div class="rail-cell"><span class="rail-label">Threat</span><strong class="rail-value good" id="railThreat">Stable</strong></div>
-    <div class="rail-cell hide-1250"><span class="rail-label">Doctrine</span><strong class="rail-value" id="railDoctrine">Elastic Swarm</strong></div>
-    <div class="rail-cell hide-1250"><span class="rail-label">Coach State</span><strong class="rail-value accent" id="railCoach">Live</strong></div>
-    <div class="top-actions">
-      <button class="hud-btn" id="voiceBtn">Voice</button>
-      <button class="hud-btn" id="fullscreenBtn">Fullscreen</button>
-    </div>
-  </header>
+<body>
+  <a class="skip-link" href="#routeContent">Skip to content</a>
+  <div class="intel-shell" id="intelShell">
+    <header class="intel-topbar">
+      <a class="intel-brand" href="#/home" aria-label="SC2 Master Coach Master Intel home">
+        <span class="intel-brand-mark" aria-hidden="true">MI</span>
+        <span><strong>SC2 Master Coach</strong><small>Master Intel · Offline by design</small></span>
+      </a>
+      <nav class="intel-nav" aria-label="Primary navigation">
+        <a href="#/home" data-route="home">Home</a>
+        <a href="#/players" data-route="players">Players</a>
+        <a href="#/compare" data-route="compare">Compare</a>
+        <a href="#/practice" data-route="practice">Practice</a>
+        <a href="#/settings" data-route="settings">Settings</a>
+      </nav>
+      <div class="intel-status" id="offlineStatus" aria-live="polite">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>Checking local data…</span>
+      </div>
+    </header>
 
-  <div class="main-grid">
-    <aside class="left-stack">
-      <section class="frame panel-pad">
-        <div class="section-title">Race Command <span>switch doctrine</span></div>
-        <div class="race-tabs">
-          <button class="hud-btn race-btn active" data-race="Zerg">Zerg</button>
-          <button class="hud-btn race-btn" data-race="Terran">Terran</button>
-          <button class="hud-btn race-btn" data-race="Protoss">Protoss</button>
-        </div>
-        <select id="opponent" class="opponent"><option>Terran</option><option>Protoss</option><option>Zerg</option></select>
-      </section>
+    <main id="routeContent" class="intel-route" tabindex="-1" aria-busy="true"></main>
 
-      <section class="portrait-frame holo-flicker">
-        <div class="race-art" id="raceArt"></div>
-        <div class="portrait-overlay">
-          <div class="portrait-name" id="portraitName">Overmind Node</div>
-          <div class="portrait-sub" id="portraitSub">Zerg tactical cognition</div>
-          <div class="voice-line" id="voiceLine">Larva is optionality. Spend it only after evidence tells you what future state must exist.</div>
-        </div>
-      </section>
-
-      <section class="frame panel-pad">
-        <div class="section-title">Scouting Evidence <span>1–6</span></div>
-        <div class="priority-list" id="evidenceList"></div>
-      </section>
-
-      <section class="frame panel-pad">
-        <div class="section-title">Resource Telemetry <span>manual / replay</span></div>
-        <div class="resource-row">
-          <div class="resource-chip"><b id="workersVal">—</b><span>Workers</span></div>
-          <div class="resource-chip"><b id="basesVal">—</b><span>Bases</span></div>
-          <div class="resource-chip"><b id="armyVal">—</b><span>Army</span></div>
-          <div class="resource-chip"><b id="bankVal">—</b><span>Bank</span></div>
-        </div>
-      </section>
-    </aside>
-
-    <main class="center-stack">
-      <section class="command-center">
-        <div class="command-top">
-          <div class="phase"><span class="live-dot"></span><span id="phase">Opening</span></div>
-          <div class="clock" id="clock">0:00</div>
-        </div>
-        <div class="execute-label">Execute now</div>
-        <div class="execute" id="execute">Drone continuously</div>
-        <div class="execute-why" id="executeWhy">Build the economy that pays for every later decision.</div>
-        <div class="command-footer">
-          <div class="next-step"><span>Next transition</span><strong id="nextAction">Overlord · 12 supply</strong></div>
-          <div class="countdown"><span>Window opens in</span><strong id="nextCountdown">0:32</strong></div>
-        </div>
-      </section>
-
-      <section class="frame panel-pad build-priority-panel">
-        <div class="section-title">Build / Decision Queue <span>always visible next actions</span></div>
-        <div class="build-queue" id="buildQueue"></div>
-      </section>
-
-      <section class="alert-frame">
-        <div class="alert-level" id="alertLevel">STABLE</div>
-        <div class="alert-copy" id="alertCopy">No exception signal selected. Continue the economic spine, but keep scouting.</div>
-      </section>
-
-      <section class="doctrine-frame">
-        <div class="doctrine-head">
-          <div><div class="doctrine-name" id="doctrineName">Elastic Swarm</div><div class="doctrine-posture" id="doctrinePosture">ABSORB → SURROUND → OVERWHELM</div></div>
-          <div class="matchup-code" id="matchupCode">ZvT</div>
-        </div>
-        <div class="doctrine-grid">
-          <div class="doctrine-cell"><b>Win Condition</b><span id="docWin"></span></div>
-          <div class="doctrine-cell"><b>Economy Rule</b><span id="docEco"></span></div>
-          <div class="doctrine-cell"><b>Fight Rule</b><span id="docFight"></span></div>
-          <div class="doctrine-cell"><b>Critical Question</b><span id="docQuestion"></span></div>
-        </div>
-      </section>
-
-      <section class="tactical-map">
-        <div class="map-grid"></div><div class="map-label">Tactical radar // doctrine projection</div>
-        <svg class="map-svg" id="mapSvg" viewBox="0 0 600 330"></svg>
-      </section>
-    </main>
-
-    <aside class="right-stack">
-      <section class="frame panel-pad">
-        <div class="section-title">Threat Matrix <span>state-driven</span></div>
-        <div class="threat-wrap">
-          <div class="threat-ring" id="threatRing"><strong id="threatScore">18</strong><span>Threat</span></div>
-          <div class="threat-copy"><strong id="threatTitle">Low strategic pressure</strong><p id="threatDetail">No evidence conflicts with the current economic plan.</p></div>
-        </div>
-      </section>
-
-      <section class="command-card">
-        <div class="section-title">Command Card <span>hotkeys</span></div>
-        <div class="command-grid">
-          <button class="command-key" data-command="Scout"><span class="icon">⌖</span><span class="name">Scout</span><kbd>Q</kbd></button>
-          <button class="command-key" data-command="Pressure"><span class="icon">▲</span><span class="name">Pressure</span><kbd>W</kbd></button>
-          <button class="command-key" data-command="Expand"><span class="icon">◇</span><span class="name">Expand</span><kbd>E</kbd></button>
-          <button class="command-key" data-command="Hold"><span class="icon">▣</span><span class="name">Hold</span><kbd>A</kbd></button>
-          <button class="command-key" data-command="Adapt"><span class="icon">↻</span><span class="name">Adapt</span><kbd>S</kbd></button>
-          <button class="command-key" data-command="Recover"><span class="icon">✚</span><span class="name">Recover</span><kbd>D</kbd></button>
-          <button class="command-key" data-command="Trap"><span class="icon">⚠</span><span class="name">Trap Lab</span><kbd>Z</kbd></button>
-          <button class="command-key" data-command="Replay"><span class="icon">▶</span><span class="name">Replay</span><kbd>X</kbd></button>
-          <button class="command-key" data-command="Reset"><span class="icon">⟲</span><span class="name">Reset</span><kbd>C</kbd></button>
-        </div>
-      </section>
-
-      <section class="frame panel-pad">
-        <div class="section-title">Tactical Priority Queue <span>do these in order</span></div>
-        <div class="priority-list" id="priorityList"></div>
-      </section>
-
-      <section class="frame panel-pad">
-        <div class="section-title">Replay Intelligence <span>local analysis</span></div>
-        <div class="replay-drop" id="replayDrop"><strong>Drop .SC2Replay</strong><span>State reconstruction · doctrine review · engagement analysis</span><input id="replayFile" type="file" accept=".SC2Replay"></div>
-        <div class="status" id="replayStatus">Checking parser service…</div>
-        <button class="hud-btn" id="demoBtn" style="width:100%;margin-top:5px">Load demo replay</button>
-        <div class="replay-result" id="replayResult"><div class="replay-metrics" id="replayMetrics"></div></div>
-      </section>
-    </aside>
+    <footer class="intel-footer">
+      <span>Created by <strong>MBMapps</strong></span>
+      <span>Local replay intelligence · no required cloud service</span>
+    </footer>
   </div>
 
-  <footer class="footer-rail">
-    <button class="hud-btn active" id="playBtn">Start</button>
-    <button class="hud-btn" id="minusBtn">−10s</button>
-    <button class="hud-btn" id="plusBtn">+10s</button>
-    <button class="hud-btn" id="speedBtn">1×</button>
-    <div class="footer-note">Command HUD is a coaching interface, not gameplay automation.</div>
-    <div class="mbm">Created by <strong>MBMapps</strong></div>
-  </footer>
-</div>
-<script src="/command-data.js"></script>
-<script src="/command-app.js"></script>
-<script src="/build-priority.js"></script>
+  <input id="replayImportInput" type="file" accept=".SC2Replay" hidden>
+  <input id="playerPackImportInput" type="file" accept=".json,.sc2pack,application/json" hidden>
+
+  <dialog id="onboardingDialog" class="intel-dialog" aria-labelledby="onboardingTitle">
+    <form method="dialog" class="dialog-card">
+      <div class="dialog-kicker">First-run setup</div>
+      <h1 id="onboardingTitle">Start with evidence already on your computer.</h1>
+      <p>SC2 Master Coach works offline. Import a replay, add a trusted player pack, or explore the bundled synthetic demonstration.</p>
+      <div class="onboarding-actions">
+        <button type="button" class="action-card" data-onboarding-action="replay">
+          <span class="action-icon" aria-hidden="true">01</span>
+          <span><strong>Import replay</strong><small>Analyze one local .SC2Replay file.</small></span>
+        </button>
+        <button type="button" class="action-card" data-onboarding-action="pack">
+          <span class="action-icon" aria-hidden="true">02</span>
+          <span><strong>Import master-player pack</strong><small>Add verified or clearly unverified local player records.</small></span>
+        </button>
+        <button type="button" class="action-card" data-onboarding-action="demo">
+          <span class="action-icon" aria-hidden="true">03</span>
+          <span><strong>Explore bundled demo</strong><small>Install a synthetic pack and open the player library.</small></span>
+        </button>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="button secondary" data-onboarding-action="later">Continue later</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="messageDialog" class="intel-dialog" aria-labelledby="messageDialogTitle">
+    <section class="dialog-card compact">
+      <div class="dialog-kicker" id="messageDialogKicker">Master Intel</div>
+      <h2 id="messageDialogTitle">Notice</h2>
+      <div id="messageDialogBody"></div>
+      <div class="dialog-actions">
+        <button type="button" class="button primary" id="messageDialogClose">Close</button>
+      </div>
+    </section>
+  </dialog>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+  <script type="module" src="/master-intel/app.js"></script>
 </body>
 </html>

@@ -28,6 +28,22 @@ def _safe_label(value: str, max_length: int = 64) -> str:
     return (cleaned or "Replay")[:max_length]
 
 
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _existing_created_at(target: Path) -> str | None:
+    manifest_path = target / "manifest.json"
+    if not manifest_path.is_file():
+        return None
+    try:
+        value = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    created_at = value.get("created_at") if isinstance(value, dict) else None
+    return str(created_at) if created_at else None
+
+
 def replay_digest(path: str | Path) -> str:
     h = sha256()
     with Path(path).open("rb") as stream:
@@ -66,21 +82,36 @@ def create_or_update_case(replay_path: str | Path, analysis: dict[str, Any]) -> 
         first_pid = str(players[0].get("pid"))
         matchup = ((analysis.get("analysis_by_player") or {}).get(first_pid) or {}).get("matchup", "")
 
+    patch = (
+        replay_meta.get("patch")
+        or replay_meta.get("game_version")
+        or replay_meta.get("gameVersion")
+        or replay_meta.get("version")
+    )
+    now = _utc_now()
     manifest = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "case_id": case_id,
         "digest_sha256": digest,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": _existing_created_at(target) or now,
+        "updated_at": now,
         "source_filename": source.name,
         "display_name": _safe_label(f"{replay_meta.get('map', 'Replay')} {matchup}"),
         "map": replay_meta.get("map"),
         "duration": replay_meta.get("duration"),
+        "patch": patch,
+        "game_version": patch,
+        "matchup": matchup or None,
         "players": players,
         "replay_file": stored_replay.name,
         "frames_directory": frames.name,
     }
-    (target / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
-    (target / "analysis.json").write_text(json.dumps(analysis, indent=2, ensure_ascii=False), encoding="utf-8")
+    (target / "manifest.json").write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    (target / "analysis.json").write_text(
+        json.dumps(analysis, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
 
     case = {
         "id": case_id,
@@ -89,10 +120,14 @@ def create_or_update_case(replay_path: str | Path, analysis: dict[str, Any]) -> 
         "workspace": str(target),
         "frame_base_url": f"/api/cases/{case_id}/frames",
         "capture_available": None,
+        "patch": patch,
+        "matchup": matchup or None,
     }
     analysis["case"] = case
     # Persist the case metadata in the final analysis file as well.
-    (target / "analysis.json").write_text(json.dumps(analysis, indent=2, ensure_ascii=False), encoding="utf-8")
+    (target / "analysis.json").write_text(
+        json.dumps(analysis, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
     return case
 
 

@@ -10,6 +10,7 @@
   let listening=false;
 
   const safe=value=>String(value??"").replace(/[<>&\"]/g,ch=>({"<":"&lt;",">":"&gt;","&":"&amp;",'\"':"&quot;"}[ch]));
+  const setTextIfChanged=(node,text)=>{if(node.textContent!==text)node.textContent=text};
 
   async function getStatus(force=false){
     if(status&&!force)return status;
@@ -120,7 +121,8 @@
   }
 
   function boot(){
-    const observer=new MutationObserver(()=>{ensureButton();syncEvidenceHighlight()});observer.observe(document.documentElement,{subtree:true,childList:true});
+    const observer=new MutationObserver(()=>{ensureButton();syncEvidenceHighlight()});
+    const hud=document.getElementById("v110HudShell");if(hud)observer.observe(hud,{subtree:true,childList:true});
     window.addEventListener("sc2:strategy-state",()=>syncEvidenceHighlight());
     getStatus().catch(()=>{});ensureButton();
   }

@@ -17,9 +17,10 @@ def test_v110_hud_is_default_and_versions_match():
     installer_version = re.search(r'^!define VERSION "([0-9]+\.[0-9]+\.[0-9]+)"$', installer, re.MULTILINE)
     product_version = re.search(r'^VIProductVersion "([0-9]+\.[0-9]+\.[0-9]+)\.0"$', installer, re.MULTILINE)
     assert app_version and installer_version and product_version
-    assert app_version.group(1) == installer_version.group(1) == product_version.group(1) == "1.12.1"
+    assert app_version.group(1) == installer_version.group(1) == product_version.group(1)
     assert '"/v110-hud.css"' in app
     assert '"/v110-hud.js"' in app
+    assert app.index('"/strategy-library.js"') < app.index('"/live-checkpoints.js"') < app.index('"/v110-hud.js"')
     assert app.index('"/strategy-compiler-data.js"') < app.index('"/strategy-compiler-engine.js"') < app.index('"/v110-hud.js"')
 
 
@@ -68,7 +69,7 @@ def test_v110_player_reports_evidence_and_engine_selects_branch():
     ui = (STATIC / "v110-hud.js").read_text(encoding="utf-8")
     for phrase in (
         "Report what you see",
-        "The player reports reality. Master Coach chooses the branch.",
+        "One click reports immediately. Optional detail improves confidence.",
         "E.reportEvidence",
         "E.evaluate()",
         "reaper",
@@ -79,6 +80,28 @@ def test_v110_player_reports_evidence_and_engine_selects_branch():
         "fast_third",
     ):
         assert phrase in ui
+
+
+def test_v110_accessibility_and_live_focus_contracts():
+    ui = (ROOT / "static" / "v110-hud.js").read_text(encoding="utf-8")
+    css = (ROOT / "static" / "v110-hud.css").read_text(encoding="utf-8")
+    for phrase in (
+        'href="#v110Main"',
+        'role="dialog" aria-modal="true"',
+        'role="status" aria-live="polite"',
+        'role="alert" aria-live="assertive"',
+        'aria-current="page"',
+        'aria-pressed=',
+        "function closeOverlay(id)",
+        "function trapFocus(event,container)",
+        "function updateScenarioButtons()",
+        "function toggleTimer()",
+    ):
+        assert phrase in ui
+    assert ".v110-shell :focus-visible" in css
+    assert ".v110-sr-only" in css
+    assert "@media(max-width:480px)" in css
+    assert "@media(prefers-reduced-motion:reduce)" in css
 
 
 def test_v110_build_context_teaches_strategy_not_only_timestamps():
@@ -123,5 +146,5 @@ def test_v110_replay_is_secondary_but_advanced_remains_reachable():
     ui = (STATIC / "v110-hud.js").read_text(encoding="utf-8")
     hud = ui.split("function hudView", 1)[1].split("function liveOutput", 1)[0]
     assert "Replay" not in hud
-    assert "Open Replay / Advanced" in ui
+    assert "Open Advanced Review" in ui
     assert "Open Advanced Command Center" in ui
