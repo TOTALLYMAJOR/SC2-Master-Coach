@@ -29,10 +29,12 @@
       button=document.createElement("button");button.id=BUTTON_ID;button.type="button";button.className="v110-btn";button.addEventListener("click",listen);
       host.appendChild(button);
     }
-    button.disabled=listening;
-    const label=listening?"Native Mic · Listening…":status?.ok?"Native Mic · Ready":"Native Mic · Setup";
-    setTextIfChanged(button,label);
-    button.title=status?.ok?"Listen for one short offline tactical phrase. Raw audio is not retained.":"Open offline voice diagnostics.";
+    const nextDisabled=listening;
+    const nextText=listening?"Native Mic · Listening…":status?.ok?"Native Mic · Ready":"Native Mic · Setup";
+    const nextTitle=status?.ok?"Listen for one short offline tactical phrase. Raw audio is not retained.":"Open offline voice diagnostics.";
+    if(button.disabled!==nextDisabled)button.disabled=nextDisabled;
+    if(button.textContent!==nextText)button.textContent=nextText;
+    if(button.title!==nextTitle)button.title=nextTitle;
   }
 
   function closeOverlay(){document.getElementById(OVERLAY_ID)?.remove()}

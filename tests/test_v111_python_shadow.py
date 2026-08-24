@@ -1,3 +1,4 @@
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,7 +15,7 @@ def test_python_shadow_adapter_exists_and_loads_after_combat_hud():
     assert '"/v111-python-shadow.js"' in app
     assert '"/v111-opportunity-cost.js"' in app
     assert app.index('"/v110-hud.js"') < app.index('"/v111-python-shadow.js"') < app.index('"/v111-opportunity-cost.js"')
-    assert 'CURRENT_VERSION = "1.12.0"' in app
+    assert 'CURRENT_VERSION = "1.13.0"' in app
 
 
 def test_shadow_adapter_uses_local_science_health_audio_and_run_endpoints():
@@ -91,10 +92,21 @@ def test_python_diagnostics_are_compact_and_include_native_microphone_boundary()
 
 def test_shadow_status_observer_is_hud_scoped_and_idempotent():
     ui = (STATIC / "v111-python-shadow.js").read_text(encoding="utf-8")
-    assert "setTextIfChanged(button,row.label)" in ui
-    assert "if(node.textContent!==text)node.textContent=text" in ui
+    assert "if(button.textContent!==row.label)button.textContent=row.label" in ui
     assert 'observer.observe(hud,{subtree:true,childList:true})' in ui
     assert "observer.observe(document.documentElement" not in ui
+
+
+def test_python_shadow_status_observer_reaches_quiescence():
+    harness = ROOT / "tests" / "js" / "v111_python_shadow_observer_harness.cjs"
+    result = subprocess.run(
+        ["node", str(harness)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
 
 
 def test_opportunity_cost_and_threat_hazard_are_on_demand_only():

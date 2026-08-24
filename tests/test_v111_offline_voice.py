@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import python_strategy_science.api as science_api_module
@@ -115,10 +116,21 @@ def test_native_voice_frontend_loads_after_shadow_helpers_and_preserves_voice_pr
 
 def test_native_voice_observer_is_hud_scoped_and_idempotent():
     ui = (STATIC / "v111-native-voice.js").read_text(encoding="utf-8")
-    assert "setTextIfChanged(button,label)" in ui
-    assert "if(node.textContent!==text)node.textContent=text" in ui
+    assert "if(button.textContent!==nextText)button.textContent=nextText" in ui
     assert 'observer.observe(hud,{subtree:true,childList:true})' in ui
     assert "observer.observe(document.documentElement" not in ui
+
+
+def test_native_voice_status_observer_reaches_quiescence():
+    harness = ROOT / "tests" / "js" / "v111_native_voice_observer_harness.cjs"
+    result = subprocess.run(
+        ["node", str(harness)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr or result.stdout
 
 
 def test_release_workflow_packages_vosk_model_and_native_voice_dependencies():

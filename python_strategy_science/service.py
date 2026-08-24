@@ -127,7 +127,7 @@ class ScienceRuntime:
         if capability_id is not CapabilityId.DIGITAL_TWIN:
             raise ScienceError(
                 "model_unavailable",
-                f"{descriptor.title} is registered but not implemented in v1.11.0.",
+                f"{descriptor.title} is registered but not implemented in v1.13.0.",
                 501,
             )
 

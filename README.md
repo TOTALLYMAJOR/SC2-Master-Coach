@@ -15,7 +15,7 @@ The live strategy baseline targets **StarCraft II 5.0.16b**, including the eight
 
 Official patch reference: <https://news.blizzard.com/en-us/article/24291949/starcraft-ii-5-0-16b-hotfix-patch-notes>
 
-## v1.12.0 — Live Coach Windows release
+## v1.13.0 — Adaptive Live Coach Windows release
 
 The Combat HUD now derives timed practice checkpoints from the concrete matchup plan selected for the operation. A checkpoint can combine a worker range with planned infrastructure, for example `3 Gateways · 29–35 Probes`, and asks the player to report `On track`, `Behind`, or `Plan changed`.
 
@@ -33,6 +33,27 @@ The Combat HUD now derives timed practice checkpoints from the concrete matchup 
 - Versioned local progression events preserve exact target context for new reports, migrate older reports as low-confidence history, detect recurring worker/production/execution weaknesses, and recommend the next no-replay drill.
 - Every generated benchmark is explicitly marked as derived practice guidance with expert review still required. The app does not claim professional validation that has not occurred.
 - The live HUD adds focus preservation, dialog focus trapping/restoration, keyboard semantics, live-region announcements, reduced-motion behavior, and narrow/zoom reflow safeguards. These improve the implementation but do not replace human keyboard, screen-reader, zoom, and motion acceptance testing.
+
+## v1.12.1 - Countdown and Click Reliability
+
+v1.12.1 fixes two browser-main-thread loops that could stall the 3-2-1 transition or leave the rendered page unable to accept clicks.
+
+### Changes
+
+- Throttled Strategic OS clock synchronization to once per elapsed game second instead of every animation frame.
+- Made Native Voice button rendering idempotent so its page-wide DOM observer reaches quiescence.
+- Added observer regression coverage and a real-browser flow through onboarding, Deploy, 3-2-1, Pause/Resume, and the Command palette.
+
+## v1.12.0 - Interaction Reliability
+
+v1.12 restores reliable input across the Combat HUD by eliminating a Python Shadow status-observer feedback loop that could keep the browser main thread busy after startup.
+
+### Major changes
+
+- Fixed the startup condition that made the app render while buttons remained unresponsive.
+- Made Python Shadow status-chip rendering idempotent so its DOM observer reaches quiescence.
+- Added executable observer regression coverage and real-browser pointer verification for onboarding and operation deployment.
+- Advanced the Windows release workflow and validation marker to the v1.12 line.
 
 ## v1.11.1 - Startup interaction hotfix
 
