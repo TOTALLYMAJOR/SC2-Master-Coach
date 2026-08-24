@@ -29,7 +29,7 @@ from sc2_frame_capture import (
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
 MAX_REPLAY_BYTES = 40 * 1024 * 1024
-CURRENT_VERSION = "1.11.1"
+CURRENT_VERSION = "1.12.0"
 LOCAL_BROWSER_ORIGIN = "http:" + "//127.0.0.1:8765"
 
 app = Flask(__name__, static_folder=str(STATIC), static_url_path="")
@@ -60,6 +60,8 @@ LEGACY_SCRIPTS = (
     "/experience-bridge.js",
     "/replay-identity.js",
     "/strategy-library.js",
+    "/live-checkpoints.js",
+    "/coach-progression.js",
     "/experience.js",
     "/moment-theater.js",
     "/coach-intelligence.js",

@@ -29,6 +29,6 @@ def test_v111_dev_ci_builds_without_publishing_and_marks_only_after_artifacts():
 def test_v111_release_versions_are_consistent():
     app = (ROOT / "app.py").read_text(encoding="utf-8")
     installer = (ROOT / "installer" / "sc2-master-coach.nsi").read_text(encoding="utf-8")
-    assert 'CURRENT_VERSION = "1.11.1"' in app
-    assert '!define VERSION "1.11.1"' in installer
-    assert 'VIProductVersion "1.11.1.0"' in installer
+    assert 'CURRENT_VERSION = "1.12.0"' in app
+    assert '!define VERSION "1.12.0"' in installer
+    assert 'VIProductVersion "1.12.0.0"' in installer

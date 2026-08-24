@@ -2,6 +2,19 @@ name: Windows desktop release
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - v1.11-dev
+    paths:
+      - 'app.py'
+      - 'desktop_app.py'
+      - 'requirements-desktop.txt'
+      - 'build_windows_*.bat'
+      - 'installer/**'
+      - 'static/**'
+      - 'tests/**'
+      - '.github/workflows/windows-release.yml'
   push:
     branches:
       - main
@@ -35,7 +48,6 @@ jobs:
           python -m pip install -r requirements-desktop.txt
 
       - name: Prepare offline tactical speech model
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/v1.11-dev' || startsWith(github.ref, 'refs/tags/v1.11')
         shell: pwsh
         run: |
           $modelName = "vosk-model-small-en-us-0.15"
@@ -104,6 +116,21 @@ jobs:
           ) + $voiceData + @("desktop_app.py")
           python -m PyInstaller @args
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $requiredLiveCoachAssets = @(
+            "static\legacy-index.html",
+            "static\strategy-library.js",
+            "static\live-checkpoints.js",
+            "static\coach-progression.js",
+            "static\v110-hud.js",
+            "static\v110-hud.css"
+          )
+          foreach ($relative in $requiredLiveCoachAssets) {
+            $match = Get-ChildItem -Path "dist\SC2 Master Coach" -Recurse -File | Where-Object {
+              $_.FullName.Replace('/', '\') -like "*$relative"
+            } | Select-Object -First 1
+            if (-not $match) { throw "Packaged Live Coach asset missing: $relative" }
+            Write-Host "Packaged Live Coach asset: $($match.FullName)"
+          }
           $scienceSchema = Get-ChildItem -Path "dist\SC2 Master Coach" -Recurse -Filter schema.sql | Where-Object { $_.FullName -match "python_strategy_science" } | Select-Object -First 1
           if (-not $scienceSchema) { throw "Packaged Strategy Science schema.sql was not found." }
           Write-Host "Packaged Strategy Science schema: $($scienceSchema.FullName)"

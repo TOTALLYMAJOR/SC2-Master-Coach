@@ -15,7 +15,8 @@ from waitress import create_server
 from app import app
 
 
-APP_TITLE = "SC2 Master Coach"
+APP_TITLE = "SC2 Master Coach — Live Coach"
+DEFAULT_ROUTE = "/hud"
 DEFAULT_WIDTH = 1560
 DEFAULT_HEIGHT = 980
 
@@ -50,7 +51,7 @@ class LocalServer:
 
     @property
     def url(self) -> str:
-        return f"http://127.0.0.1:{self.port}"
+        return f"http://127.0.0.1:{self.port}{DEFAULT_ROUTE}"
 
     def start(self) -> None:
         self.thread.start()

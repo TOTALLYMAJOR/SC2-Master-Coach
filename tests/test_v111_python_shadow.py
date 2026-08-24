@@ -14,7 +14,7 @@ def test_python_shadow_adapter_exists_and_loads_after_combat_hud():
     assert '"/v111-python-shadow.js"' in app
     assert '"/v111-opportunity-cost.js"' in app
     assert app.index('"/v110-hud.js"') < app.index('"/v111-python-shadow.js"') < app.index('"/v111-opportunity-cost.js"')
-    assert 'CURRENT_VERSION = "1.11.1"' in app
+    assert 'CURRENT_VERSION = "1.12.0"' in app
 
 
 def test_shadow_adapter_uses_local_science_health_audio_and_run_endpoints():

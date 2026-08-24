@@ -131,4 +131,6 @@ def test_release_workflow_packages_vosk_model_and_native_voice_dependencies():
     assert '"--collect-all", "vosk"' in workflow
     assert '"--collect-all", "sounddevice"' in workflow
     assert "Packaged offline Vosk model was not found" in workflow
-    assert "if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/v1.11-dev' || startsWith(github.ref, 'refs/tags/v1.11')" in workflow
+    prepare = workflow.index("- name: Prepare offline tactical speech model")
+    verify = workflow.index("- name: Verify SC2 protocol compatibility")
+    assert "if:" not in workflow[prepare:verify]
