@@ -1,9 +1,5 @@
 # SC2 Master Coach — Combat HUD + Strategic OS
 <img width="320" height="480" alt="image" src="https://github.com/user-attachments/assets/49cb24af-f08e-4b3b-a831-8d723696be69" />
-<img width="800" height="1200" alt="image" src="https://github.com/user-attachments/assets/c2f65872-c9e9-456b-926f-e4d8aad730ce" />
-<img width="1000" height="583" alt="image" src="https://github.com/user-attachments/assets/51228fe7-af25-4eab-bde3-71b2862fe991" />
-<img width="1000" height="458" alt="image" src="https://github.com/user-attachments/assets/974049a1-6ec6-4bfb-8d93-36e5b3757ebb" />
-
 
 **Created by MBMapps**
 
