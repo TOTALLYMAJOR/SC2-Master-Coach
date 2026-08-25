@@ -42,6 +42,34 @@ def test_v110_navigation_random_operation_and_no_manual_plan_browser():
     assert "browse ten builds" in ui.lower()
 
 
+def test_v110_command_shell_uses_truthful_sc2_status_and_original_navigation():
+    ui = (STATIC / "v110-hud.js").read_text(encoding="utf-8")
+    css = (STATIC / "v110-hud.css").read_text(encoding="utf-8")
+    for phrase in (
+        "Mission Control",
+        "Live Coach",
+        "Doctrine Lab",
+        "Debrief",
+        "LOCAL-ONLY RUNTIME",
+        "PLAYER-REPORTED INTEL",
+        "No direct SC2 process access",
+        "MATCH CLOCK",
+        "UNREPORTED",
+        "v110-command-shell",
+    ):
+        assert phrase in ui or phrase in css
+    for copied_or_invented_phrase in (
+        "AEGIS",
+        "UPLINK SECURE",
+        "SAT RELAY",
+        "ACTIVE UNITS",
+        "CLEARANCE",
+    ):
+        assert copied_or_invented_phrase not in ui
+    assert "grid-template-columns:236px minmax(0,1fr)" in css
+    assert "@media(max-width:1320px)" in css
+
+
 def test_v110_timer_sync_and_command_palette_hotkeys():
     ui = (STATIC / "v110-hud.js").read_text(encoding="utf-8")
     for phrase in (

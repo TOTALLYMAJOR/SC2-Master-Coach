@@ -80,6 +80,13 @@
     turtle:"Static defense confirmed. Attack the map and economy instead of feeding the fortified location."
   };
 
+  const SHELL_NAV=[
+    {id:"deploy",label:"Mission Control",code:"PREP-01"},
+    {id:"hud",label:"Live Coach",code:"EXEC-02"},
+    {id:"spellbook",label:"Doctrine Lab",code:"STUDY-03"},
+    {id:"review",label:"Debrief",code:"LEARN-04"}
+  ];
+
   function loadJson(key,fallback){try{return JSON.parse(localStorage.getItem(key)||"null")??fallback}catch(_e){return fallback}}
   function saveJson(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(_e){return false}}
   function loadText(key,fallback=""){try{return localStorage.getItem(key)??fallback}catch(_e){return fallback}}
@@ -109,8 +116,33 @@
     render();wireGlobalKeys();window.addEventListener("beforeunload",persistUi);
   }
 
-  function chrome(content){return `<a class="v110-skip" href="#v110Main">Skip to coaching</a><header class="v110-topbar"><div class="v110-brand"><b>SC2 Master Coach // Combat HUD</b><span>Patch ${D.PATCH} · Created by MBMapps</span></div><nav class="v110-nav" aria-label="Primary navigation">${navButton("deploy","Deploy")}${navButton("hud","Live HUD")}${navButton("spellbook","Spellbook")}${navButton("review","Review")}</nav><div class="v110-top-actions"><button class="v110-btn" id="v110Command" aria-haspopup="dialog">Command <kbd>Ctrl/⌘ K</kbd></button></div></header><main class="v110-main" id="v110Main" tabindex="-1">${content}</main>${overlays()}`}
-  function navButton(id,label){const active=view===id||(view==="brief"&&id==="deploy");return `<button data-v110-nav="${id}" class="${active?"active":""}" ${active?'aria-current="page"':""}>${label}</button>`}
+  function navIcon(id){
+    const common='viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true"';
+    if(id==="deploy")return `<svg ${common}><path d="M4 18 12 4l8 14H4Z"/><path d="M8 14h8M12 9v9"/></svg>`;
+    if(id==="hud")return `<svg ${common}><circle cx="12" cy="12" r="3"/><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>`;
+    if(id==="spellbook")return `<svg ${common}><path d="M4 5.5c3.2-.8 5.8-.1 8 2v12c-2.2-2.1-4.8-2.8-8-2V5.5ZM20 5.5c-3.2-.8-5.8-.1-8 2v12c2.2-2.1 4.8-2.8 8-2V5.5Z"/></svg>`;
+    return `<svg ${common}><path d="M4 19V5M4 19h16M7 15l4-4 3 2 5-7"/><circle cx="7" cy="15" r="1"/><circle cx="11" cy="11" r="1"/><circle cx="14" cy="13" r="1"/><circle cx="19" cy="6" r="1"/></svg>`;
+  }
+  function navButton(id,label,code){const active=view===id||(view==="brief"&&id==="deploy");return `<button data-v110-nav="${id}" class="v110-rail-link ${active?"active":""}" ${active?'aria-current="page"':""}><span class="v110-rail-edge" aria-hidden="true"></span><span class="v110-rail-icon">${navIcon(id)}</span><span class="v110-rail-copy"><strong>${label}</strong><small>${code}</small></span><span class="v110-rail-marker" aria-hidden="true">◂</span></button>`}
+  function sessionState(){if(!currentPlan())return {label:"STANDBY",tone:"muted"};if(view!=="hud")return {label:view==="brief"?"BRIEFING":"STUDY",tone:"cyan"};if(timerRunning)return {label:"LIVE",tone:"ok"};return {label:timerSynced?"PAUSED":"READY",tone:timerSynced?"warn":"cyan"}}
+  function statusSnapshot(){
+    const p=currentPlan(),session=sessionState(),output=p?liveOutput():null,signal=lastScenario?D.getSignal(lastScenario):null;
+    return [
+      {label:"SESSION",value:session.label,tone:session.tone,dot:true,id:"v110StatusSession"},
+      {label:"MODE",value:mode.toUpperCase(),tone:"cyan"},
+      {label:"MATCHUP",value:mode==="1v1"?matchupKey():(p?.matchup||"2V2 TEAM")},
+      {label:"MATCH CLOCK",value:fmt(timerSeconds),tone:timerSynced?"ok":"warn",id:"v110StatusClock"},
+      {label:"PLAN",value:(output?.status||"unassigned").toUpperCase(),tone:planTone(output?.status),dot:Boolean(output),id:"v110StatusPlan"},
+      {label:"INTEL",value:signal?.label||lastScenario?.replaceAll("_"," ")||"UNREPORTED",tone:lastScenario?"cyan":"muted",id:"v110StatusIntel"},
+      {label:"COACH",value:coachingMode.toUpperCase()},
+      {label:"AUDIO",value:voiceEnabled?"ON":"MUTED",tone:voiceEnabled?"ok":"muted",id:"v110StatusAudio"}
+    ];
+  }
+  function planTone(status){return status==="continue"?"ok":status==="modify"?"warn":status?"crit":"muted"}
+  function statusCell(row){return `<div class="v110-status-cell"><span class="v110-status-label">${safe(row.label)}</span><strong class="v110-status-value tone-${safe(row.tone||"default")}">${row.dot?'<i class="v110-status-dot" aria-hidden="true"></i>':""}<span${row.id?` id="${row.id}"`:""}>${safe(row.value)}</span></strong></div>`}
+  function statusBar(){return `<header class="v110-statusbar" aria-label="Current operation status">${statusSnapshot().map(statusCell).join("")}<span class="v110-status-scan" aria-hidden="true"></span></header>`}
+  function commandRail(){return `<aside class="v110-rail"><div class="v110-rail-brand"><div class="v110-rail-insignia" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><path d="M22 3 39 13v18L22 41 5 31V13L22 3Z"/><path d="m22 10 10 6v12l-10 6-10-6V16l10-6Z"/><path d="M22 15v14M15 22h14"/></svg></div><div><strong>MASTER COACH</strong><span>COMBAT SYSTEM // ${safe(D.PATCH)}</span></div></div><div class="v110-rail-section">OPERATION MODULES</div><nav class="v110-nav-list" aria-label="Primary navigation">${SHELL_NAV.map(row=>navButton(row.id,row.label,row.code)).join("")}</nav><div class="v110-rail-spacer"></div><section class="v110-rail-block" aria-label="Evidence boundary"><div class="v110-rail-section">STATE AUTHORITY</div><p><i class="v110-status-dot" aria-hidden="true"></i><span>LOCAL-ONLY RUNTIME</span></p><p><i class="v110-status-dot cyan" aria-hidden="true"></i><span>PLAYER-REPORTED INTEL</span></p><small>No direct SC2 process access</small></section><div class="v110-rail-operator"><span class="v110-rail-avatar" aria-hidden="true">${safe(state.self[0])}</span><span><strong>${safe(state.skill)}</strong><small>${safe(state.self)} program</small></span><button class="v110-rail-command" id="v110Command" aria-haspopup="dialog" aria-label="Open command palette">CMD <kbd>Ctrl/⌘ K</kbd></button></div></aside>`}
+  function chrome(content){return `<a class="v110-skip" href="#v110Main">Skip to coaching</a><div class="v110-command-shell">${commandRail()}<div class="v110-workspace">${statusBar()}<main class="v110-main" id="v110Main" tabindex="-1">${content}</main></div></div>${overlays()}`}
   function overlays(){return `<div class="v110-overlay" id="v110Palette" role="dialog" aria-modal="true" aria-labelledby="v110PaletteTitle" hidden><section class="v110-palette"><h2 class="v110-sr-only" id="v110PaletteTitle">Command palette</h2><label class="v110-sr-only" for="v110CommandInput">Search commands</label><input id="v110CommandInput" placeholder="Command… e.g. sync timer to 4:25"><div id="v110CommandList"></div></section></div><div class="v110-overlay" id="v110Modal" role="dialog" aria-modal="true" aria-labelledby="v110ModalTitle" hidden><section class="v110-modal"><h2 id="v110ModalTitle"></h2><p id="v110ModalBody"></p><button class="v110-btn primary" id="v110ModalClose">Close</button></section></div><div class="v110-overlay countdown" id="v110Countdown" role="status" aria-live="assertive" aria-atomic="true" hidden><strong id="v110CountNumber">3</strong><span>Match timer synchronization</span></div><div class="v110-toast" id="v110Toast" role="status" aria-live="polite" aria-atomic="true"></div><div class="v110-sr-only" id="v110Urgent" role="alert" aria-live="assertive" aria-atomic="true"></div>`}
 
   function render(){if(!root)return;const content=view==="deploy"?deployView():view==="brief"?briefView():view==="hud"?hudView():view==="spellbook"?spellbookView():reviewView();root.innerHTML=chrome(content);wireView()}
@@ -215,8 +247,9 @@
   function maybeBuildPrep(){if(!voiceEnabled)return;const rows=buildRows(currentPlan());for(const row of rows){const key=`${row.start}:${row.action}`,delta=row.start-timerSeconds;if(delta>4.5&&delta<=5.5&&!spokenPrep.has(key)){spokenPrep.add(key);speak(`In five seconds, ${row.action}.`);break}}}
   function maybeCheckpointCue(){const current=activeCheckpoint();if(!voiceEnabled||current?.kind!=="checkpoint"||current.phase!=="due"||announcedCheckpoints.has(current.key))return;announcedCheckpoints.add(current.key);speak(`Checkpoint. Target ${current.checkpoint.summary}. Report on track, behind, or plan changed.`)}
 
-  function updateHudDynamic(){if(view!=="hud")return;const clock=$("v110Clock");if(clock)clock.textContent=fmt(timerSeconds);const o=liveOutput();setText("v110Question",o.question);setText("v110Action",o.action);setText("v110Reason",o.reason);setText("v110Permission",o.permission);setText("v110PermissionWhy",o.permissionWhy);const stateNode=root.querySelector(".v110-plan-state");if(stateNode){stateNode.className=`v110-plan-state ${o.status}`;stateNode.innerHTML=`<i aria-hidden="true"></i>${safe(o.status.toUpperCase())}`}const next=$("v110Next");if(next)next.innerHTML=o.next.map(row=>`<div><time>${fmt(row.start)}–${fmt(row.end)}</time><b>${safe(row.action)}</b></div>`).join("")||"<div><b>No upcoming window compiled.</b></div>";renderCheckpointDynamic()}
-  function setText(id,text){const node=$(id);if(node)node.textContent=text||""}
+  function updateHudDynamic(){if(view!=="hud")return;const clock=$("v110Clock");if(clock&&clock.textContent!==fmt(timerSeconds))clock.textContent=fmt(timerSeconds);const o=liveOutput(),session=sessionState(),signal=lastScenario?D.getSignal(lastScenario):null;setText("v110Question",o.question);setText("v110Action",o.action);setText("v110Reason",o.reason);setText("v110Permission",o.permission);setText("v110PermissionWhy",o.permissionWhy);setStatus("v110StatusClock",fmt(timerSeconds),timerSynced?"ok":"warn");setStatus("v110StatusSession",session.label,session.tone);setStatus("v110StatusPlan",o.status.toUpperCase(),planTone(o.status));setStatus("v110StatusIntel",signal?.label||lastScenario?.replaceAll("_"," ")||"UNREPORTED",lastScenario?"cyan":"muted");const stateNode=root.querySelector(".v110-plan-state");if(stateNode){stateNode.className=`v110-plan-state ${o.status}`;stateNode.innerHTML=`<i aria-hidden="true"></i>${safe(o.status.toUpperCase())}`}const next=$("v110Next");if(next)next.innerHTML=o.next.map(row=>`<div><time>${fmt(row.start)}–${fmt(row.end)}</time><b>${safe(row.action)}</b></div>`).join("")||"<div><b>No upcoming window compiled.</b></div>";renderCheckpointDynamic()}
+  function setText(id,text){const node=$(id),value=text||"";if(node&&node.textContent!==value)node.textContent=value}
+  function setStatus(id,text,tone){const node=$(id);if(!node)return;setText(id,text);const value=node.parentElement;if(value)value.className=`v110-status-value tone-${tone||"default"}`}
 
   function checkpointRenderKey(){const current=activeCheckpoint();return current?`${current.key}:${current.phase||"directive"}:${current.directive?.id||""}`:"complete"}
   function renderCheckpointDynamic(force=false){const host=$("v110CheckpointHost");if(!host)return;const key=checkpointRenderKey();if(!force&&key===renderedCheckpointKey)return;renderedCheckpointKey=key;host.innerHTML=checkpointMarkup();wireCheckpoint()}
@@ -232,7 +265,7 @@
   function readBrief(){const p=currentPlan();if(!p)return;const c=planContext(p);speak(`${p.title}. ${p.story} Your job: ${c.unitJob} Pivot: ${c.pivot} Unspoken rule: ${c.unspoken}`)}
   function playEarcon(type){if(!voiceEnabled)return;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;const ctx=new AC(),osc=ctx.createOscillator(),gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.type="sine";osc.frequency.value=type==="danger"?220:type==="good"?660:440;gain.gain.setValueAtTime(.001,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.055,ctx.currentTime+.01);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.18);osc.start();osc.stop(ctx.currentTime+.2);setTimeout(()=>ctx.close(),260)}catch(_e){}}
   function toggleTimer(){timerRunning=!timerRunning;timerAnchor=performance.now();if(mode==="1v1"){try{timerRunning?E.resume():E.pause()}catch(_e){}}const button=$("v110Pause");if(button){button.textContent=timerRunning?"Pause":"Resume";button.setAttribute("aria-pressed",String(!timerRunning))}}
-  function toggleAudio(){voiceEnabled=!voiceEnabled;if(!voiceEnabled&&"speechSynthesis" in window)try{speechSynthesis.cancel()}catch(_e){}persistUi();const button=$("v110Voice");if(button){button.textContent=`Audio ${voiceEnabled?"On":"Off"}`;button.setAttribute("aria-pressed",String(voiceEnabled))}toast(`Coach audio ${voiceEnabled?"enabled":"muted"}`)}
+  function toggleAudio(){voiceEnabled=!voiceEnabled;if(!voiceEnabled&&"speechSynthesis" in window)try{speechSynthesis.cancel()}catch(_e){}persistUi();const button=$("v110Voice");if(button){button.textContent=`Audio ${voiceEnabled?"On":"Off"}`;button.setAttribute("aria-pressed",String(voiceEnabled))}setStatus("v110StatusAudio",voiceEnabled?"ON":"MUTED",voiceEnabled?"ok":"muted");toast(`Coach audio ${voiceEnabled?"enabled":"muted"}`)}
   function shiftTimer(delta){timerSeconds=Math.max(0,timerSeconds+delta);timerSynced=false;timerAnchor=performance.now();lastEngineSecond=null;syncEngineClock(true);render();toast(`Timer ${delta>=0?"+":""}${delta}s · now approximate`)}
   function showView(next){if(next==="hud"&&!currentPlan()){toast("Deploy an operation first.");view="deploy";render();return}view=next;render()}
 
