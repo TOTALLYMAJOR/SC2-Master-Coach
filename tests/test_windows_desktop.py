@@ -26,6 +26,9 @@ def test_local_windows_builders_package_complete_runtime():
     )
     for name in ("build_windows_portable.bat", "build_windows_onefile.bat"):
         script = (ROOT / name).read_text(encoding="utf-8")
+        assert "set \"PYTHON_LAUNCHER=py -3.12\"" in script
+        assert "%PYTHON_LAUNCHER% -m venv" in script
+        assert "python -m pip uninstall -y enum34" in script
         for token in required:
             assert token in script, f"{name} is missing {token}"
 

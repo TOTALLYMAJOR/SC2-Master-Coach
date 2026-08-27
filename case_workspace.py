@@ -9,6 +9,8 @@ import os
 import re
 import shutil
 
+from replay_intelligence import build_case_learning_index
+
 APP_FOLDER = "SC2 Master Coach"
 
 
@@ -89,6 +91,20 @@ def create_or_update_case(replay_path: str | Path, analysis: dict[str, Any]) -> 
         or replay_meta.get("version")
     )
     now = _utc_now()
+    analysis_source = analysis.setdefault("source", {})
+    analysis_source["digest_sha256"] = digest
+    analysis_source["ingested_at"] = now
+    for player_analysis in (analysis.get("analysis_by_player") or {}).values():
+        hard_data_source = (
+            (player_analysis.get("hard_data") or {})
+            .get("fact_envelope", {})
+            .get("source")
+        )
+        if isinstance(hard_data_source, dict):
+            hard_data_source["digest_sha256"] = digest
+            hard_data_source["ingested_at"] = now
+    learning_index = build_case_learning_index(analysis)
+    learning_index_file = "learning-index.json"
     manifest = {
         "schema_version": "1.1",
         "case_id": case_id,
@@ -105,12 +121,16 @@ def create_or_update_case(replay_path: str | Path, analysis: dict[str, Any]) -> 
         "players": players,
         "replay_file": stored_replay.name,
         "frames_directory": frames.name,
+        "learning_index_file": learning_index_file,
     }
     (target / "manifest.json").write_text(
         json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8"
     )
     (target / "analysis.json").write_text(
         json.dumps(analysis, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    (target / learning_index_file).write_text(
+        json.dumps(learning_index, indent=2, ensure_ascii=False), encoding="utf-8"
     )
 
     case = {

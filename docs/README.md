@@ -1,5 +1,19 @@
 # SC2 Master Coach Architecture Index
 
+## Canonical project state
+
+- [Canonical Project State](../PROJECT_STATE.md)
+- [Executive State](project/EXECUTIVE_STATE.md)
+- [Capability Register](project/CAPABILITIES.md)
+- [Decision Ledger](project/DECISIONS.md)
+- [Evidence Graph](project/EVIDENCE_GRAPH.md)
+- [Dependency Register](project/DEPENDENCIES.md)
+- [Exploration Register](project/EXPLORATIONS.md)
+- [Proof Register](project/PROOF.md)
+- [Blocker Register](project/BLOCKERS.md)
+- Machine ledger: `.project/state.json`
+- Drift check: `python3 scripts/check_project_state.py`
+
 ## Current product architecture
 
 - [Strategic OS Architecture](strategic-os-architecture.md)

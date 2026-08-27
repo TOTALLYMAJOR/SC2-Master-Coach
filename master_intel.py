@@ -12,6 +12,7 @@ import sys
 from flask import Blueprint, current_app, jsonify, request
 
 from case_workspace import case_directory, workspace_root
+from replay_intelligence import build_case_learning_summary
 
 
 master_intel_api = Blueprint("master_intel", __name__, url_prefix="/api/intel")
@@ -228,6 +229,21 @@ def list_recent_cases(limit: int = 20) -> list[dict[str, Any]]:
     return rows[: max(1, min(limit, 100))]
 
 
+def load_learning_indexes(*, exclude_case_id: str | None = None) -> list[dict[str, Any]]:
+    indexes = []
+    for row in list_recent_cases(100):
+        case_id = str(row.get("case_id") or "")
+        if not case_id or case_id == exclude_case_id:
+            continue
+        try:
+            value = _read_json(case_directory(case_id) / "learning-index.json")
+        except (FileNotFoundError, ValueError, OSError, json.JSONDecodeError):
+            continue
+        if value.get("status") == "calculated":
+            indexes.append(value)
+    return indexes
+
+
 def latest_data_timestamp() -> str | None:
     timestamps = [str(row.get("created_at") or "") for row in list_recent_cases(100)]
     for pack in load_player_packs():
@@ -276,7 +292,10 @@ def case_detail(case_id: str):
         analysis = _read_json(directory / "analysis.json")
     except (FileNotFoundError, ValueError, OSError, json.JSONDecodeError):
         return jsonify({"ok": False, "error": "Replay analysis was not found."}), 404
-    return jsonify({"ok": True, "manifest": manifest, "analysis": analysis})
+    learning = build_case_learning_summary(
+        analysis, load_learning_indexes(exclude_case_id=case_id)
+    )
+    return jsonify({"ok": True, "manifest": manifest, "analysis": analysis, "learning": learning})
 
 
 @master_intel_api.get("/player-packs")

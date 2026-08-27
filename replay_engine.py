@@ -6,6 +6,8 @@ from typing import Any, Iterable
 import math
 import statistics
 
+from replay_intelligence import SUPPLY_PROVIDERS, build_player_hard_data
+
 
 BASE_TYPES = {
     "CommandCenter", "Nexus", "Hatchery"
@@ -16,6 +18,11 @@ BASE_FAMILY = {
     "Hatchery", "Lair", "Hive",
 }
 WORKER_TYPES = {"SCV", "Probe", "Drone"}
+PRODUCTION_STRUCTURES = {
+    "Barracks", "Factory", "Starport",
+    "Gateway", "WarpGate", "RoboticsFacility", "Stargate",
+    "Hatchery", "Lair", "Hive",
+}
 
 STRUCTURES = {
     "Terran": {
@@ -105,6 +112,15 @@ def unit_cost(event: Any) -> int:
         return int(minerals) + int(gas)
     except Exception:
         return 0
+
+
+def unit_tag(event: Any) -> str | None:
+    for candidate in (event, safe_attr(event, "unit")):
+        for attr in ("unit_id", "id", "tag"):
+            value = safe_attr(candidate, attr)
+            if isinstance(value, (int, str)) and str(value):
+                return str(value)
+    return None
 
 
 def replay_seconds(replay: Any) -> int:
@@ -439,6 +455,26 @@ def analyze_replay(path: str | Path) -> dict:
 
     path = Path(path)
     replay = sc2reader.load_replay(str(path), load_level=4, load_map=False)
+    parser_version = str(getattr(sc2reader, "__version__", "unknown"))
+    duration_seconds = replay_seconds(replay)
+    replay_meta = {
+        "map": str(safe_attr(replay, "map_name", "Unknown")),
+        "duration_seconds": duration_seconds,
+        "duration": fmt_time(duration_seconds),
+        "release": str(safe_attr(replay, "release_string", "Unknown")),
+        "build": safe_attr(replay, "build"),
+        "date": str(safe_attr(replay, "date", "")),
+        "category": str(safe_attr(replay, "category", "")),
+        "type": str(safe_attr(replay, "type", "")),
+    }
+    source_meta = {
+        "filename": path.name,
+        "parser": "sc2reader",
+        "parser_version": parser_version,
+        "parser_schema_version": "1.0",
+        "evidence_class": "observed_replay",
+        "confidence_note": "Tracker/resource reconstruction is replay-derived. Doctrine flags are coaching heuristics. Fog-of-war knowledge is not reconstructed, so hidden-information judgments are labeled as review signatures rather than proven mistakes.",
+    }
 
     players = [player_summary(p) for p in list(safe_attr(replay, "players", []) or [])]
     players = [p for p in players if p["pid"] is not None]
@@ -450,6 +486,7 @@ def analyze_replay(path: str | Path) -> dict:
 
     base_events: dict[int, list[tuple[int, int]]] = {pid: [] for pid in player_ids}
     build_events: list[dict] = []
+    production_assets: list[dict] = []
     upgrades: list[dict] = []
     deaths: list[dict] = []
 
@@ -460,19 +497,33 @@ def analyze_replay(path: str | Path) -> dict:
         utype = unit_type(event)
 
         if name in ("UnitBornEvent", "UnitInitEvent"):
+            phase = "completed" if name == "UnitBornEvent" else "started"
             if pid in base_events and utype in BASE_TYPES:
                 base_events[pid].append((second, +1))
             race = next((p["race"] for p in players if p["pid"] == pid), "Unknown")
             is_structure = utype in STRUCTURES.get(race, set())
-            if is_structure:
-                kind = "expansion" if utype in BASE_TYPES else "structure"
-                build_events.append({"second": second, "time": fmt_time(second), "pid": pid, "unit": utype, "kind": kind})
+            if is_structure or utype in SUPPLY_PROVIDERS:
+                kind = "supply" if utype in SUPPLY_PROVIDERS else "expansion" if utype in BASE_TYPES else "structure"
+                build_events.append({"second": second, "time": fmt_time(second), "pid": pid, "unit": utype, "kind": kind, "phase": phase})
+            if name == "UnitBornEvent" and pid in player_ids and utype in PRODUCTION_STRUCTURES:
+                production_assets.append({
+                    "pid": pid,
+                    "producer_tag": unit_tag(event),
+                    "unit_type": utype,
+                    "online_second": second,
+                    "offline_second": None,
+                    "evidence_class": "observed_replay",
+                })
 
         elif name == "UnitDiedEvent":
             dead_type = unit_type(event)
             owner = unit_owner_pid(event)
             if owner in base_events and dead_type in BASE_FAMILY:
                 base_events[owner].append((second, -1))
+            dead_tag = unit_tag(event)
+            for asset in production_assets:
+                if dead_tag and asset["producer_tag"] == dead_tag and asset["offline_second"] is None:
+                    asset["offline_second"] = second
             deaths.append({
                 "second": second, "time": fmt_time(second), "owner_pid": owner,
                 "killer_pid": safe_attr(event, "killing_player_id"),
@@ -531,6 +582,16 @@ def analyze_replay(path: str | Path) -> dict:
             "economy_inflections": inflections,
             "decision_windows": decisions,
             "violations": violations,
+            "hard_data": build_player_hard_data(
+                replay=replay_meta,
+                player=p,
+                matchup=matchup,
+                resource_samples=stats_by_pid.get(pid, []),
+                build_events=[row for row in build_events if row["pid"] == pid],
+                production_assets=[row for row in production_assets if row["pid"] == pid],
+                production_cycles=[],
+                source=source_meta,
+            ),
             "summary": {
                 "final_workers": final.get("workers"),
                 "peak_workers": max([x["workers"] for x in stats_by_pid.get(pid, [])], default=None),
@@ -546,21 +607,8 @@ def analyze_replay(path: str | Path) -> dict:
 
     return {
         "schema_version": "1.0",
-        "source": {
-            "filename": path.name,
-            "parser": "sc2reader",
-            "confidence_note": "Tracker/resource reconstruction is replay-derived. Doctrine flags are coaching heuristics. Fog-of-war knowledge is not reconstructed, so hidden-information judgments are labeled as review signatures rather than proven mistakes.",
-        },
-        "replay": {
-            "map": str(safe_attr(replay, "map_name", "Unknown")),
-            "duration_seconds": replay_seconds(replay),
-            "duration": fmt_time(replay_seconds(replay)),
-            "release": str(safe_attr(replay, "release_string", "Unknown")),
-            "build": safe_attr(replay, "build"),
-            "date": str(safe_attr(replay, "date", "")),
-            "category": str(safe_attr(replay, "category", "")),
-            "type": str(safe_attr(replay, "type", "")),
-        },
+        "source": source_meta,
+        "replay": replay_meta,
         "players": players,
         "build_events": sorted(build_events, key=lambda x: x["second"]),
         "upgrades": sorted(upgrades, key=lambda x: x["second"]),
@@ -616,8 +664,22 @@ def demo_analysis() -> dict:
             "stats":series,"economy_inflections":inflections,"decision_windows":decisions,"violations":violations,
             "summary":{"final_workers":series[-1]["workers"],"peak_workers":max(x["workers"] for x in series),"peak_bank":max(x["bank"] for x in series),"peak_army_value":max(x["army_value"] for x in series),"resources_lost":series[-1]["resources_lost"],"resources_killed":series[-1]["resources_killed"],"expansions_started":len([x for x in build_events if x["pid"]==pid and x["kind"]=="expansion"]),"upgrades_completed":len([x for x in upgrades if x["pid"]==pid]),"engagements":len(engagements)}
         }
+    replay_meta = {"map":"Demo Arena LE","duration_seconds":600,"duration":"10:00","release":"Demo","build":None,"date":"","category":"1v1","type":"1v1"}
+    source_meta = {"filename":"SYNTHETIC_DEMO.SC2Replay","parser":"demo","parser_version":"1.0","parser_schema_version":"1.0","evidence_class":"synthetic_demo","confidence_note":"Synthetic UI fixture only. Upload a real .SC2Replay for replay-derived analysis."}
+    for player in players:
+        pid = player["pid"]
+        analyses[str(pid)]["hard_data"] = build_player_hard_data(
+            replay=replay_meta,
+            player=player,
+            matchup=analyses[str(pid)]["matchup"],
+            resource_samples=analyses[str(pid)]["stats"],
+            build_events=[row for row in build_events if row["pid"] == pid],
+            production_assets=[],
+            production_cycles=[],
+            source=source_meta,
+        )
     return {
-        "schema_version":"1.0","source":{"filename":"SYNTHETIC_DEMO.SC2Replay","parser":"demo","confidence_note":"Synthetic UI fixture only. Upload a real .SC2Replay for replay-derived analysis."},
-        "replay":{"map":"Demo Arena LE","duration_seconds":600,"duration":"10:00","release":"Demo","build":None,"date":"","category":"1v1","type":"1v1"},
+        "schema_version":"1.0","source":source_meta,
+        "replay":replay_meta,
         "players":players,"build_events":build_events,"upgrades":upgrades,"engagements":engagements,"analysis_by_player":analyses
     }

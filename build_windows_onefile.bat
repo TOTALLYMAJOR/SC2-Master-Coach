@@ -4,23 +4,31 @@ cd /d "%~dp0"
 
 set "VENV=.venv-desktop"
 set "APPNAME=SC2 Master Coach"
+set "PYTHON_LAUNCHER=py -3.12"
 
-where py >nul 2>nul
+%PYTHON_LAUNCHER% --version >nul 2>nul
 if errorlevel 1 (
-  echo Python launcher "py" was not found.
-  echo Install Python 3.12 or newer, then run this file again.
+  echo Python 3.12 was not found through the Windows "py" launcher.
+  echo Install Python 3.12, then run this file again.
   pause
   exit /b 1
 )
 
 if not exist "%VENV%\Scripts\python.exe" (
-  py -3 -m venv "%VENV%"
+  %PYTHON_LAUNCHER% -m venv "%VENV%"
 )
 
 call "%VENV%\Scripts\activate.bat"
 python -m pip install --upgrade pip
 python -m pip install -r requirements-desktop.txt
 if errorlevel 1 (
+  pause
+  exit /b 1
+)
+
+python -m pip uninstall -y enum34
+if errorlevel 1 (
+  echo Failed to remove obsolete enum34 package.
   pause
   exit /b 1
 )

@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from observation_engine import reconstruct_observation_model
+from replay_intelligence import attach_decision_context
 from strategy_narrative import build_strategy_narrative
 
 
@@ -38,6 +39,8 @@ def enrich_replay_analysis(path: str | Path, result: dict) -> dict:
     models = reconstruct_observation_model(replay, result.get("players", []), structures=_structure_catalog())
     for pid, analysis in (result.get("analysis_by_player") or {}).items():
         analysis["observation_model"] = models.get(str(pid), {})
+        if analysis.get("hard_data"):
+            attach_decision_context(analysis["hard_data"], analysis["observation_model"])
     result["schema_version"] = "1.2"
     source = result.setdefault("source", {})
     source["confidence_note"] = (
@@ -62,5 +65,7 @@ def enrich_demo_analysis(result: dict) -> dict:
     }
     for analysis in (result.get("analysis_by_player") or {}).values():
         analysis["observation_model"] = dict(demo)
+        if analysis.get("hard_data"):
+            attach_decision_context(analysis["hard_data"], analysis["observation_model"])
     result["schema_version"] = "1.2"
     return _attach_narratives(result)

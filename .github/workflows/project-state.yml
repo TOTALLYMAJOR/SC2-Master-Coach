@@ -1,0 +1,66 @@
+name: Canonical project state
+
+on:
+  pull_request:
+    paths:
+      - "*.py"
+      - "*.bat"
+      - "*.ps1"
+      - "*.sh"
+      - "Dockerfile"
+      - "requirements*.txt"
+      - "static/**"
+      - "python_strategy_science/**"
+      - "installer/**"
+      - "tests/**"
+      - "docs/**"
+      - "README.md"
+      - "PROJECT_STATE.md"
+      - ".project/**"
+      - "docs/project/**"
+      - "scripts/check_project_state.py"
+      - "tests/test_project_state_control.py"
+      - "AGENTS.md"
+      - ".github/workflows/**"
+  push:
+    branches:
+      - main
+      - v1.13-dev
+    paths:
+      - "*.py"
+      - "*.bat"
+      - "*.ps1"
+      - "*.sh"
+      - "Dockerfile"
+      - "requirements*.txt"
+      - "static/**"
+      - "python_strategy_science/**"
+      - "installer/**"
+      - "tests/**"
+      - "docs/**"
+      - "README.md"
+      - "PROJECT_STATE.md"
+      - ".project/**"
+      - "docs/project/**"
+      - "scripts/check_project_state.py"
+      - "tests/test_project_state_control.py"
+      - "AGENTS.md"
+      - ".github/workflows/**"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install focused test dependency
+        run: python -m pip install pytest
+      - name: Check canonical state drift
+        run: python scripts/check_project_state.py
+      - name: Test the drift checker
+        run: python -m pytest -q tests/test_project_state_control.py

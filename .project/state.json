@@ -1,0 +1,621 @@
+{
+  "schemaVersion": "1.0",
+  "reconciledOn": "2026-08-27",
+  "verificationPolicy": {
+    "maxVerificationAgeDays": 30,
+    "semanticPromotionAuthority": "Project owner or explicitly authorized maintainer",
+    "missingEvidenceVerdict": "UNVERIFIED"
+  },
+  "project": {
+    "id": "sc2-master-coach",
+    "name": "SC2 Master Coach",
+    "repository": "TOTALLYMAJOR/SC2-Master-Coach",
+    "primaryPurpose": "Provide local, evidence-bounded StarCraft II replay intelligence and decision coaching without claiming access to unreported game state.",
+    "primaryUser": "A StarCraft II player seeking structured practice, replay review, and low-cognitive-load coaching.",
+    "economicBuyer": "The individual player is the current buyer hypothesis; validation is UNVERIFIED.",
+    "stage": "Local-first product beta; operational adoption and commercialization are UNVERIFIED.",
+    "deploymentTarget": "Unsigned per-user Windows desktop application with a loopback-only Flask service and embedded web UI.",
+    "currentDeployment": "UNVERIFIED",
+    "reconciledFromCommit": "1243d0b4a7c3c77d7000aad38d3ef0f79211217e",
+    "activeBranchAtReconciliation": "feat/master-intel-live-checkpoints",
+    "portfolioMembership": "UNVERIFIED"
+  },
+  "goals": [
+    {
+      "id": "GOAL-001",
+      "name": "Evidence-bounded player improvement",
+      "description": "A player can move from local evidence to one understandable, actionable practice decision without fabricated certainty.",
+      "technicalSuccess": "Replay and manual-report inputs produce bounded local outputs while preserving authority and privacy contracts.",
+      "userSuccess": "A player understands what to do next and why.",
+      "operationalSuccess": "The packaged Windows application completes the journey on a clean installation without developer intervention.",
+      "commercialSuccess": "Paying players repeatedly use the workflow and report a measurable improvement outcome; currently UNVERIFIED."
+    },
+    {
+      "id": "GOAL-002",
+      "name": "Truthful live coaching",
+      "description": "The live surface asks for battlefield evidence, presents one decision at a time, and never implies process-level game observation."
+    },
+    {
+      "id": "GOAL-003",
+      "name": "Operationally supportable Windows release",
+      "description": "A reproducible build, install, launch, replay, voice, and update path has current external receipts and a safe rollback."
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "CAP-001",
+      "name": "Master Intel local application shell",
+      "description": "Serves Master Intel at the default route with lazy local navigation and the Combat HUD at /hud.",
+      "lifecycle_state": "TESTED",
+      "confidence": "HIGH",
+      "evidence": [
+        {"kind": "source", "path": "app.py", "symbol": "index"},
+        {"kind": "test", "path": "tests/test_master_intel_m0.py", "symbol": "test_master_intel_is_default_and_legacy_hud_remains_explicit", "outcome": "passed", "verified_at": "2026-08-25"}
+      ],
+      "dependencies": [],
+      "blockers": ["BLK-001", "BLK-004", "BLK-005"],
+      "last_verified": "2026-08-25",
+      "owner_or_authority": "Flask routes and Master Intel router",
+      "unresolved_placeholders": [],
+      "current": true
+    },
+    {
+      "id": "CAP-002",
+      "name": "Local replay ingestion and durable case workspace",
+      "description": "Parses uploaded or local SC2 replays and persists content-addressed local case data.",
+      "lifecycle_state": "TESTED",
+      "confidence": "HIGH",
+      "evidence": [
+        {"kind": "source", "path": "case_workspace.py", "symbol": "create_or_update_case"},
+        {"kind": "test", "path": "tests/test_master_intel_m0.py", "symbol": "test_replay_case_persists_patch_matchup_and_survives_restart", "outcome": "passed", "verified_at": "2026-08-25"}
+      ],
+      "dependencies": ["CAP-001"],
+      "blockers": ["BLK-001", "BLK-004"],
+      "last_verified": "2026-08-25",
+      "owner_or_authority": "Replay parser output and local case manifest",
+      "unresolved_placeholders": [],
+      "current": true
+    },
+    {
+      "id": "CAP-003",
+      "name": "Bounded local player-pack management",
+      "description": "Validates, stores, lists, and removes local player-reference packs with explicit identity provenance.",
+      "lifecycle_state": "TESTED",
+      "confidence": "HIGH",
+      "evidence": [
+        {"kind": "source", "path": "master_intel.py", "symbol": "validate_player_pack"},
+        {"kind": "test", "path": "tests/test_master_intel_m0.py", "symbol": "test_player_pack_import_validates_integrity_identity_and_local_removal", "outcome": "passed", "verified_at": "2026-08-25"}
+      ],
+      "dependencies": ["CAP-001"],
+      "blockers": ["BLK-004"],
+      "last_verified": "2026-08-25",
+      "owner_or_authority": "Local player-pack store and declared provenance",
+      "unresolved_placeholders": [],
+      "current": true
+    },
+    {
+      "id": "CAP-004",
+      "name": "Normalized replay hard data and compatibility gate",
+      "description": "Normalizes replay facts into versioned fingerprints and bounded local metrics while withholding unsupported causality, production utilization, and master comparison.",
+      "lifecycle_state": "TESTED",
+      "confidence": "HIGH",
+      "evidence": [
+        {"kind": "source", "path": "replay_intelligence.py", "symbol": "build_player_hard_data"},
+        {"kind": "test", "path": "tests/test_replay_intelligence.py", "symbol": "test_hard_data_normalizes_once_and_exposes_bounded_metrics", "outcome": "passed", "verified_at": "2026-08-26"},
+        {"kind": "source", "path": "static/master-intel/routes/compare.js", "symbol": "render"},
+        {"kind": "test", "path": "tests/test_master_intel_m0.py", "symbol": "test_comparison_and_practice_routes_do_not_fabricate_future_intelligence", "outcome": "passed", "verified_at": "2026-08-26"}
+      ],
+      "dependencies": ["CAP-002", "CAP-003"],
+      "blockers": ["BLK-002", "BLK-004"],
+      "last_verified": "2026-08-26",
+      "owner_or_authority": "Replay fact envelope, evidence classes, and compatibility gate",
+      "unresolved_placeholders": ["Replay-to-master calculation is not implemented.", "Real-replay production utilization remains withheld until explicit producer-cycle start and end facts are parsed."],
+      "current": true
+    },
+    {
+      "id": "CAP-005",
+      "name": "Evidence-bounded Combat HUD",
+      "description": "Provides a low-cognitive-load live command surface driven by player reports and manual clock synchronization.",
+      "lifecycle_state": "TESTED",
+      "confidence": "HIGH",
+      "evidence": [
+        {"kind": "source", "path": "static/v110-hud.js", "symbol": "function render("},
+        {"kind": "test", "path": "tests/test_v110_hud.py", "symbol": "test_v110_command_shell_uses_truthful_sc2_status_and_original_navigation", "outcome": "passed", "verified_at": "2026-08-25"}
+      ],
+      "dependencies": ["CAP-007", "CAP-008"],
+      "blockers": ["BLK-003", "BLK-004", "BLK-005"],
+      "last_verified": "2026-08-25",
+      "owner_or_authority": "Player reports plus Strategic OS decision state",
+      "unresolved_placeholders": [],
+      "current": true
+    },
+    {
+      "id": "CAP-006",
+      "name": "Adaptive checkpoints and local progression",
+      "description": "Derives practice checkpoints from the selected plan and records bounded self-reported progression locally.",
+      "lifecycle_state": "TESTED",
+      "confidence": "HIGH",
+      "evidence": [
+        {"kind": "source", "path": "static/live-checkpoints.js", "symbol": "function buildCheckpoints("},
+        {"kind": "test", "path": "tests/test_live_checkpoints.py", "symbol": "test_live_checkpoint_contract_is_manual_report_driven_and_persisted_locally", "outcome": "passed", "verified_at": "2026-08-25"}
+      ],
+      "dependencies": ["CAP-005", "CAP-008"],
+      "blockers": ["BLK-003", "BLK-004"],
+      "last_verified": "2026-08-25",
+      "owner_or_authority": "Selected plan plus player checkpoint reports",
+      "unresolved_placeholders": [],
+      "current": true
+    },
+    {
+      "id": "CAP-007",
+      "name": "Strategic OS decision kernel",
+      "description": "Maintains Mission, Policy, Intel, Permission, Obligation, and Decision objects with an attention governor.",
+      "lifecycle_state": "TESTED",
+      "confidence": "HIGH",
+      "evidence": [
+        {"kind": "source", "path": "static/strategic-os-kernel.js", "symbol": "function snapshot("},
+        {"kind": "test", "path": "tests/test_strategic_os.py", "symbol": "test_kernel_exposes_six_canonical_objects_and_event_backing", "outcome": "passed", "verified_at": "2026-08-25"}
+      ],
+      "dependencies": ["CAP-008"],
+      "blockers": ["BLK-003", "BLK-004"],
+      "last_verified": "2026-08-25",
+      "owner_or_authority": "Strategic OS event log and canonical browser state",
+      "unresolved_placeholders": [],
+      "current": true
+    },
+    {
+      "id": "CAP-008",
+      "name": "Nine-matchup Strategy Compiler",
+      "description": "Compiles goal, risk, matchup, assumptions, scout triggers, and fallbacks into strategy policies.",
+      "lifecycle_state": "TESTED",
+      "confidence": "HIGH",
+      "evidence": [
+        {"kind": "source", "path": "static/strategy-compiler-engine.js", "symbol": "compile"},
+        {"kind": "test", "path": "tests/test_strategy_compiler.py", "symbol": "test_strategy_compiler_covers_ten_goals_and_nine_matchups", "outcome": "passed", "verified_at": "2026-08-25"}
+      ],
+      "dependencies": [],
+      "blockers": ["BLK-003", "BLK-004"],
+      "last_verified": "2026-08-25",
+      "owner_or_authority": "Versioned strategy data and compiler event log",
+      "unresolved_placeholders": [],
+      "current": true
+    },
+    {
+      "id": "CAP-009",
+      "name": "2v2 Team Composer",
+      "description": "Selects from ten role-based team operations using allied and opposing race composition.",
+      "lifecycle_state": "TESTED",
+      "confidence": "HIGH",
+      "evidence": [
+        {"kind": "source", "path": "static/team-composer.js", "symbol": "function shell("},
+        {"kind": "test", "path": "tests/test_team_composer.py", "symbol": "test_team_composer_defines_exactly_ten_strategy_archetypes", "outcome": "passed", "verified_at": "2026-08-25"}
+      ],
+      "dependencies": ["CAP-005"],
+      "blockers": ["BLK-003", "BLK-004"],
+      "last_verified": "2026-08-25",
+      "owner_or_authority": "Team Composer data and player-selected races",
+      "unresolved_placeholders": [],
+      "current": true
+    },
+    {
+      "id": "CAP-010",
+      "name": "Python Strategy Science shadow Digital Twin",
+      "description": "Returns proof-carrying PvT three-base advisories without mutating Strategic OS state.",
+      "lifecycle_state": "TESTED",
+      "confidence": "HIGH",
+      "evidence": [
+        {"kind": "source", "path": "python_strategy_science/service.py", "symbol": "ScienceRuntime"},
+        {"kind": "test", "path": "tests/test_strategy_science_runtime.py", "symbol": "test_digital_twin_returns_shadow_advisory_without_mutating_canonical_state", "outcome": "passed", "verified_at": "2026-08-25"}
+      ],
+      "dependencies": ["CAP-007"],
+      "blockers": ["BLK-003", "BLK-004"],
+      "last_verified": "2026-08-25",
+      "owner_or_authority": "Strategic OS accepts or rejects advisory output",
+      "unresolved_placeholders": ["Twelve registered Strategy Science capabilities remain design-only; proof and invariant foundations are not independent user features."],
+      "current": true
+    },
+    {
+      "id": "CAP-011",
+      "name": "Constrained offline tactical voice",
+      "description": "Provides local microphone diagnostics and bounded phrase recognition while retaining manual controls as fallback.",
+      "lifecycle_state": "TESTED",
+      "confidence": "MEDIUM",
+      "evidence": [
+        {"kind": "source", "path": "python_strategy_science/voice/offline.py", "symbol": "listen_once"},
+        {"kind": "test", "path": "tests/test_v111_offline_voice.py", "symbol": "test_voice_listen_endpoint_returns_transcript_without_requiring_real_ci_microphone", "outcome": "passed", "verified_at": "2026-08-25"}
+      ],
+      "dependencies": ["CAP-005", "CAP-010"],
+      "blockers": ["BLK-001", "BLK-004"],
+      "last_verified": "2026-08-25",
+      "owner_or_authority": "Local Vosk result labeled with voice provenance",
+      "unresolved_placeholders": ["Real Windows microphone and packaged-model acceptance are UNVERIFIED."],
+      "current": true
+    },
+    {
+      "id": "CAP-012",
+      "name": "SC2 replay frame-capture boundary",
+      "description": "Validates capture requests, resolves exact SC2 protocol builds, and returns explicit unavailable fallbacks.",
+      "lifecycle_state": "TESTED",
+      "confidence": "MEDIUM",
+      "evidence": [
+        {"kind": "source", "path": "sc2_frame_capture.py", "symbol": "capture_replay_views"},
+        {"kind": "test", "path": "tests/test_sc2_frame_capture.py", "symbol": "test_capture_filename_is_safe", "outcome": "passed", "verified_at": "2026-08-25"}
+      ],
+      "dependencies": ["CAP-002"],
+      "blockers": ["BLK-001", "BLK-004"],
+      "last_verified": "2026-08-25",
+      "owner_or_authority": "Installed SC2 binary and exact replay base-build mapping",
+      "unresolved_placeholders": ["Successful capture from a real replay on a clean Windows target is UNVERIFIED."],
+      "current": true
+    },
+    {
+      "id": "CAP-013",
+      "name": "Windows packaging and release definition",
+      "description": "Defines dependency checks, tests, PyInstaller packaging, NSIS installation, artifact upload, and release publication.",
+      "lifecycle_state": "TESTED",
+      "confidence": "MEDIUM",
+      "evidence": [
+        {"kind": "workflow", "path": ".github/workflows/windows-release.yml", "symbol": "build-windows"},
+        {"kind": "test", "path": "tests/test_windows_desktop.py", "symbol": "test_windows_packaging_runs_for_relevant_pull_requests_without_publishing", "outcome": "passed", "verified_at": "2026-08-25"}
+      ],
+      "dependencies": ["CAP-001", "CAP-005", "CAP-010", "CAP-011"],
+      "blockers": ["BLK-001", "BLK-004"],
+      "last_verified": "2026-08-25",
+      "owner_or_authority": "GitHub Actions workflow and release tag policy",
+      "unresolved_placeholders": ["No current-branch hosted workflow receipt or install artifact was inspected."],
+      "current": true
+    },
+    {
+      "id": "CAP-014",
+      "name": "Offline and loopback-only runtime boundary",
+      "description": "Binds the service to loopback, disables automatic updates, and restricts browser connections with CSP.",
+      "lifecycle_state": "TESTED",
+      "confidence": "HIGH",
+      "evidence": [
+        {"kind": "source", "path": "app.py", "symbol": "apply_offline_security_headers"},
+        {"kind": "test", "path": "tests/test_master_intel_m0.py", "symbol": "test_offline_boundary_disables_background_update_and_external_connections", "outcome": "passed", "verified_at": "2026-08-25"}
+      ],
+      "dependencies": ["CAP-001"],
+      "blockers": ["BLK-001"],
+      "last_verified": "2026-08-25",
+      "owner_or_authority": "Local Flask configuration and browser security policy",
+      "unresolved_placeholders": [],
+      "current": true
+    },
+    {
+      "id": "CAP-015",
+      "name": "Replay decision-context reconstruction",
+      "description": "Reconstructs conservative information state before commitments, separates decision reasonableness from outcome, grades expansion evidence coverage, and exposes attention-gap and repeated-phase proxies.",
+      "lifecycle_state": "TESTED",
+      "confidence": "MEDIUM",
+      "evidence": [
+        {"kind": "source", "path": "replay_intelligence.py", "symbol": "attach_decision_context"},
+        {"kind": "test", "path": "tests/test_replay_intelligence.py", "symbol": "test_decision_context_separates_information_outcome_and_policy_judgment", "outcome": "passed", "verified_at": "2026-08-26"},
+        {"kind": "test", "path": "tests/test_strategy_narrative.py", "symbol": "test_observation_enrichment_attaches_bounded_decision_context", "outcome": "passed", "verified_at": "2026-08-26"}
+      ],
+      "dependencies": ["CAP-002", "CAP-004"],
+      "blockers": ["BLK-003", "BLK-004"],
+      "last_verified": "2026-08-26",
+      "owner_or_authority": "Replay observation model plus normalized fact envelope",
+      "unresolved_placeholders": ["Exact fog-of-war and private knowledge are not reconstructed.", "Strategic expansion safety remains withheld without an applicable matchup policy.", "Cross-replay recurrence remains withheld without a compatible case cohort."],
+      "current": true
+    },
+    {
+      "id": "CAP-016",
+      "name": "Longitudinal replay learning fingerprints",
+      "description": "Builds result-independent personal macro and intent-free opponent behavior vectors, compares only strict compatible case indexes, detects recurring first-five-minute signatures, and returns one provisional correction.",
+      "lifecycle_state": "TESTED",
+      "confidence": "MEDIUM",
+      "evidence": [
+        {"kind": "source", "path": "replay_intelligence.py", "symbol": "build_case_learning_summary"},
+        {"kind": "source", "path": "case_workspace.py", "symbol": "create_or_update_case"},
+        {"kind": "test", "path": "tests/test_replay_intelligence.py", "symbol": "test_learning_summary_uses_strict_cohorts_and_returns_one_provisional_correction", "outcome": "passed", "verified_at": "2026-08-26"}
+      ],
+      "dependencies": ["CAP-004", "CAP-015"],
+      "blockers": ["BLK-001", "BLK-003", "BLK-004"],
+      "last_verified": "2026-08-26",
+      "owner_or_authority": "Content-addressed local learning indexes and strict compatibility contract",
+      "unresolved_placeholders": ["Real multi-replay cohort behavior is not accepted on clean Windows.", "The one-correction mapping lacks expert and player outcome validation.", "Master-reference comparison remains outside this personal-history cohort."],
+      "current": true
+    },
+    {
+      "id": "CAP-017",
+      "name": "Evidence graph and dependency control plane",
+      "description": "Records claim-specific evidence edges and dependency sequencing so future proof, capability, and blocker claims remain tied to registered authority.",
+      "lifecycle_state": "TESTED",
+      "confidence": "HIGH",
+      "evidence": [
+        {"kind": "documentation", "path": "docs/project/EVIDENCE_GRAPH.md", "symbol": "Evidence Graph"},
+        {"kind": "documentation", "path": "docs/project/DEPENDENCIES.md", "symbol": "Dependency Register"},
+        {"kind": "source", "path": "scripts/check_project_state.py", "symbol": "_validate_graph_edges"},
+        {"kind": "test", "path": "tests/test_project_state_control.py", "symbol": "test_checker_validates_evidence_and_dependency_graphs", "outcome": "passed", "verified_at": "2026-08-27"}
+      ],
+      "dependencies": ["CAP-004", "CAP-015", "CAP-016"],
+      "blockers": [],
+      "last_verified": "2026-08-27",
+      "owner_or_authority": "Canonical Project State ledger, evidence graph, dependency register, and project-state checker",
+      "unresolved_placeholders": [],
+      "current": true
+    }
+  ],
+  "journeys": [
+    {
+      "id": "JRN-001",
+      "name": "Local replay to bounded practice decision",
+      "primary": true,
+      "state": "TESTED",
+      "steps": [
+        "Trigger: player launches the Windows or local application",
+        "Actor: StarCraft II player",
+        "Action: import a local replay or install the explicitly synthetic demo",
+        "State Change: a content-addressed local case is persisted",
+        "Authority / Evidence: replay parser output, normalized fact envelope, observation proxies, case manifest, patch and matchup metadata",
+        "Next State: review observed facts, derived local signals, withheld judgments, and open provisional practice",
+        "Outcome: one bounded practice focus without fabricated master comparison"
+      ],
+      "evidence": [
+        {"kind": "source", "path": "static/master-intel/app.js", "symbol": "function parseRoute("},
+        {"kind": "test", "path": "tests/test_master_intel_m0.py", "symbol": "test_replay_case_persists_patch_matchup_and_survives_restart", "outcome": "passed", "verified_at": "2026-08-26"},
+        {"kind": "test", "path": "tests/test_strategy_narrative.py", "symbol": "test_observation_enrichment_attaches_bounded_decision_context", "outcome": "passed", "verified_at": "2026-08-26"}
+      ]
+    },
+    {
+      "id": "JRN-002",
+      "name": "Manual battlefield report to live coaching decision",
+      "primary": false,
+      "state": "TESTED",
+      "steps": [
+        "Trigger: player deploys a curated operation",
+        "Actor: StarCraft II player",
+        "Action: synchronize the timer and report observed battlefield evidence",
+        "State Change: Strategic OS updates Intel and selects CONTINUE, MODIFY, HOLD, or ABORT",
+        "Authority / Evidence: player report plus current policy and deterministic rules",
+        "Next State: Combat HUD shows one question, one action, and one reason",
+        "Outcome: player acts while uncertainty remains explicit"
+      ],
+      "evidence": [
+        {"kind": "source", "path": "static/strategic-os-kernel.js", "symbol": "function snapshot("},
+        {"kind": "test", "path": "tests/test_v110_hud.py", "symbol": "test_v110_player_reports_evidence_and_engine_selects_branch", "outcome": "passed", "verified_at": "2026-08-25"}
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "name": "Strategic OS retains live state authority",
+      "status": "ACTIVE",
+      "authority": "ADR-002 / MBMapps",
+      "evidence": [
+        {"kind": "documentation", "path": "docs/adr/ADR-002-python-strategy-science-runtime-boundary.md", "symbol": "Decision"},
+        {"kind": "test", "path": "tests/test_python_strategy_science_architecture.py", "symbol": "test_every_capability_preserves_strategic_os_authority_and_advisory_output", "outcome": "passed", "verified_at": "2026-08-25"}
+      ]
+    },
+    {
+      "id": "DEC-002",
+      "name": "Runtime remains offline-first and loopback-only",
+      "status": "ACTIVE",
+      "authority": "Executable configuration and Master Intel implementation record",
+      "evidence": [
+        {"kind": "source", "path": "app.py", "symbol": "LOCAL_BROWSER_ORIGIN"},
+        {"kind": "test", "path": "tests/test_master_intel_m0.py", "symbol": "test_offline_boundary_disables_background_update_and_external_connections", "outcome": "passed", "verified_at": "2026-08-25"}
+      ]
+    },
+    {
+      "id": "DEC-003",
+      "name": "Master Intel is the executable default and Combat HUD is secondary",
+      "status": "IMPLEMENTED_WITH_DOCUMENTATION_DRIFT",
+      "authority": "Current Flask routes; product-owner confirmation remains required",
+      "evidence": [
+        {"kind": "source", "path": "app.py", "symbol": "legacy_hud"},
+        {"kind": "documentation", "path": "docs/master-intel-milestone-0.md", "symbol": "Master Intel is the default"}
+      ]
+    },
+    {
+      "id": "DEC-004",
+      "name": "Canonical state uses federated evidence views backed by one JSON ledger",
+      "status": "ACTIVE",
+      "authority": "User-directed Canonical Project State mission",
+      "evidence": [
+        {"kind": "source", "path": "scripts/check_project_state.py", "symbol": "validate_state"},
+        {"kind": "test", "path": "tests/test_project_state_control.py", "symbol": "test_valid_state_ledger_passes", "outcome": "passed", "verified_at": "2026-08-25"}
+      ]
+    },
+    {
+      "id": "DEC-005",
+      "name": "Replay metrics preserve fact, derivation, and withholding boundaries",
+      "status": "ACTIVE",
+      "authority": "Replay parser output and normalized hard-data contract",
+      "evidence": [
+        {"kind": "source", "path": "replay_intelligence.py", "symbol": "build_player_hard_data"},
+        {"kind": "test", "path": "tests/test_replay_intelligence.py", "symbol": "test_production_utilization_requires_explicit_cycles_and_calculates_idle_time", "outcome": "passed", "verified_at": "2026-08-26"}
+      ]
+    },
+    {
+      "id": "DEC-006",
+      "name": "Replay outcomes do not retroactively grade decision reasonableness",
+      "status": "ACTIVE",
+      "authority": "Observation-model evidence boundary and normalized decision-context contract",
+      "evidence": [
+        {"kind": "source", "path": "replay_intelligence.py", "symbol": "attach_decision_context"},
+        {"kind": "test", "path": "tests/test_replay_intelligence.py", "symbol": "test_decision_context_separates_information_outcome_and_policy_judgment", "outcome": "passed", "verified_at": "2026-08-26"}
+      ]
+    },
+    {
+      "id": "DEC-007",
+      "name": "Longitudinal learning fails closed on compatibility and returns one correction",
+      "status": "ACTIVE",
+      "authority": "Normalized fingerprint contract and local case index",
+      "evidence": [
+        {"kind": "source", "path": "replay_intelligence.py", "symbol": "build_case_learning_summary"},
+        {"kind": "test", "path": "tests/test_replay_intelligence.py", "symbol": "test_learning_summary_uses_strict_cohorts_and_returns_one_provisional_correction", "outcome": "passed", "verified_at": "2026-08-26"}
+      ]
+    },
+    {
+      "id": "DEC-008",
+      "name": "Evidence graph and dependency register govern proof sequencing",
+      "status": "ACTIVE",
+      "authority": "User-directed QuietPilot architecture adoption",
+      "evidence": [
+        {"kind": "documentation", "path": "docs/project/quietpilot-architecture-adoption-report.md", "symbol": "Recommended Adoption Order"},
+        {"kind": "documentation", "path": "docs/project/EVIDENCE_GRAPH.md", "symbol": "Current Graph Edges"},
+        {"kind": "documentation", "path": "docs/project/DEPENDENCIES.md", "symbol": "Current Capability Dependency Graph"},
+        {"kind": "test", "path": "tests/test_project_state_control.py", "symbol": "test_checker_validates_evidence_and_dependency_graphs", "outcome": "passed", "verified_at": "2026-08-27"}
+      ]
+    }
+  ],
+  "evidenceGraph": {
+    "status": "ACTIVE",
+    "authority": "DEC-008",
+    "edges": [
+      {"id": "EG-001", "from": "CAP-001", "to": "JRN-001", "relationship": "supports_primary_journey"},
+      {"id": "EG-002", "from": "CAP-002", "to": "JRN-001", "relationship": "supplies_case_evidence"},
+      {"id": "EG-003", "from": "CAP-004", "to": "CAP-015", "relationship": "supplies_normalized_facts"},
+      {"id": "EG-004", "from": "CAP-015", "to": "CAP-016", "relationship": "supplies_decision_context"},
+      {"id": "EG-005", "from": "DEC-005", "to": "CAP-004", "relationship": "governs_fact_derivation_boundaries"},
+      {"id": "EG-006", "from": "DEC-006", "to": "CAP-015", "relationship": "governs_hindsight_boundary"},
+      {"id": "EG-007", "from": "DEC-007", "to": "CAP-016", "relationship": "governs_cohort_boundary"},
+      {"id": "EG-008", "from": "DEC-001", "to": "CAP-010", "relationship": "constrains_advisory_authority"},
+      {"id": "EG-009", "from": "DEC-002", "to": "CAP-014", "relationship": "constrains_runtime_boundary"},
+      {"id": "EG-010", "from": "BLK-001", "to": "PROOF-NEXT-001", "relationship": "blocks_target_verification"},
+      {"id": "EG-011", "from": "BLK-005", "to": "PROOF-NEXT-001", "relationship": "blocks_primary_journey_claim"},
+      {"id": "EG-012", "from": "DEC-008", "to": "CAP-017", "relationship": "governs_graph_control_plane"},
+      {"id": "EG-013", "from": "CAP-017", "to": "PROOF-NEXT-001", "relationship": "organizes_required_evidence"}
+    ]
+  },
+  "dependencyGraph": {
+    "status": "ACTIVE",
+    "authority": "DEC-008",
+    "edges": [
+      {"id": "DEP-001", "from": "CAP-002", "to": "CAP-001", "relationship": "depends_on"},
+      {"id": "DEP-002", "from": "CAP-004", "to": "CAP-002", "relationship": "depends_on"},
+      {"id": "DEP-003", "from": "CAP-004", "to": "CAP-003", "relationship": "depends_on"},
+      {"id": "DEP-004", "from": "CAP-005", "to": "CAP-007", "relationship": "depends_on"},
+      {"id": "DEP-005", "from": "CAP-005", "to": "CAP-008", "relationship": "depends_on"},
+      {"id": "DEP-006", "from": "CAP-010", "to": "CAP-007", "relationship": "depends_on"},
+      {"id": "DEP-007", "from": "CAP-015", "to": "CAP-002", "relationship": "depends_on"},
+      {"id": "DEP-008", "from": "CAP-015", "to": "CAP-004", "relationship": "depends_on"},
+      {"id": "DEP-009", "from": "CAP-016", "to": "CAP-004", "relationship": "depends_on"},
+      {"id": "DEP-010", "from": "CAP-016", "to": "CAP-015", "relationship": "depends_on"},
+      {"id": "DEP-011", "from": "CAP-017", "to": "CAP-004", "relationship": "depends_on"},
+      {"id": "DEP-012", "from": "CAP-017", "to": "CAP-015", "relationship": "depends_on"},
+      {"id": "DEP-013", "from": "CAP-017", "to": "CAP-016", "relationship": "depends_on"},
+      {"id": "DEP-014", "from": "BLK-004", "to": "BLK-001", "relationship": "depends_on"},
+      {"id": "DEP-015", "from": "PROOF-NEXT-001", "to": "BLK-001", "relationship": "requires_resolution"},
+      {"id": "DEP-016", "from": "PROOF-NEXT-001", "to": "BLK-005", "relationship": "requires_resolution"}
+    ]
+  },
+  "integrations": [
+    {"id": "INT-001", "name": "sc2reader replay parser", "state": "TESTED", "authority": "Local replay bytes", "evidence": [{"kind": "source", "path": "replay_engine.py", "symbol": "analyze_replay"}]},
+    {"id": "INT-002", "name": "PySC2 and installed SC2 frame capture", "state": "IMPLEMENTED", "authority": "Installed game binary", "evidence": [{"kind": "source", "path": "sc2_frame_capture.py", "symbol": "capture_replay_views"}]},
+    {"id": "INT-003", "name": "Vosk and sounddevice offline voice", "state": "TESTED_WITHOUT_REAL_DEVICE", "authority": "Local microphone and model", "evidence": [{"kind": "source", "path": "python_strategy_science/voice/offline.py", "symbol": "listen_once"}]},
+    {"id": "INT-004", "name": "GitHub Actions Windows build and release", "state": "CONFIGURED_CURRENT_RUN_UNVERIFIED", "authority": "GitHub Actions receipts", "evidence": [{"kind": "workflow", "path": ".github/workflows/windows-release.yml", "symbol": "build-windows"}]}
+  ],
+  "risks": [
+    {"id": "RSK-001", "name": "Product-center ambiguity", "severity": "HIGH", "description": "README release framing centers the Combat HUD while executable routing centers Master Intel.", "evidence": [{"kind": "documentation", "path": "README.md", "symbol": "Combat HUD"}, {"kind": "source", "path": "app.py", "symbol": "Master Intel is the default"}]},
+    {"id": "RSK-002", "name": "Static tests can overstate operational readiness", "severity": "HIGH", "description": "Many tests inspect source contracts; they do not prove a clean Windows install, real replay capture, microphone behavior, or user acceptance.", "evidence": [{"kind": "documentation", "path": "docs/master-intel-milestone-0.md", "symbol": "Acceptance matrix"}]},
+    {"id": "RSK-003", "name": "Patch knowledge can become stale", "severity": "MEDIUM", "description": "Strategy and model behavior is pinned to StarCraft II 5.0.16b and requires explicit reconciliation after patch changes.", "evidence": [{"kind": "source", "path": "python_strategy_science/twin/pvt_three_base.py", "symbol": "SUPPORTED_PATCH"}]},
+    {"id": "RSK-004", "name": "Unsigned Windows distribution friction", "severity": "MEDIUM", "description": "The documented zero-cost build remains unsigned and may trigger SmartScreen warnings.", "evidence": [{"kind": "documentation", "path": "README.md", "symbol": "Unknown Publisher"}]}
+  ],
+  "blockers": [
+    {
+      "id": "BLK-001",
+      "priority": "P1",
+      "summary": "No current clean-Windows, real-replay end-to-end acceptance receipt is present.",
+      "evidence": "Repository tests and workflow definitions exist; external Windows runtime evidence was not inspected.",
+      "affectedGoals": ["GOAL-001", "GOAL-003"],
+      "affectedJourneys": ["JRN-001"],
+      "affectedCapabilities": ["CAP-001", "CAP-002", "CAP-011", "CAP-012", "CAP-013", "CAP-014", "CAP-016"],
+      "dependencies": [],
+      "resolutionCondition": "A clean Windows installation imports a real supported replay, persists the case, renders the bounded debrief, exercises capture/voice fallbacks, and records reproducible artifacts and human acceptance."
+    },
+    {
+      "id": "BLK-002",
+      "priority": "P1",
+      "summary": "Provenance-backed replay-to-master comparison is not implemented.",
+      "evidence": "A tested normalized local fact envelope and compatibility fingerprint now exist, but the comparison route deliberately withholds calculation because no compatible reference calculation and real-replay fixture proof exist.",
+      "affectedGoals": ["GOAL-001"],
+      "affectedJourneys": ["JRN-001"],
+      "affectedCapabilities": ["CAP-004"],
+      "dependencies": [],
+      "resolutionCondition": "A compatibility-gated calculation uses provenance-backed reference fingerprints to produce evidence-linked deltas from real replay fixtures without inventing identity or causality."
+    },
+    {
+      "id": "BLK-003",
+      "priority": "P2",
+      "summary": "Strategy benchmarks and coaching outcomes lack expert and player validation.",
+      "evidence": "The live checkpoint UI labels derived guidance as pending expert review; decision-context reconstruction withholds strategic safety without matchup policy; no external review or outcome record is stored.",
+      "affectedGoals": ["GOAL-001", "GOAL-002"],
+      "affectedJourneys": ["JRN-002"],
+      "affectedCapabilities": ["CAP-005", "CAP-006", "CAP-007", "CAP-008", "CAP-009", "CAP-010", "CAP-015", "CAP-016"],
+      "dependencies": [],
+      "resolutionCondition": "Named expert review and bounded player trials validate or revise the current-patch guidance with recorded methodology and results."
+    },
+    {
+      "id": "BLK-004",
+      "priority": "P2",
+      "summary": "Deployment, active usage, retention, outcome, and revenue remain UNVERIFIED.",
+      "evidence": "Local tags and release automation are not provider receipts, telemetry, customer acceptance, or transactions.",
+      "affectedGoals": ["GOAL-001", "GOAL-002", "GOAL-003"],
+      "affectedJourneys": ["JRN-001", "JRN-002"],
+      "affectedCapabilities": ["CAP-001", "CAP-002", "CAP-003", "CAP-004", "CAP-005", "CAP-006", "CAP-007", "CAP-008", "CAP-009", "CAP-010", "CAP-011", "CAP-012", "CAP-013", "CAP-015", "CAP-016"],
+      "dependencies": ["BLK-001"],
+      "resolutionCondition": "Current provider receipts plus consented usage, retention, outcome, and transaction evidence are reconciled into this ledger."
+    },
+    {
+      "id": "BLK-005",
+      "priority": "P2",
+      "summary": "Primary product journey authority is inconsistent across current documentation and executable routing.",
+      "evidence": "app.py serves Master Intel at / while README release framing calls the Combat HUD the product center.",
+      "affectedGoals": ["GOAL-001"],
+      "affectedJourneys": ["JRN-001", "JRN-002"],
+      "affectedCapabilities": ["CAP-001", "CAP-005"],
+      "dependencies": [],
+      "resolutionCondition": "The product owner confirms the primary journey and README, route behavior, release positioning, and NEXT proof event are reconciled to that decision."
+    }
+  ],
+  "proofEvents": [
+    {
+      "id": "PROOF-LOCAL-2026-08-25",
+      "name": "Repository test and state-control reconciliation",
+      "status": "OBSERVED",
+      "scope": "Local checkout only",
+      "result": "TESTED",
+      "command": ".venv/bin/python -m pytest -q --disable-warnings",
+      "summary": "164 passed, 101 dependency deprecation warnings",
+      "evidence": [
+        {"kind": "test", "path": "tests/test_project_state_control.py", "symbol": "test_valid_state_ledger_passes", "outcome": "passed", "verified_at": "2026-08-25"}
+      ]
+    },
+    {
+      "id": "PROOF-NEXT-001",
+      "name": "Clean Windows real-replay coaching loop",
+      "status": "NEXT",
+      "whyItMatters": "It is the smallest event that crosses source, packaging, real replay, persistence, fallback, UX, and human-acceptance boundaries.",
+      "prerequisites": ["Validated Windows artifact", "Clean supported Windows environment", "Supported real SC2 replay", "Named human acceptance owner"],
+      "acceptanceCriteria": [
+        "Install and launch without developer tools.",
+        "Import a real replay and persist one content-addressed case.",
+        "Show patch, matchup, observed evidence, uncertainty, and one provisional practice focus.",
+        "Exercise actual frame capture or record the explicit unavailable fallback.",
+        "Exercise actual microphone recognition or record the explicit manual fallback.",
+        "Human tester confirms the next action and evidence boundary are understandable."
+      ],
+      "requiredEvidence": ["Exact commit and workflow run", "Artifact checksum", "Install and launch record", "Sanitized case manifest", "Capture and voice result", "Human acceptance record"],
+      "currentBlockers": ["BLK-001", "BLK-005"]
+    }
+  ],
+  "commercialEvidence": [
+    {"id": "COM-001", "name": "Target buyer", "status": "HYPOTHESIS", "value": "Individual StarCraft II player seeking structured improvement"},
+    {"id": "COM-002", "name": "Buying trigger", "status": "HYPOTHESIS", "value": "Player wants actionable replay review or live practice structure without cloud data sharing"},
+    {"id": "COM-003", "name": "Offer and price", "status": "UNVERIFIED", "value": "UNKNOWN"},
+    {"id": "COM-004", "name": "Prospects and design partners", "status": "UNVERIFIED", "value": "No repository evidence"},
+    {"id": "COM-005", "name": "Paid customers, activation, usage, retention, measured outcome, and revenue", "status": "UNVERIFIED", "value": "No repository or external evidence inspected"}
+  ],
+  "nextActions": [
+    {"id": "ACT-001", "order": 1, "action": "Confirm whether Master Intel or the Combat HUD is the product's primary journey and reconcile release positioning.", "proofEventId": "PROOF-NEXT-001"},
+    {"id": "ACT-002", "order": 2, "action": "Produce a current Windows artifact from an exact commit and retain the workflow receipt and checksum.", "proofEventId": "PROOF-NEXT-001"},
+    {"id": "ACT-003", "order": 3, "action": "Run the clean-Windows real-replay journey with capture and voice fallback evidence.", "proofEventId": "PROOF-NEXT-001"},
+    {"id": "ACT-004", "order": 4, "action": "Record human comprehension and acceptance against the bounded coaching outcome.", "proofEventId": "PROOF-NEXT-001"},
+    {"id": "ACT-005", "order": 5, "action": "After the proof event, select the next validation slice: provenance-backed comparison, live-coach validation, or release hardening.", "proofEventId": "PROOF-NEXT-001"}
+  ]
+}

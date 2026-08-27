@@ -188,11 +188,13 @@ def test_replay_case_persists_patch_matchup_and_survives_restart(local_client, t
 
     detail = local_client.get(f"/api/intel/cases/{case['id']}")
     assert detail.status_code == 200
-    manifest = detail.get_json()["manifest"]
+    detail_body = detail.get_json()
+    manifest = detail_body["manifest"]
     assert manifest["schema_version"] == "1.1"
     assert manifest["digest_sha256"]
     assert manifest["created_at"]
     assert manifest["updated_at"]
+    assert detail_body["learning"]["status"] == "withheld"
 
 
 def test_master_intel_shell_is_lazy_responsive_and_accessible():
@@ -225,3 +227,27 @@ def test_comparison_and_practice_routes_do_not_fabricate_future_intelligence():
     assert "Unavailable until compatible master-reference evidence exists" in replay
     assert "Milestone 3" in replay
     assert "not calculated coaching diagnoses" in practice
+
+
+def test_replay_route_separates_normalized_facts_from_withheld_causality():
+    replay = (MASTER_INTEL / "routes" / "replay.js").read_text(encoding="utf-8")
+    for phrase in (
+        "Normalized hard data",
+        "derived exposure, not presumed waste",
+        "producer-cycle facts unavailable",
+        "Not a master-reference divergence claim",
+        "Withheld when unsupported",
+        "exact queued-unit delay",
+        "Information before commitments",
+        "Attention-debt proxy",
+        "Repeated phase signatures",
+        "Decision quality versus outcome",
+        "No hindsight verdict",
+        "Personal macro fingerprint",
+        "Opponent behavior fingerprint",
+        "Intent is not inferred",
+        "Compatible cohort",
+        "Recurring first-five signature",
+        "One priority correction",
+    ):
+        assert phrase in replay

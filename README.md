@@ -11,6 +11,8 @@ SC2 Master Coach is a local-first StarCraft II strategic decision aid designed a
 
 > **The player reports the battlefield. Master Coach maintains the operation and surfaces only the decision that matters now.**
 
+> **Canonical state:** Start with [`PROJECT_STATE.md`](PROJECT_STATE.md) for the reconciled product journey, capability lifecycle, proof boundaries, blockers, and next proof event. Release notes below are historical claims and do not by themselves prove current deployment or use.
+
 The live strategy baseline targets **StarCraft II 5.0.16b**, including the eight-worker economy introduced in 5.0.16 and the later 5.0.16b balance hotfix. Timing windows are coaching benchmarks; reported battlefield evidence outranks a memorized script.
 
 Official patch reference: <https://news.blizzard.com/en-us/article/24291949/starcraft-ii-5-0-16b-hotfix-patch-notes>
