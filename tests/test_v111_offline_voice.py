@@ -112,6 +112,18 @@ def test_native_voice_frontend_loads_after_shadow_helpers_and_preserves_voice_pr
 
     # Spoken intel must not masquerade as a mouse click to update canonical state.
     assert "button.click();continue" not in ui
+    for phrase in (
+        'node.setAttribute("role","dialog")',
+        'node.setAttribute("aria-modal","true")',
+        "node.tabIndex=-1",
+        "node.focus({preventScroll:true})",
+        "trapDialogFocus",
+        "overlayReturnFocus",
+        "window.SC2MasterCoachHud?.reportEvidence",
+        'button.setAttribute("aria-pressed",String(active))',
+        'document.getElementById("v110DecisionAnnouncement")',
+    ):
+        assert phrase in ui
 
 
 def test_native_voice_observer_is_hud_scoped_and_idempotent():

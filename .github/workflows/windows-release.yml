@@ -78,6 +78,15 @@ jobs:
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
 
+      - name: Verify Master Intel ES-module syntax
+        shell: pwsh
+        run: |
+          Get-ChildItem static\master-intel -Filter *.js -Recurse | ForEach-Object {
+            Write-Host "Checking module $($_.FullName)"
+            Get-Content -Raw $_.FullName | node --check --input-type=module
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
       - name: Run unit tests
         shell: pwsh
         run: |
@@ -155,6 +164,44 @@ jobs:
           Pop-Location
           if ($exitCode -ne 0) { exit $exitCode }
 
+      - name: Record exact-SHA artifact provenance
+        shell: pwsh
+        run: |
+          python -m pip freeze --all | Set-Content -Path "dist\SC2-Master-Coach-Python-Dependencies.txt" -Encoding ascii
+          $artifactPaths = @(
+            "installer\out\SC2-Master-Coach-Setup.exe",
+            "dist\SC2-Master-Coach-Portable.zip",
+            "dist\SC2-Master-Coach-Python-Dependencies.txt"
+          )
+          foreach ($path in $artifactPaths) {
+            if (-not (Test-Path $path -PathType Leaf)) {
+              throw "Required Windows artifact missing before provenance capture: $path"
+            }
+          }
+          $artifacts = @($artifactPaths | ForEach-Object {
+            $item = Get-Item $_
+            $hash = Get-FileHash -Path $_ -Algorithm SHA256
+            [ordered]@{
+              file = $item.Name
+              sha256 = $hash.Hash.ToLowerInvariant()
+              bytes = $item.Length
+            }
+          })
+          $manifest = [ordered]@{
+            schema_version = 1
+            repository = $env:GITHUB_REPOSITORY
+            commit_sha = $env:GITHUB_SHA
+            ref = $env:GITHUB_REF
+            workflow_run_id = $env:GITHUB_RUN_ID
+            workflow_run_attempt = $env:GITHUB_RUN_ATTEMPT
+            generated_at_utc = (Get-Date).ToUniversalTime().ToString("o")
+            artifacts = $artifacts
+          }
+          $manifest | ConvertTo-Json -Depth 5 | Set-Content -Path "dist\SC2-Master-Coach-Build-Manifest.json" -Encoding utf8NoBOM
+          $artifacts | ForEach-Object { "$($_.sha256) *$($_.file)" } | Set-Content -Path "dist\SC2-Master-Coach-SHA256SUMS.txt" -Encoding ascii
+          Get-Content "dist\SC2-Master-Coach-Build-Manifest.json"
+          Get-Content "dist\SC2-Master-Coach-SHA256SUMS.txt"
+
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -162,6 +209,10 @@ jobs:
           path: |
             installer/out/SC2-Master-Coach-Setup.exe
             dist/SC2-Master-Coach-Portable.zip
+            dist/SC2-Master-Coach-Build-Manifest.json
+            dist/SC2-Master-Coach-SHA256SUMS.txt
+            dist/SC2-Master-Coach-Python-Dependencies.txt
+          if-no-files-found: error
 
       - name: Mark validated v1.13 development commit
         if: github.ref == 'refs/heads/v1.13-dev'
@@ -173,28 +224,25 @@ jobs:
           git push origin "HEAD:refs/heads/v1.13-ci-green" --force
           Write-Host "Validated dev SHA: $env:GITHUB_SHA"
 
-      - name: Publish tagged GitHub Release
+      - name: Publish tagged GitHub Release draft
         if: startsWith(github.ref, 'refs/tags/v')
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "${{ github.ref_name }}" "installer\out\SC2-Master-Coach-Setup.exe" "dist\SC2-Master-Coach-Portable.zip" --title "SC2 Master Coach ${{ github.ref_name }}" --generate-notes
-
-      - name: Publish or refresh current version from main
-        if: github.ref == 'refs/heads/main'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           $match = Select-String -Path app.py -Pattern 'CURRENT_VERSION = "([^"]+)"'
           if (-not $match) { throw "CURRENT_VERSION was not found in app.py" }
-          $version = $match.Matches[0].Groups[1].Value
-          $tag = "v$version"
-          gh release view $tag *> $null
-          if ($LASTEXITCODE -eq 0) {
-            gh release upload $tag "installer\out\SC2-Master-Coach-Setup.exe" "dist\SC2-Master-Coach-Portable.zip" --clobber
-            Write-Host "$tag release assets refreshed from validated main build $env:GITHUB_SHA."
-            exit 0
+          $expectedTag = "v$($match.Matches[0].Groups[1].Value)"
+          if ("${{ github.ref_name }}" -ne $expectedTag) {
+            throw "Release tag ${{ github.ref_name }} does not match application version $expectedTag."
           }
-          gh release create $tag "installer\out\SC2-Master-Coach-Setup.exe" "dist\SC2-Master-Coach-Portable.zip" --target main --title "SC2 Master Coach $tag" --generate-notes
+          gh release create "${{ github.ref_name }}" `
+            "installer\out\SC2-Master-Coach-Setup.exe" `
+            "dist\SC2-Master-Coach-Portable.zip" `
+            "dist\SC2-Master-Coach-Build-Manifest.json" `
+            "dist\SC2-Master-Coach-SHA256SUMS.txt" `
+            "dist\SC2-Master-Coach-Python-Dependencies.txt" `
+            --verify-tag `
+            --draft `
+            --title "SC2 Master Coach ${{ github.ref_name }}" `
+            --generate-notes

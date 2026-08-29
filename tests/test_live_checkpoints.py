@@ -21,7 +21,8 @@ def test_concrete_matchup_library_is_primary_deploy_source():
     assert "L.forMatchup(state.self,state.enemy)" in hud
     assert "C.adaptLibraryPlan(libraryPlan,base,state.skill)" in hud
     assert 'p.source?.kind==="matchup_library"?"Concrete matchup plan":"Compiler fallback"' in hud
-    assert 'function currentPlan(){return mode==="1v1"?(plan||' in hud
+    assert 'function currentPlan(){return mode==="1v1"?plan:teamPlan}' in hud
+    assert "lastEngineState?.mission?.plan" not in hud
 
 
 def test_live_checkpoint_contract_is_manual_report_driven_and_persisted_locally():
@@ -73,7 +74,8 @@ def test_skill_profiles_change_tolerance_and_cue_burden():
     assert "function applyCoachingMode(profile,value)" in engine
     assert '"sc2-master-coach:first-run:v1"' in hud
     assert "row?.skill||row?.skillLevel||row?.level" in hud
-    assert "function chooseRandomOperation(){state.self=rememberedRace();state.skill=rememberedSkill();" in hud
+    assert 'function chooseRandomOperation(){if(activeExecution()&&!executionStartedAt)' in hud
+    assert "state.self=rememberedRace();state.skill=rememberedSkill();" in hud
 
 
 def test_checkpoint_ui_is_responsive_and_keeps_one_active_card():
@@ -86,7 +88,39 @@ def test_checkpoint_ui_is_responsive_and_keeps_one_active_card():
     assert "@media(max-width:720px)" in css
     assert 'if(!checkpointSession)return "";' in hud
     assert 'checkpointSession=mode==="1v1"?C.createSession' in hud
-    assert "coachingMode}" in hud
+    assert "coachingMode,drill:activeDrill(),drillKey:drillIdentity()}" in hud
+
+
+def test_active_replay_correction_becomes_a_player_reported_focus_checkpoint():
+    engine = (STATIC / "live-checkpoints.js").read_text(encoding="utf-8")
+    hud = (STATIC / "v110-hud.js").read_text(encoding="utf-8")
+    for code in (
+        "WORKER_CONTINUITY_STALL",
+        "MINERAL_FLOAT_EXPOSURE",
+        "SUPPLY_BLOCK_EXPOSURE",
+        "PRODUCTION_IDLE_EXPOSURE",
+    ):
+        assert code in engine
+    for phrase in (
+        "FOCUS_PROGRAMS",
+        "function normalizeFocus(drill)",
+        'authority:"player_report"',
+        'normalizedFocus==="not_observed"?"not_evaluated":"reported_only"',
+    ):
+        assert phrase in engine
+    for phrase in (
+        'id="v110FocusActual"',
+        "required player report",
+        "compare the same signal manually in a later replay",
+        "Practice focus${focus.label?",
+        "player report only",
+    ):
+        assert phrase in hud
+    assert 'if(checkpoint.focus&&!(["met","missed","uncertain","not_observed"].includes(focusReport)))return null' in engine
+    assert "const observationSecond=300" in engine
+    assert "Condition did not occur" in hud
+    assert "Upcoming preview · report opens at" in hud
+    assert "if(reportedSecond<checkpoint.at-session.profile.cueLead)return null" in engine
 
 
 def test_benchmark_authority_is_explicitly_pending_expert_review():
@@ -95,7 +129,8 @@ def test_benchmark_authority_is_explicitly_pending_expert_review():
     assert 'reviewState:"expert_review_required"' in engine
     assert 'benchmarkType:"derived_practice_range"' in engine
     assert "expert review remains required" in engine
-    assert "Practice guidance · expert review required" in hud
+    assert "Experimental practice estimate" in hud
+    assert "Expert review unverified" in hud
     assert "Benchmark status: expert review required" in hud
 
 

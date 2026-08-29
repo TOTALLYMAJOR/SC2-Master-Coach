@@ -22,8 +22,20 @@ export const api = {
   recent(limit = 12) { return request(`/api/intel/recent?limit=${encodeURIComponent(limit)}`); },
   packs() { return request("/api/intel/player-packs"); },
   players() { return request("/api/intel/players"); },
-  caseDetail(caseId) { return request(`/api/intel/cases/${encodeURIComponent(caseId)}`); },
+  caseDetail(caseId, playerPid = null) {
+    const query = playerPid ? `?player_pid=${encodeURIComponent(playerPid)}` : "";
+    return request(`/api/intel/cases/${encodeURIComponent(caseId)}${query}`);
+  },
+  selectCasePlayer(caseId, playerPid) {
+    return request(`/api/intel/cases/${encodeURIComponent(caseId)}/player-selection`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ player_pid: String(playerPid) }),
+    });
+  },
   offlinePolicy() { return request("/api/intel/offline-policy"); },
+  supportReport() { return request("/api/intel/support-report"); },
+  openStorage(target) { return request("/api/intel/storage/open", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ target }) }); },
   launchContext() { return request("/api/launch-context"); },
   async importReplay(file) {
     const form = new FormData();

@@ -33,12 +33,12 @@ CAP-004 normalized replay hard data and compatibility gate
   -> CAP-002 replay cases
   -> CAP-003 player packs
 
-CAP-005 Combat HUD
+CAP-005 Guided Execution HUD
   -> CAP-007 Strategic OS
   -> CAP-008 Strategy Compiler
 
 CAP-006 adaptive checkpoints and progression
-  -> CAP-005 Combat HUD
+  -> CAP-005 Guided Execution HUD
   -> CAP-008 Strategy Compiler
 
 CAP-007 Strategic OS decision kernel
@@ -48,13 +48,13 @@ CAP-008 Strategy Compiler
   -> no capability prerequisite
 
 CAP-009 2v2 Team Composer
-  -> CAP-005 Combat HUD
+  -> CAP-005 Guided Execution HUD
 
 CAP-010 Python shadow Digital Twin
   -> CAP-007 Strategic OS
 
 CAP-011 offline tactical voice
-  -> CAP-005 Combat HUD
+  -> CAP-005 Guided Execution HUD
   -> CAP-010 Python shadow Digital Twin
 
 CAP-012 replay frame-capture boundary
@@ -62,7 +62,7 @@ CAP-012 replay frame-capture boundary
 
 CAP-013 Windows release definition
   -> CAP-001 shell
-  -> CAP-005 Combat HUD
+  -> CAP-005 Guided Execution HUD
   -> CAP-010 Python shadow Digital Twin
   -> CAP-011 offline tactical voice
 
@@ -81,6 +81,24 @@ CAP-017 evidence graph and dependency control plane
   -> CAP-004 normalized hard data
   -> CAP-015 decision-context reconstruction
   -> CAP-016 longitudinal learning fingerprints
+
+CAP-018 persistent replay-to-execution improvement loop
+  -> CAP-001 Master Intel shell
+  -> CAP-005 Guided Execution HUD
+  -> CAP-006 adaptive checkpoints and progression
+  -> CAP-016 longitudinal learning fingerprints
+
+CAP-019 durable Guided Execution session continuity
+  -> CAP-005 Guided Execution HUD
+  -> CAP-006 adaptive checkpoints and progression
+  -> CAP-007 Strategic OS decision kernel
+  -> CAP-018 persistent replay-to-execution improvement loop
+
+CAP-020 local recovery and truthful degraded-data handling
+  -> CAP-001 Master Intel shell
+  -> CAP-002 replay ingestion and case workspace
+  -> CAP-003 player-pack management
+  -> CAP-014 offline runtime boundary
 ```
 
 ## Proof Dependencies
@@ -90,8 +108,6 @@ CAP-017 evidence graph and dependency control plane
 - `BLK-001` resolution: clean supported Windows install, real replay import,
   persisted case, bounded debrief, capture or fallback, voice or fallback, and
   human acceptance.
-- `BLK-005` resolution: product-owner confirmation of whether Master Intel or
-  Combat HUD is the primary journey.
 - Exact artifact identity: commit, workflow run, artifact checksum, and local
   install record.
 - Sanitized case evidence: case manifest, replay metadata, patch, matchup,
@@ -105,7 +121,6 @@ CAP-017 evidence graph and dependency control plane
 | BLK-002 | none | Provenance-backed replay comparison needs compatible references and calculation proof. |
 | BLK-003 | none | Coaching validity needs expert review and player outcome evidence. |
 | BLK-004 | BLK-001 | Operational and commercial claims cannot advance until clean target proof exists. |
-| BLK-005 | none | Product-owner authority is required to resolve primary-journey drift. |
 
 ## Implementation Packet Shape
 

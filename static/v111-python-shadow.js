@@ -14,6 +14,7 @@
   let audioStatus=null;
   let lastRun=null;
   let busy=false;
+  let overlayReturnFocus=null;
 
   function safe(value){return String(value??"").replace(/[<>&\"]/g,ch=>({"<":"&lt;",">":"&gt;","&":"&amp;",'\"':"&quot;"}[ch]))}
   function setTextIfChanged(node,text){if(node.textContent!==text)node.textContent=text}
@@ -26,12 +27,13 @@
       .v111-science-chip{min-height:38px!important;padding:8px 10px!important;border-color:#2f6d82!important;font-size:13px!important;letter-spacing:.05em;text-transform:uppercase}
       .v111-science-chip.ready{color:#75e7ae!important;border-color:#3f9b70!important}.v111-science-chip.error{color:#ff7a7a!important;border-color:#a84a4a!important}.v111-science-chip.busy{color:#ffd36a!important;border-color:#9b7a37!important}
       .v111-science-overlay{position:fixed;inset:0;z-index:6500;display:grid;place-items:center;padding:22px;background:rgba(0,0,0,.78);backdrop-filter:blur(7px)}
-      .v111-science-card{width:min(980px,96vw);max-height:88vh;overflow:auto;border:1px solid #66e7ff;background:#06131d;color:#eefaff;border-radius:7px;box-shadow:0 30px 110px #000;padding:24px}
+      .v111-science-card{width:100%;max-width:980px;max-height:88vh;overflow:auto;border:1px solid #66e7ff;background:#06131d;color:#eefaff;border-radius:7px;box-shadow:0 30px 110px #000;padding:24px}
       .v111-science-card h2{font-size:30px;margin:0 0 8px}.v111-science-card h3{font-size:15px;text-transform:uppercase;letter-spacing:.1em;color:#66e7ff;margin:0 0 7px}.v111-science-card p,.v111-science-card li{font-size:17px;line-height:1.55}.v111-science-card .muted{color:#9cb4c2}
-      .v111-science-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}.v111-science-badge{display:inline-block;border:1px solid #3f9b70;color:#75e7ae;padding:5px 8px;border-radius:3px;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.07em}
+      .v111-science-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}.v111-science-close{min-width:44px;min-height:44px;border:1px solid #3a7896;background:#071722;color:#eefaff;border-radius:4px;font-size:26px;line-height:1}.v111-science-close:hover,.v111-science-close:focus-visible{border-color:#66e7ff}.v111-science-badge{display:inline-block;border:1px solid #3f9b70;color:#75e7ae;padding:5px 8px;border-radius:3px;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.07em}
       .v111-science-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.v111-science-panel{border:1px solid #23495f;background:#071722;padding:17px;border-radius:5px}.v111-science-panel strong{display:block;font-size:20px;line-height:1.35}.v111-science-panel .status{font-size:25px;font-weight:950;margin:7px 0}.v111-science-panel .status.open,.v111-science-panel .status.continue{color:#6de4a4}.v111-science-panel .status.caution,.v111-science-panel .status.modify{color:#ffd166}.v111-science-panel .status.hold,.v111-science-panel .status.abort{color:#ff7373}
       .v111-science-proof{margin-top:14px;border-top:1px solid #23495f;padding-top:14px}.v111-science-proof ul{padding-left:22px}.v111-science-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.v111-science-actions button{min-height:44px;padding:10px 15px;border:1px solid #3a7896;background:#071722;color:#eefaff;border-radius:4px;font-weight:850;font-size:16px}.v111-science-actions button:hover{border-color:#66e7ff}
-      @media(max-width:760px){.v111-science-grid{grid-template-columns:1fr}}
+      @media(max-width:820px){.v111-science-chip{width:44px!important;min-width:44px!important;max-width:44px!important;padding:5px!important;overflow:hidden;font-size:0!important;white-space:nowrap}.v111-science-chip:before{content:"PY";font-size:11px;letter-spacing:.08em}}
+      @media(max-width:760px){.v111-science-overlay{padding:10px}.v111-science-card{padding:17px}.v111-science-grid{grid-template-columns:1fr}}
     `;
     document.head.appendChild(style);
   }
@@ -67,7 +69,7 @@
 
   function ensureStatusChip(){
     ensureStyle();
-    const host=document.querySelector("#v110HudShell .v110-top-actions");
+    const host=document.querySelector("#v110HudShell .v110-rail-operator");
     if(!host)return;
     let button=document.getElementById(STATUS_ID);
     if(!button){
@@ -76,11 +78,12 @@
       button.type="button";
       button.className="v110-btn v111-science-chip";
       button.addEventListener("click",()=>openDiagnostics());
-      button.title="Python Intelligence runs in Shadow Mode on v1.13.0. It may calculate a second opinion but cannot mutate the live Strategic OS plan.";
+      button.title="Python Intelligence runs in Shadow Mode on v1.14.0. It may calculate a second opinion but cannot mutate the live Strategic OS plan.";
       host.prepend(button);
     }
     const row=scienceState(),className=`v110-btn v111-science-chip ${row.cls}`;
     if(button.textContent!==row.label)button.textContent=row.label;
+    button.setAttribute?.("aria-label",row.label);
     if(button.className!==className)button.className=className;
   }
 
@@ -145,8 +148,10 @@
     return `<section class="v111-science-proof"><h3>Proof & uncertainty</h3>${refs?`<ul>${refs}</ul>`:""}${uncertainty?`<p class="muted"><b>Still unknown:</b></p><ul class="muted">${uncertainty}</ul>`:""}<p class="muted">Shadow Mode guarantee: canonical state mutated = <b>${body.runtime?.canonical_state_mutated===false?"false":"unknown"}</b>. Python output is advisory and cannot replace deterministic HUD state.</p></section>`;
   }
 
+  function closeOverlay(){document.getElementById(OVERLAY_ID)?.remove();const target=overlayReturnFocus;overlayReturnFocus=null;if(target?.isConnected)target.focus()}
+  function trapDialogFocus(event,overlay){if(event.key==="Escape"){event.preventDefault();closeOverlay();return}if(event.key!=="Tab")return;const rows=[...overlay.querySelectorAll("button,[href],input,select,textarea,[tabindex]:not([tabindex='-1'])")].filter(node=>!node.disabled);if(!rows.length)return;const first=rows[0],last=rows.at(-1);if(document.activeElement===overlay){event.preventDefault();(event.shiftKey?last:first).focus()}else if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}}
   function openOverlay(title,content){
-    ensureStyle();let overlay=document.getElementById(OVERLAY_ID);if(overlay)overlay.remove();overlay=document.createElement("div");overlay.id=OVERLAY_ID;overlay.className="v111-science-overlay";overlay.innerHTML=`<section class="v111-science-card"><div class="v111-science-head"><div><span class="v111-science-badge">Experimental · v1.13.0</span><h2>${safe(title)}</h2></div></div>${content}<div class="v111-science-actions"><button id="v111ScienceClose">Close</button></div></section>`;document.body.appendChild(overlay);overlay.addEventListener("click",event=>{if(event.target===overlay)overlay.remove()});document.getElementById("v111ScienceClose")?.addEventListener("click",()=>overlay.remove());
+    ensureStyle();const trigger=document.activeElement;closeOverlay();overlayReturnFocus=trigger;const overlay=document.createElement("div");overlay.id=OVERLAY_ID;overlay.className="v111-science-overlay";overlay.tabIndex=-1;overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");overlay.setAttribute("aria-labelledby","v111ScienceTitle");overlay.innerHTML=`<section class="v111-science-card"><div class="v111-science-head"><div><span class="v111-science-badge">Experimental · v1.14.0</span><h2 id="v111ScienceTitle">${safe(title)}</h2></div><button class="v111-science-close" id="v111ScienceCloseTop" aria-label="Close Python Intelligence Diagnostics">×</button></div>${content}<div class="v111-science-actions"><button id="v111ScienceClose">Close</button></div></section>`;document.body.appendChild(overlay);overlay.addEventListener("click",event=>{if(event.target===overlay)closeOverlay()});overlay.addEventListener("keydown",event=>trapDialogFocus(event,overlay));["v111ScienceCloseTop","v111ScienceClose"].forEach(id=>document.getElementById(id)?.addEventListener("click",closeOverlay));requestAnimationFrame(()=>{overlay.scrollTop=0;document.getElementById("v111ScienceCloseTop")?.focus({preventScroll:true})});
   }
 
   function audioHtml(){

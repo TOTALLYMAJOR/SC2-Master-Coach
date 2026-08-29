@@ -4,15 +4,25 @@ from datetime import datetime, timezone
 from hashlib import sha256
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
+import ipaddress
 import json
 import os
 import re
+import subprocess
 import sys
+import tempfile
 
 from flask import Blueprint, current_app, jsonify, request
 
-from case_workspace import case_directory, workspace_root
-from replay_intelligence import build_case_learning_summary
+from case_workspace import (
+    CaseIntegrityError,
+    case_directory,
+    load_case_records,
+    persist_case_records,
+    workspace_root,
+)
+from replay_intelligence import build_case_learning_index, build_case_learning_summary
 
 
 master_intel_api = Blueprint("master_intel", __name__, url_prefix="/api/intel")
@@ -21,6 +31,34 @@ PACK_SCHEMA_VERSION = "0.1"
 MAX_PACK_BYTES = 5 * 1024 * 1024
 PACK_ID = re.compile(r"^[a-z0-9][a-z0-9._-]{2,63}$")
 VALID_RACES = {"Protoss", "Terran", "Zerg", "Random", "Unknown"}
+
+
+def _loopback_address(value: str | None) -> bool:
+    try:
+        return ipaddress.ip_address(str(value or "").split("%", 1)[0]).is_loopback
+    except ValueError:
+        return str(value or "").lower() == "localhost"
+
+
+@master_intel_api.before_app_request
+def enforce_loopback_browser_authority():
+    """Reject DNS-rebinding and cross-origin mutation of the local application."""
+    if not _loopback_address(request.remote_addr):
+        return jsonify({"ok": False, "error": "The local service accepts loopback requests only."}), 403
+    try:
+        host = urlsplit(request.host_url).hostname
+    except ValueError:
+        host = None
+    if not _loopback_address(host):
+        return jsonify({"ok": False, "error": "The request Host is not a loopback address."}), 403
+    fetch_site = str(request.headers.get("Sec-Fetch-Site") or "").lower()
+    if fetch_site == "cross-site":
+        return jsonify({"ok": False, "error": "Cross-site browser requests are not allowed."}), 403
+    if request.method not in {"GET", "HEAD", "OPTIONS"}:
+        origin = request.headers.get("Origin")
+        if origin and origin.rstrip("/").lower() != request.host_url.rstrip("/").lower():
+            return jsonify({"ok": False, "error": "Cross-origin local mutations are not allowed."}), 403
+    return None
 
 
 def utc_now() -> str:
@@ -56,6 +94,29 @@ def _read_json(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError("Expected a JSON object.")
     return value
+
+
+def _atomic_write_json(path: Path, value: dict[str, Any]) -> None:
+    """Commit one local JSON record only after its complete payload reaches disk."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary = Path(handle.name)
+            json.dump(value, handle, indent=2, ensure_ascii=False)
+            handle.flush()
+            os.fsync(handle.fileno())
+        temporary.replace(path)
+    finally:
+        if temporary is not None and temporary.exists():
+            temporary.unlink()
 
 
 def _safe_pack_path(pack_id: str) -> Path:
@@ -110,10 +171,17 @@ def validate_player_pack(value: Any) -> dict[str, Any]:
             raise ValueError(f"Player {name} has unsupported race {race}.")
 
         identity = raw.get("identity") if isinstance(raw.get("identity"), dict) else {}
-        verified = bool(identity.get("verified", raw.get("verified", False)))
-        confidence = str(identity.get("confidence") or raw.get("identity_confidence") or ("high" if verified else "unverified")).strip().lower()
-        if confidence not in {"high", "moderate", "low", "unverified"}:
-            confidence = "unverified"
+        publisher_declared_verified = bool(
+            identity.get("publisher_declared_verified", identity.get("verified", raw.get("verified", False)))
+        )
+        publisher_declared_confidence = str(
+            identity.get("publisher_declared_confidence")
+            or identity.get("confidence")
+            or raw.get("identity_confidence")
+            or ("high" if publisher_declared_verified else "unverified")
+        ).strip().lower()
+        if publisher_declared_confidence not in {"high", "moderate", "low", "unverified"}:
+            publisher_declared_confidence = "unverified"
 
         coverage = raw.get("coverage") if isinstance(raw.get("coverage"), dict) else {}
         dossier = raw.get("dossier") if isinstance(raw.get("dossier"), dict) else {}
@@ -123,10 +191,17 @@ def validate_player_pack(value: Any) -> dict[str, Any]:
                 "display_name": name,
                 "race": race,
                 "aliases": [str(alias).strip() for alias in raw.get("aliases", []) if str(alias).strip()],
-                "identity": {"verified": verified, "confidence": confidence},
+                "identity": {
+                    "verified": False,
+                    "publisher_declared_verified": publisher_declared_verified,
+                    "confidence": "unverified",
+                    "publisher_declared_confidence": publisher_declared_confidence,
+                    "claim_source": "publisher_declared",
+                    "independently_verified": False,
+                },
                 "coverage": coverage,
                 "dossier": dossier,
-                "synthetic": bool(raw.get("synthetic", value.get("synthetic", False))),
+                "synthetic": bool(value.get("synthetic", False) or raw.get("synthetic", False)),
             }
         )
 
@@ -146,6 +221,20 @@ def validate_player_pack(value: Any) -> dict[str, Any]:
 
 def store_player_pack(value: dict[str, Any], *, source_filename: str) -> dict[str, Any]:
     normalized = validate_player_pack(value)
+    incoming_ids = {row["player_id"] for row in normalized["players"]}
+    installed_ids = {
+        row["player_id"]
+        for pack in load_player_packs()
+        if pack.get("pack_id") != normalized["pack_id"]
+        for row in pack.get("players") or []
+        if isinstance(row, dict) and row.get("player_id")
+    }
+    collisions = sorted(incoming_ids & installed_ids)
+    if collisions:
+        raise ValueError(
+            "player_id must be unique across installed packs; conflicting ID: "
+            + collisions[0]
+        )
     payload = json.dumps(normalized, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
     normalized["local_import"] = {
         "imported_at": utc_now(),
@@ -153,7 +242,7 @@ def store_player_pack(value: dict[str, Any], *, source_filename: str) -> dict[st
         "sha256": sha256(payload).hexdigest(),
     }
     path = _safe_pack_path(normalized["pack_id"])
-    path.write_text(json.dumps(normalized, indent=2, ensure_ascii=False), encoding="utf-8")
+    _atomic_write_json(path, normalized)
     return pack_summary(normalized)
 
 
@@ -177,7 +266,16 @@ def load_player_packs() -> list[dict[str, Any]]:
     packs: list[dict[str, Any]] = []
     for path in sorted(player_pack_root().glob("*.json")):
         try:
-            packs.append(_read_json(path))
+            stored = _read_json(path)
+            imported = stored.get("local_import") if isinstance(stored.get("local_import"), dict) else {}
+            claimed_digest = str(imported.get("sha256") or "")
+            unsigned = {key: value for key, value in stored.items() if key != "local_import"}
+            normalized = validate_player_pack(unsigned)
+            payload = json.dumps(normalized, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+            if not claimed_digest or sha256(payload).hexdigest() != claimed_digest:
+                continue
+            normalized["local_import"] = imported
+            packs.append(normalized)
         except (OSError, ValueError, json.JSONDecodeError):
             continue
     return packs
@@ -191,6 +289,9 @@ def flatten_players() -> list[dict[str, Any]]:
             if not isinstance(row, dict):
                 continue
             identity = row.get("identity") if isinstance(row.get("identity"), dict) else {}
+            publisher_claim = bool(
+                identity.get("publisher_declared_verified", identity.get("verified", False))
+            ) and not bool(identity.get("independently_verified", False))
             players.append(
                 {
                     **row,
@@ -199,8 +300,10 @@ def flatten_players() -> list[dict[str, Any]]:
                     "pack_version": summary["pack_version"],
                     "pack_synthetic": summary["synthetic"],
                     "patch_coverage": summary["patch_coverage"],
-                    "identity_label": "Verified" if identity.get("verified") else "Unverified",
+                    "identity_label": "Publisher-declared" if publisher_claim else "Unverified",
+                    "identity_trust": "publisher_declared" if publisher_claim else "unverified",
                     "identity_confidence": identity.get("confidence", "unverified"),
+                    "publisher_declared_confidence": identity.get("publisher_declared_confidence", "unverified"),
                 }
             )
     players.sort(key=lambda row: (str(row.get("display_name") or "").lower(), str(row.get("pack_title") or "").lower()))
@@ -213,34 +316,94 @@ def list_recent_cases(limit: int = 20) -> list[dict[str, Any]]:
     for path in root.iterdir():
         if not path.is_dir():
             continue
-        manifest = path / "manifest.json"
-        analysis = path / "analysis.json"
-        if not manifest.is_file() or not analysis.is_file():
-            continue
         try:
-            value = _read_json(manifest)
-        except (OSError, ValueError, json.JSONDecodeError):
+            value, analyzed, _learning = load_case_records(path.name)
+        except (OSError, ValueError, CaseIntegrityError):
+            # Preserve recovery discoverability without trusting any failed metadata.
+            # The directory name is already a bounded local case identifier; no
+            # replay-derived labels, players, patch, or matchup escape this branch.
+            if re.fullmatch(r"[a-f0-9]{12,64}", path.name) and (
+                path / "replay.SC2Replay"
+            ).is_file():
+                rows.append({
+                    "case_id": path.name,
+                    "display_name": "Replay needs re-import",
+                    "analysis_available": False,
+                    "integrity_status": "failed",
+                    "recovery_required": True,
+                    "recovery_action": "reimport_original_replay",
+                    "imported_at": None,
+                    "created_at": None,
+                    "patch": None,
+                    "matchup": None,
+                    "map": None,
+                })
             continue
+        source = analyzed.get("source") if isinstance(analyzed.get("source"), dict) else {}
         value["case_id"] = value.get("case_id") or path.name
         value["analysis_available"] = True
+        value["integrity_status"] = "verified_local"
+        value["recovery_required"] = False
         value["imported_at"] = value.get("created_at")
+        value["source_evidence_class"] = str(source.get("evidence_class") or "unknown")
         rows.append(value)
     rows.sort(key=lambda row: str(row.get("created_at") or ""), reverse=True)
     return rows[: max(1, min(limit, 100))]
 
 
-def load_learning_indexes(*, exclude_case_id: str | None = None) -> list[dict[str, Any]]:
+def _case_player_selection(case_id: str) -> dict[str, Any] | None:
+    try:
+        value = _read_json(case_directory(case_id) / "player-selection.json")
+    except (FileNotFoundError, ValueError, OSError, json.JSONDecodeError):
+        return None
+    pid = str(value.get("selected_player_pid") or "").strip()
+    return value if (
+        value.get("schema_version") == "1.0"
+        and value.get("case_id") == case_id
+        and value.get("authority") == "player_report"
+        and pid
+    ) else None
+
+
+def _played_at(value: Any) -> datetime | None:
+    try:
+        parsed = datetime.fromisoformat(str(value or "").replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def load_learning_indexes(
+    *, exclude_case_id: str | None = None, before_played_at: Any = None
+) -> list[dict[str, Any]]:
+    """Load only fingerprints whose local replay ownership was explicitly reported."""
+    target_played_at = _played_at(before_played_at)
+    if target_played_at is None:
+        return []
     indexes = []
     for row in list_recent_cases(100):
         case_id = str(row.get("case_id") or "")
         if not case_id or case_id == exclude_case_id:
             continue
+        selection = _case_player_selection(case_id)
+        if not selection:
+            continue
         try:
-            value = _read_json(case_directory(case_id) / "learning-index.json")
-        except (FileNotFoundError, ValueError, OSError, json.JSONDecodeError):
+            _manifest, analysis, _learning = load_case_records(case_id)
+            candidate_played_at = _played_at((analysis.get("replay") or {}).get("date"))
+            if candidate_played_at is None or candidate_played_at >= target_played_at:
+                continue
+            value = build_case_learning_index(analysis, selection["selected_player_pid"])
+        except (FileNotFoundError, ValueError, OSError, json.JSONDecodeError, CaseIntegrityError):
             continue
         if value.get("status") == "calculated":
-            indexes.append(value)
+            indexes.append({
+                **value,
+                "case_id": case_id,
+                "played_at": candidate_played_at.isoformat().replace("+00:00", "Z"),
+            })
     return indexes
 
 
@@ -275,6 +438,142 @@ def status():
     )
 
 
+def _platform_label() -> str:
+    if os.name == "nt":
+        return "Windows"
+    if sys.platform == "darwin":
+        return "macOS"
+    return "Linux"
+
+
+def _optional_readiness() -> dict[str, dict[str, Any]]:
+    optional: dict[str, dict[str, Any]] = {}
+    try:
+        from sc2_frame_capture import capture_status
+
+        capture = capture_status()
+        optional["frame_capture"] = {
+            "status": "ready" if capture.get("available") else "unavailable",
+            "manual_fallback": True,
+        }
+    except Exception:
+        optional["frame_capture"] = {"status": "unavailable", "manual_fallback": True}
+    try:
+        from python_strategy_science.storage import database_health
+
+        science = database_health()
+        optional["strategy_science"] = {
+            "status": "ready" if science.get("ok") else "unavailable",
+            "state_authority": "strategic_os",
+            "manual_fallback": True,
+        }
+    except Exception:
+        optional["strategy_science"] = {
+            "status": "unavailable", "state_authority": "strategic_os", "manual_fallback": True
+        }
+    try:
+        from python_strategy_science.voice import voice_status
+
+        voice = voice_status()
+        optional["voice"] = {
+            "status": "ready" if voice.get("ok") else "unavailable",
+            "offline": True,
+            "manual_fallback": True,
+        }
+    except Exception:
+        optional["voice"] = {"status": "unavailable", "offline": True, "manual_fallback": True}
+    return optional
+
+
+def _storage_write_status(root: Path) -> str:
+    temporary: Path | None = None
+    try:
+        root.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(
+            mode="wb", dir=root, prefix=".sc2mc-write-probe-", delete=False
+        ) as handle:
+            temporary = Path(handle.name)
+            handle.write(b"local-storage-probe")
+            handle.flush()
+            os.fsync(handle.fileno())
+        temporary.unlink()
+        temporary = None
+        return "ready"
+    except OSError:
+        return "unavailable"
+    finally:
+        if temporary is not None:
+            try:
+                temporary.unlink(missing_ok=True)
+            except OSError:
+                pass
+
+
+@master_intel_api.get("/support-report")
+def support_report():
+    """Return an allowlisted diagnostic summary without local paths or player data."""
+    try:
+        recent = list_recent_cases(100)
+        packs = load_player_packs()
+        players = flatten_players()
+        replay_storage_status = _storage_write_status(workspace_root())
+        player_library_status = _storage_write_status(player_pack_root())
+        parser_ready = True
+        try:
+            import sc2reader  # noqa: F401
+        except Exception:
+            parser_ready = False
+        return jsonify(
+            {
+                "schema_version": "1.0",
+                "generated_at": utc_now(),
+                "application": {
+                    "version": current_app.config.get("APP_VERSION", "unknown"),
+                    "platform": _platform_label(),
+                    "offline_only": bool(current_app.config.get("OFFLINE_ONLY", True)),
+                },
+                "core": {
+                    "local_service": "ready",
+                    "replay_parser": "ready" if parser_ready else "unavailable",
+                    "replay_storage": {"status": replay_storage_status, "case_count": len(recent)},
+                    "player_library": {
+                        "status": player_library_status, "pack_count": len(packs), "player_count": len(players)
+                    },
+                },
+                "optional": _optional_readiness(),
+                "privacy": {
+                    "filesystem_paths_included": False,
+                    "replay_or_player_identity_included": False,
+                    "raw_audio_included": False,
+                },
+            }
+        )
+    except Exception:
+        return jsonify({"ok": False, "error": "The local support report could not be generated."}), 503
+
+
+@master_intel_api.post("/storage/open")
+def open_storage():
+    payload = request.get_json(silent=True) or {}
+    target = payload.get("target")
+    roots = {"replays": workspace_root, "application": app_data_root}
+    if target not in roots:
+        return jsonify({"ok": False, "error": "Choose the replay or application data folder."}), 400
+    try:
+        directory = roots[target]().resolve()
+        if os.name == "nt":
+            os.startfile(str(directory))  # type: ignore[attr-defined]
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", str(directory)])
+        else:
+            subprocess.Popen(["xdg-open", str(directory)])
+        return jsonify({"ok": True, "target": target})
+    except Exception:
+        return jsonify(
+            {"ok": False, "error": "The folder could not be opened. Copy its path from Settings instead."}
+        ), 422
+
+
 @master_intel_api.get("/recent")
 def recent():
     try:
@@ -287,15 +586,80 @@ def recent():
 @master_intel_api.get("/cases/<case_id>")
 def case_detail(case_id: str):
     try:
-        directory = case_directory(case_id)
-        manifest = _read_json(directory / "manifest.json")
-        analysis = _read_json(directory / "analysis.json")
+        manifest, analysis, _learning_index = load_case_records(case_id)
+    except CaseIntegrityError:
+        return jsonify({
+            "ok": False,
+            "error": "Replay case integrity check failed. Re-import the original replay to repair it.",
+        }), 409
     except (FileNotFoundError, ValueError, OSError, json.JSONDecodeError):
         return jsonify({"ok": False, "error": "Replay analysis was not found."}), 404
-    learning = build_case_learning_summary(
-        analysis, load_learning_indexes(exclude_case_id=case_id)
+    stored_selection = _case_player_selection(case_id)
+    selected_player_pid = str((stored_selection or {}).get("selected_player_pid") or "")
+    analyses = analysis.get("analysis_by_player") or {}
+    selection_recovery_required = bool(selected_player_pid and selected_player_pid not in analyses)
+    if selected_player_pid and selected_player_pid not in analyses:
+        selected_player_pid = ""
+    if selected_player_pid:
+        learning = build_case_learning_summary(
+            analysis,
+            load_learning_indexes(
+                exclude_case_id=case_id,
+                before_played_at=(analysis.get("replay") or {}).get("date"),
+            ),
+            target_player_pid=selected_player_pid,
+        )
+    else:
+        learning = {
+            "status": "withheld",
+            "reason": "Choose which replay player is you before personal coaching is calculated.",
+            "requires_player_selection": True,
+        }
+    return jsonify(
+        {
+            "ok": True,
+            "manifest": manifest,
+            "analysis": analysis,
+            "learning": learning,
+            "selected_player_pid": selected_player_pid or None,
+            "selection_authority": "player_report" if selected_player_pid else "withheld",
+            "selection_recovery_required": selection_recovery_required,
+        }
     )
-    return jsonify({"ok": True, "manifest": manifest, "analysis": analysis, "learning": learning})
+
+
+@master_intel_api.post("/cases/<case_id>/player-selection")
+def select_case_player(case_id: str):
+    """Persist one local player-reported replay identity for longitudinal learning."""
+    try:
+        directory = case_directory(case_id)
+        manifest, analysis, _learning_index = load_case_records(case_id)
+    except CaseIntegrityError:
+        return jsonify({
+            "ok": False,
+            "error": "Replay case integrity check failed. Re-import the original replay to repair it.",
+        }), 409
+    except (FileNotFoundError, ValueError, OSError, json.JSONDecodeError):
+        return jsonify({"ok": False, "error": "Replay analysis was not found."}), 404
+    payload = request.get_json(silent=True) or {}
+    player_pid = str(payload.get("player_pid") or "").strip()
+    if not player_pid or player_pid not in (analysis.get("analysis_by_player") or {}):
+        return jsonify({"ok": False, "error": "Choose an available replay player."}), 400
+    selection = {
+        "schema_version": "1.0",
+        "case_id": case_id,
+        "selected_player_pid": player_pid,
+        "authority": "player_report",
+        "selected_at": utc_now(),
+    }
+    index = build_case_learning_index(analysis, player_pid)
+    try:
+        # Refresh all case-integrity bindings before the player report commit marker.
+        persist_case_records(case_id, manifest, analysis, index)
+        _atomic_write_json(directory / "player-selection.json", selection)
+    except (OSError, CaseIntegrityError):
+        return jsonify({"ok": False, "error": "Replay identity could not be saved locally."}), 503
+    return jsonify({"ok": True, "selection": selection})
 
 
 @master_intel_api.get("/player-packs")
@@ -360,9 +724,11 @@ def offline_policy():
             "ok": True,
             "guarantee": "Core journeys run without internet access. No replay, player pack, or coaching record is uploaded.",
             "automatic_update_checks": False,
+            "network_required": False,
+            "connect_policy": "self_only",
             "manual_update_steps": [
                 "Obtain a trusted installer or portable package outside the application.",
-                "Open Settings and select the local package for inspection.",
+                "Open Settings and select the local package to review its filename, type, and size.",
                 "Close SC2 Master Coach before running the installer or replacing the portable folder.",
                 "Keep a backup of the local data directory before major upgrades.",
             ],

@@ -57,7 +57,7 @@ const document = {
     return nodes.get(id) || null;
   },
   querySelector(selector) {
-    return selector === "#v110HudShell .v110-top-actions" ? host : null;
+    return selector === "#v110HudShell .v110-rail-operator" ? host : null;
   },
   addEventListener(type, callback) {
     listeners.set(type, callback);

@@ -8,6 +8,7 @@
   const OVERLAY_ID="v111VoiceOverlay";
   let status=null;
   let listening=false;
+  let overlayReturnFocus=null;
 
   const safe=value=>String(value??"").replace(/[<>&\"]/g,ch=>({"<":"&lt;",">":"&gt;","&":"&amp;",'\"':"&quot;"}[ch]));
   const setTextIfChanged=(node,text)=>{if(node.textContent!==text)node.textContent=text};
@@ -37,9 +38,10 @@
     if(button.title!==nextTitle)button.title=nextTitle;
   }
 
-  function closeOverlay(){document.getElementById(OVERLAY_ID)?.remove()}
+  function closeOverlay(){document.getElementById(OVERLAY_ID)?.remove();const target=overlayReturnFocus;overlayReturnFocus=null;if(target?.isConnected)target.focus()}
+  function trapDialogFocus(event,node){if(event.key==="Escape"){event.preventDefault();closeOverlay();return}if(event.key!=="Tab")return;const rows=[...node.querySelectorAll("button,[href],input,select,textarea,[tabindex]:not([tabindex='-1'])")].filter(item=>!item.disabled);if(!rows.length)return;const first=rows[0],last=rows.at(-1);if(document.activeElement===node){event.preventDefault();(event.shiftKey?last:first).focus()}else if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}}
   function overlay(title,body,actions=""){
-    closeOverlay();const node=document.createElement("div");node.id=OVERLAY_ID;node.className="v111-science-overlay";node.innerHTML=`<section class="v111-science-card"><div class="v111-science-head"><div><span class="v111-science-badge">Offline tactical voice</span><h2>${safe(title)}</h2></div></div>${body}<div class="v111-science-actions">${actions}<button id="v111VoiceClose">Close</button></div></section>`;document.body.appendChild(node);node.addEventListener("click",event=>{if(event.target===node)closeOverlay()});document.getElementById("v111VoiceClose")?.addEventListener("click",closeOverlay);return node;
+    const trigger=document.activeElement;closeOverlay();overlayReturnFocus=trigger;const node=document.createElement("div");node.id=OVERLAY_ID;node.className="v111-science-overlay";node.tabIndex=-1;node.setAttribute("role","dialog");node.setAttribute("aria-modal","true");node.setAttribute("aria-labelledby","v111VoiceTitle");node.innerHTML=`<section class="v111-science-card"><div class="v111-science-head"><div><span class="v111-science-badge">Offline tactical voice</span><h2 id="v111VoiceTitle">${safe(title)}</h2></div></div>${body}<div class="v111-science-actions">${actions}<button id="v111VoiceClose">Close</button></div></section>`;document.body.appendChild(node);node.addEventListener("click",event=>{if(event.target===node)closeOverlay()});node.addEventListener("keydown",event=>trapDialogFocus(event,node));document.getElementById("v111VoiceClose")?.addEventListener("click",closeOverlay);requestAnimationFrame(()=>{node.scrollTop=0;node.focus({preventScroll:true})});return node;
   }
 
   function statusBody(row){
@@ -89,7 +91,8 @@
     const permissionNode=document.getElementById("v110Permission");if(permissionNode)permissionNode.className=`v110-permission ${permission.status==="OPEN"?"open":permission.status==="HOLD"?"hold":""}`;
     const planState=document.querySelector("#v110HudShell .v110-plan-state");if(planState){const statusText=String(output.planStatus||"continue").toLowerCase();planState.className=`v110-plan-state ${statusText}`;planState.innerHTML=`<i></i>${safe(statusText.toUpperCase())}`}
     const next=document.getElementById("v110Next");if(next)next.innerHTML=(output.nextWindows||[]).slice(0,3).map(row=>`<div><time>${formatSeconds(row.earliestSecond)}–${formatSeconds(row.latestSecond)}</time><b>${safe(row.label)}</b></div>`).join("")||"<div><b>No upcoming window compiled.</b></div>";
-    document.querySelectorAll("#v110HudShell [data-signal]").forEach(button=>button.classList.toggle("active",button.dataset.signal===evidenceType));
+    document.querySelectorAll("#v110HudShell [data-signal]").forEach(button=>{const active=button.dataset.signal===evidenceType;button.classList.toggle("active",active);button.setAttribute("aria-pressed",String(active))});
+    const announcement=document.getElementById("v110DecisionAnnouncement");if(announcement)announcement.textContent=`${permission.status}. ${output.primaryAction||""} ${output.reason||""}`;
   }
 
   function formatSeconds(value){const seconds=Math.max(0,Math.floor(Number(value)||0));return `${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,"0")}`}
@@ -97,8 +100,8 @@
   function applyParsed(parsed,confirmed){
     for(const intent of parsed.intents||[]){
       if(intent.intent==="report_evidence"){
-        E.reportEvidence(intent.evidenceType,intent.payload||{},"player_voice",parsed.recognitionConfidence||1);
-        refreshHud(intent.evidenceType);
+        const handled=window.SC2MasterCoachHud?.reportEvidence?.(intent.evidenceType,{...(intent.payload||{}),confidence:parsed.recognitionConfidence<.5?"uncertain":parsed.recognitionConfidence<.8?"likely":"confirmed"});
+        if(!handled){E.reportEvidence(intent.evidenceType,intent.payload||{},"player_voice",parsed.recognitionConfidence||1);refreshHud(intent.evidenceType)}
       }else if(intent.intent==="ask_status"||intent.intent==="ask_why"||intent.intent==="ask_next"){
         window.SC2PythonShadow?.comparePlan?.();
       }else if(intent.intent==="pause"){

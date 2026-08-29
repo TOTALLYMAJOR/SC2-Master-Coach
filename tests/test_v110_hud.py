@@ -31,25 +31,25 @@ def test_v110_navigation_random_operation_and_no_manual_plan_browser():
         "Live HUD",
         "Spellbook",
         "Review",
-        "Deploy Random Operation",
-        "Reroll Operation",
+        "Deploy Practice Operation",
+        "Reroll Scenario",
         "chooseRandomOperation",
         "chooseRandomOneVOne",
         "chooseRandomTeam",
-        "Curated random",
+        "Experimental practice estimate",
     ):
         assert phrase in ui
-    assert "browse ten builds" in ui.lower()
+    assert "stop browsing builds" in ui.lower()
 
 
 def test_v110_command_shell_uses_truthful_sc2_status_and_original_navigation():
     ui = (STATIC / "v110-hud.js").read_text(encoding="utf-8")
     css = (STATIC / "v110-hud.css").read_text(encoding="utf-8")
     for phrase in (
-        "Mission Control",
+        "Setup",
         "Live Coach",
-        "Doctrine Lab",
-        "Debrief",
+        "Plan Reference",
+        "Session Review",
         "LOCAL-ONLY RUNTIME",
         "PLAYER-REPORTED INTEL",
         "No direct SC2 process access",
@@ -106,6 +106,11 @@ def test_v110_player_reports_evidence_and_engine_selects_branch():
         "extra_production",
         "move_out",
         "fast_third",
+        "function activeIntelSnapshot()",
+        'label:"EXPIRED"',
+        "Clear reported intel",
+        "function clearReportedIntel()",
+        "E.clearEvidence()",
     ):
         assert phrase in ui
 
@@ -176,3 +181,135 @@ def test_v110_replay_is_secondary_but_advanced_remains_reachable():
     assert "Replay" not in hud
     assert "Open Advanced Review" in ui
     assert "Open Advanced Command Center" in ui
+
+
+def test_v110_mission_control_carries_the_active_master_intel_drill():
+    ui = (STATIC / "v110-hud.js").read_text(encoding="utf-8")
+    for phrase in (
+        'ACTIVE_DRILL_KEY="sc2-master-coach:active-drill:v1"',
+        "ACTIVE_DRILL_SCHEMA_VERSION=2",
+        "function activeDrill()",
+        "function validDrillAuthority(row)",
+        "sourceLabel",
+        "Practice target / Guided execution",
+        "Selected practice target",
+        "Assigned practice scenario",
+        "The target above guides what to measure.",
+        "live Strategic OS and player-reported battlefield evidence govern plan changes.",
+        "Target:",
+        "Measure:",
+        "Source:",
+        "Local practice selection, not observed game state.",
+        "Analysis horizon",
+        "dimensionObservationLimit",
+        "coaching validity unverified",
+        "eligible player reports across",
+        'href="/#/practice"',
+    ):
+        assert phrase in ui
+    assert "loadJson(ACTIVE_DRILL_KEY,null)" in ui
+    assert 'saved?.schemaVersion!==ACTIVE_DRILL_SCHEMA_VERSION' in ui
+    assert 'text(row.evidenceAnchorStatus)==="calculated"' in ui
+    assert "saved.session.drill&&!validDrillAuthority(saved.session.drill)" in ui
+    assert "source=text(row.source),sourceLabel=text(row.sourceLabel)||source" in ui
+    assert "id&&title&&target&&why&&source&&measure&&scenario&&evidenceStatus" in ui
+    assert "const drill=currentDrill();" in ui
+    assert "const report=progressionReport(matchupKey())" in ui
+    assert "WORKER_CONTINUITY_STALL" in ui
+    assert "focusGoals" in ui
+    css = (STATIC / "v110-hud.css").read_text(encoding="utf-8")
+    assert ".v110-review>p.v110-analysis-horizon" in css
+    assert ".v110-review h1{font-size:34px" in css
+    assert "Context aligned" in ui
+    assert "Player-chosen baseline" in ui
+    assert "Transfer practice" in ui
+
+
+def test_guided_execution_keeps_hud_route_compatibility_and_practice_return():
+    app = (ROOT / "app.py").read_text(encoding="utf-8")
+    legacy = (STATIC / "legacy-index.html").read_text(encoding="utf-8")
+    assert '@app.get("/hud")' in app
+    assert '(STATIC / "legacy-index.html").read_text' in app
+    assert "SC2 Master Coach — Guided Execution" in legacy
+    assert "Master Coach // Guided Execution" in legacy
+    assert "Guided Execution is a coaching interface, not gameplay automation." in legacy
+    assert 'href="/#/practice"' in legacy
+    assert "Return to Practice" in legacy
+    assert "Legacy Command HUD" not in legacy
+
+
+def test_guided_execution_narrow_layout_preserves_priority_without_horizontal_status_scroll():
+    css = (STATIC / "v110-hud.css").read_text(encoding="utf-8")
+    legacy = (STATIC / "legacy-index.html").read_text(encoding="utf-8")
+    assert ".v110-statusbar{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:hidden}" in css
+    assert ".v110-status-cell:nth-of-type(2),.v110-status-cell:nth-of-type(7){display:none}" in css
+    assert ".v110-return{position:relative;right:auto;top:auto;z-index:450;display:flex;width:100%" in css
+    assert "text-decoration:none" in css
+    assert ".v110-practice-focus{display:flex;flex-direction:column;gap:12px}" in css
+    assert ".v110-deploy-cta{position:static;margin-top:16px" in css
+    assert ".v110-deploy-cta>div{display:block}" in css
+    assert "#v110Start{position:fixed;left:12px;right:12px;bottom:12px" in css
+    assert 'class="v110-return" style=' not in legacy
+
+
+def test_guided_execution_guards_sync_focus_and_1v1_replay_targets():
+    ui = (STATIC / "v110-hud.js").read_text(encoding="utf-8")
+    for phrase in (
+        "let syncInProgress=false",
+        'if(!currentPlan()){toast("Deploy a practice operation before synchronizing the match clock.")',
+        'if(syncInProgress){toast("Clock synchronization is already in progress.")',
+        'focusId:"v110Action"',
+        "function focusSelector(node)",
+        "drillKey:drillIdentity()",
+        "Replay-derived practice targets are scoped to 1v1.",
+        'window.SC2MasterCoachHud={reportEvidence:',
+    ):
+        assert phrase in ui
+
+
+def test_guided_execution_persists_and_recovers_interrupted_sessions_truthfully():
+    ui = (STATIC / "v110-hud.js").read_text(encoding="utf-8")
+    css = (STATIC / "v110-hud.css").read_text(encoding="utf-8")
+    for phrase in (
+        'ACTIVE_EXECUTION_KEY="sc2-master-coach:active-execution:v1"',
+        'SESSION_RECEIPTS_KEY="sc2-master-coach:execution-receipts:v1"',
+        "function executionSnapshot()",
+        "function persistExecution()",
+        "function restoreExecution()",
+        "function appendExecutionReceipt",
+        "Session resumed at",
+        "Clock is approximate until you resync",
+        "Resume session",
+        "End session & review",
+        "Latest local session receipt",
+        "Reported checkpoint consistency",
+        "neither proves gameplay outcomes or improvement",
+        "Resume or discard the interrupted session before starting another",
+    ):
+        assert phrase in ui
+    assert 'timerRunning=false;timerSynced=false' in ui
+    assert '!["brief","hud","spellbook"].includes(view)' in ui
+    assert "persistExecution();if(mode!==\"1v1\")return" in ui
+    assert ".v110-resume-card" in css
+    assert ".v110-receipt" in css
+    assert ".v110-btn.end-session" in css
+
+
+def test_guided_execution_preserves_native_keyboard_actions_and_announces_decisions():
+    ui = (STATIC / "v110-hud.js").read_text(encoding="utf-8")
+    for phrase in (
+        'id="v110DecisionAnnouncement"',
+        "button,a,summary,input,select,textarea,[contenteditable='true']",
+        'closeOverlay("v110Palette");fn()',
+        'window.confirm("Discard this interrupted session?',
+        'setText("v110DecisionAnnouncement",announcement)',
+        'document.querySelector(".v111-science-overlay")',
+        'aria-label="${safe(label)}"',
+        '.v110-help[data-tip]',
+        'button.dataset.tip',
+    ):
+        assert phrase in ui
+    hud_markup = ui.split("function hudView", 1)[1].split("function liveOutput", 1)[0]
+    assert 'id="v110Pause" aria-pressed' not in hud_markup
+    assert hud_markup.index('class="v110-scenario-box"') < hud_markup.index('id="v110Next"')
+    assert 'permissionNode.className=`v110-permission ${o.permission===' in ui

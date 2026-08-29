@@ -14,7 +14,9 @@ export async function render({ root, route, app }) {
   const playerId = route.params[0];
   const player = app.state.players.find((row) => row.player_id === playerId);
   if (!player) {
-    root.innerHTML = `<section class="route-head"><div><span class="eyebrow">Player dossier</span><h1>Player record not found.</h1><p>The pack may have been removed or the player ID is invalid.</p></div><a class="button secondary" href="#/players">Return to players</a></section>`;
+    const unavailable = app.resourceUnavailable("players");
+    root.innerHTML = `<section class="route-head"><div><span class="eyebrow">Player dossier</span><h1>${unavailable ? "Player library unavailable." : "Player record not found."}</h1><p>${unavailable ? "The local service could not confirm this record. Your player packs were not changed." : "The pack may have been removed or the player ID is invalid."}</p></div><div class="button-row">${unavailable ? '<button class="button primary" data-resource-retry="players">Retry local data</button>' : ""}<a class="button secondary" href="#/players">Return to players</a></div></section>`;
+    app.wireResourceRetry(root);
     return;
   }
 
@@ -27,7 +29,7 @@ export async function render({ root, route, app }) {
   root.innerHTML = `
     <section class="route-head compact">
       <div><span class="eyebrow">Player dossier · local evidence</span><h1>${app.safe(player.display_name)}</h1><p>Every claim is limited to the imported pack and its declared patch coverage.</p></div>
-      <div class="button-row"><a class="button secondary" href="#/players">Back to players</a><a class="button primary" href="#/compare?player=${encodeURIComponent(player.player_id)}">Compare</a></div>
+      <div class="button-row"><a class="button secondary" href="#/players">Back to players</a><a class="button primary" href="#/practice?reference=${encodeURIComponent(player.player_id)}">Use in Practice</a></div>
     </section>
 
     ${smallSample ? '<p class="notice warn"><strong>Small sample:</strong> this dossier contains fewer than five supporting replays. Treat patterns as provisional.</p>' : ""}
@@ -38,7 +40,7 @@ export async function render({ root, route, app }) {
         <div class="identity-mark" aria-hidden="true">${app.safe(initials)}</div>
         <h1>${app.safe(player.display_name)}</h1>
         <p>${app.safe(player.race)} reference · ${app.safe(player.pack_title)}</p>
-        <div class="badges"><span class="badge ${player.identity?.verified ? "good" : "warn"}">${app.safe(player.identity_label)}</span><span class="badge">${app.safe(player.identity_confidence)}</span>${player.synthetic ? '<span class="badge warn">Synthetic</span>' : ""}</div>
+        <div class="badges"><span class="badge ${player.identity?.independently_verified ? "good" : "warn"}">${app.safe(player.identity_label)}</span><span class="badge">Publisher claim: ${app.safe(player.publisher_declared_confidence)}</span>${player.synthetic ? '<span class="badge warn">Synthetic</span>' : ""}</div>
         <div class="stat-grid" style="grid-template-columns:1fr 1fr;margin-top:18px">
           <div class="stat-cell"><span class="stat-label">Replays</span><strong>${sampleSize || "—"}</strong></div>
           <div class="stat-cell"><span class="stat-label">Race</span><strong style="font-size:17px">${app.safe(player.race)}</strong></div>
@@ -64,4 +66,8 @@ export async function render({ root, route, app }) {
         </article>
       </div>
     </section>`;
+  if (app.resourceStale("players")) {
+    root.insertAdjacentHTML("afterbegin", app.resourceIssueMarkup(["players"]));
+    app.wireResourceRetry(root);
+  }
 }

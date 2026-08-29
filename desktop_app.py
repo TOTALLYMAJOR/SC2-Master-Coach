@@ -15,8 +15,8 @@ from waitress import create_server
 from app import app
 
 
-APP_TITLE = "SC2 Master Coach — Live Coach"
-DEFAULT_ROUTE = "/hud"
+APP_TITLE = "SC2 Master Coach"
+DEFAULT_ROUTE = "/"
 DEFAULT_WIDTH = 1560
 DEFAULT_HEIGHT = 980
 
@@ -76,8 +76,8 @@ def wait_until_ready(host: str, port: int, timeout: float = 8.0) -> bool:
 
 def configure_launch_context() -> None:
     # The NSIS installer associates .SC2Replay with this executable. When a
-    # replay path is passed on launch, the local API analyzes it and the HUD
-    # opens directly into Replay Intelligence.
+    # replay path is passed on launch, Master Intel consumes the local launch
+    # context and opens the persisted replay review.
     for arg in sys.argv[1:]:
         candidate = Path(arg.strip('"')).expanduser()
         if candidate.suffix.lower() == ".sc2replay" and candidate.exists():

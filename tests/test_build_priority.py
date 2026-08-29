@@ -20,4 +20,4 @@ def test_preserved_command_hud_loads_build_priority_assets():
     assert '<link rel="stylesheet" href="/build-priority.css">' in index
     assert '<script src="/build-priority.js"></script>' in index
     assert index.index('id="buildQueue"') < index.index('class="tactical-map"')
-    assert "Return to Master Intel" in index
+    assert "Return to Practice" in index

@@ -1,4 +1,4 @@
-# SC2 Master Coach — Combat HUD + Strategic OS
+# SC2 Master Coach — Local Replay-to-Execution Improvement Loop
 <img width="320" height="480" alt="image" src="https://github.com/user-attachments/assets/49cb24af-f08e-4b3b-a831-8d723696be69" />
 <img width="800" height="1200" alt="image" src="https://github.com/user-attachments/assets/c2f65872-c9e9-456b-926f-e4d8aad730ce" />
 <img width="1000" height="583" alt="image" src="https://github.com/user-attachments/assets/51228fe7-af25-4eab-bde3-71b2862fe991" />
@@ -7,17 +7,23 @@
 
 **Created by MBMapps**
 
-SC2 Master Coach is a local-first StarCraft II strategic decision aid designed around one rule:
+SC2 Master Coach is a local-first StarCraft II improvement system designed around one loop:
 
-> **The player reports the battlefield. Master Coach maintains the operation and surfaces only the decision that matters now.**
+> **Review bounded local evidence, choose one explicit practice drill, carry it into Guided Execution, and let player-reported battlefield evidence control every live adjustment.**
+
+Master Intel at `/` is the primary product shell. Guided Execution remains available at `/hud` as the live practice mode inside that improvement loop. Replay-derived facts, provisional practice choices, compatible reference context, and live player reports remain visibly distinct.
 
 > **Canonical state:** Start with [`PROJECT_STATE.md`](PROJECT_STATE.md) for the reconciled product journey, capability lifecycle, proof boundaries, blockers, and next proof event. Release notes below are historical claims and do not by themselves prove current deployment or use.
+
+**Next candidate identity:** `1.14.0` is reserved in the current worktree but is not yet a committed, built, verified, or published release. Tagged Windows builds create checksum-bound draft releases for acceptance before publication.
+
+**Local replay migration:** replay cases created before the integrity-bound case format remain visible as **Replay needs re-import**, but cannot supply facts or coaching until the original authorized replay is imported again. The app does not silently trust or re-sign legacy metadata.
 
 The live strategy baseline targets **StarCraft II 5.0.16b**, including the eight-worker economy introduced in 5.0.16 and the later 5.0.16b balance hotfix. Timing windows are coaching benchmarks; reported battlefield evidence outranks a memorized script.
 
 Official patch reference: <https://news.blizzard.com/en-us/article/24291949/starcraft-ii-5-0-16b-hotfix-patch-notes>
 
-## v1.13.0 — Adaptive Live Coach Windows release
+## v1.13.0 — Adaptive Live Coach Windows release (historical release narrative)
 
 The Combat HUD now derives timed practice checkpoints from the concrete matchup plan selected for the operation. A checkpoint can combine a worker range with planned infrastructure, for example `3 Gateways · 29–35 Probes`, and asks the player to report `On track`, `Behind`, or `Plan changed`.
 
@@ -195,9 +201,9 @@ Download the latest release assets:
 - **`SC2-Master-Coach-Setup.exe`** — recommended
 - **`SC2-Master-Coach-Portable.zip`** — no-install alternative
 
-The installer is per-user, creates Start Menu and desktop shortcuts, installs WebView2 when required, supports uninstall, and associates `.SC2Replay` files with SC2 Master Coach.
+The installer uses the dedicated per-user application directory, creates Start Menu and desktop shortcuts, installs WebView2 when required, and guards uninstall against an unexpected path. It adds **Open with SC2 Master Coach** for `.SC2Replay` files without replacing the player's existing default association.
 
-The Windows desktop application opens directly into the Live Coach. Master Intel and the deeper research surfaces remain available from inside the app.
+The Windows desktop application opens into Master Intel. Guided Execution remains available from the active Practice drill, while associated `.SC2Replay` files enter the replay-review side of the same local improvement loop.
 
 The application remains unsigned under the zero-cost release constraint, so Windows SmartScreen may initially display **Unknown Publisher**.
 

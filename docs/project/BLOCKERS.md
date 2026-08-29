@@ -5,7 +5,7 @@ Authority: [`.project/state.json`](../../.project/state.json). Priority means im
 ## BLK-001 — Clean-Windows real-replay acceptance missing
 
 - Priority: P1
-- Evidence: tests and workflow definitions exist; no current external Windows runtime receipt was inspected.
+- Evidence: local tests, pinned direct desktop dependencies, a fixed-path guarded installer definition, an exact-SHA draft-release workflow, a build- or clean-source-bound genuine-replay smoke contract, and a privacy-bounded operator proof kit exist; no consented genuine replay run, current hosted workflow, or external Windows runtime receipt was inspected.
 - Affected goals: GOAL-001, GOAL-003
 - Affected journey: JRN-001
 - Dependencies: none
@@ -38,13 +38,8 @@ Authority: [`.project/state.json`](../../.project/state.json). Priority means im
 - Dependency: BLK-001
 - Resolution condition: current provider receipts plus consented usage, retention, outcome, and transaction evidence are reconciled.
 
-## BLK-005 — Primary product authority inconsistent
+## Resolved on 2026-08-27 — Former BLK-005
 
-- Priority: P2
-- Evidence: `app.py` makes Master Intel the default, while README release framing centers the Combat HUD and the Milestone 0 record says Master Intel was not released.
-- Affected goal: GOAL-001
-- Affected journeys: JRN-001, JRN-002
-- Dependencies: none
-- Resolution condition: product owner confirms the primary journey; routing, README, release positioning, and the next proof event are reconciled to it.
+The user-directed implementation accepted `DEC-003`: Master Intel owns the replay-to-execution improvement loop and Guided Execution is the supporting live mode. README positioning, route labels, Practice handoff, the NEXT proof event, and canonical state now agree. This removes the authority blocker; it does not provide clean-Windows, real-replay, coaching-effectiveness, usage, or commercial proof.
 
 There are no repository-evidenced P0 blockers at this reconciliation. Missing evidence is `UNVERIFIED`, not failure.

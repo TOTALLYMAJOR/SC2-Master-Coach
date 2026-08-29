@@ -1,6 +1,6 @@
 # Decision Ledger
 
-This register adopts existing decisions; it does not rewrite history. `DEC-003` is explicitly unresolved because current implementation and product framing disagree.
+This register adopts existing decisions; it does not rewrite history. `DEC-003` now records the accepted product hierarchy that resolved the former implementation-versus-framing conflict.
 
 ## DEC-001 — Strategic OS owns live state
 
@@ -21,31 +21,31 @@ This register adopts existing decisions; it does not rewrite history. `DEC-003` 
 
 - Date: 2026-08-22
 - Context: replay, voice, player-reference, and update behavior can expose private local data or create hidden operational dependencies.
-- Decision: bind Flask to loopback, keep browser connections self-only, disable automatic update calls, store evidence locally, and make optional network features explicit.
+- Decision: bind Flask to loopback, keep browser connections self-only, reject non-loopback Host values, cross-site requests, and cross-origin mutations, disable automatic update calls, store evidence locally, and make optional network features explicit.
 - Alternatives Considered: cloud-first service; background update/provider calls; browser-direct external integrations; the chosen local-first boundary.
 - Why Chosen: privacy, zero-cost operation, predictable latency, offline use, and explicit evidence authority.
 - Authority: executable configuration and Master Intel implementation record; product owner confirmation is implicit rather than separately recorded.
 - Affected Components: `app.py`, desktop shell, Master Intel data paths, CSP, update endpoints, voice runtime.
-- Evidence: `app.py:apply_offline_security_headers`; `test_offline_boundary_disables_background_update_and_external_connections`.
+- Evidence: `app.py:apply_offline_security_headers`; `master_intel.py:enforce_loopback_browser_authority`; offline-boundary and DNS-rebinding/cross-origin tests.
 - Reversible?: yes, through an explicit opt-in integration decision with privacy and fallback controls.
 - Supersedes: older automatic-update behavior retained only as manual compatibility endpoints.
 - Status: ACTIVE
 - Revisit Trigger: any feature requires an external runtime service, background network traffic, cloud storage, or provider credentials.
 
-## DEC-003 — Master Intel is the executable default
+## DEC-003 — Master Intel owns the improvement loop; Guided Execution is supporting
 
-- Date: 2026-08-22 implementation; reconciled 2026-08-25
-- Context: Master Intel Milestone 0 changed `/` to the offline replay-intelligence shell and preserved the Combat HUD at `/hud`; current README framing still centers the Combat HUD.
-- Decision: current executable behavior treats Master Intel as primary and the Combat HUD as a supporting journey. This records implementation truth, not final product-owner intent.
+- Date: 2026-08-22 implementation; product hierarchy accepted and reconciled 2026-08-27
+- Context: Master Intel became the executable default while historical release framing still centered the Combat HUD. The product-capability audit recommended one sequential improvement loop rather than competing product centers.
+- Decision: Master Intel owns browser and Windows entry, replay-player identity selection, contextual review, and exactly one persistent active drill. Guided Execution at `/hud` is the supporting live mode; the drill may constrain experimental plan selection but never supersedes Strategic OS or player-report authority.
 - Alternatives Considered: Combat HUD remains default; Master Intel becomes default; a neutral chooser becomes default.
-- Why Chosen: no explicit current authority resolves the product-positioning conflict, so the running route is recorded without rewriting the conflicting claim.
-- Authority: current Flask route and tests. Product-owner authority is REQUIRED to make this stable product policy.
+- Why Chosen: it joins the strongest evidence and action models into one resumable user loop without adding a third authority or fabricating comparison.
+- Authority: user-directed implementation on 2026-08-27 plus current Flask routes and focused tests.
 - Affected Components: `/`, `/hud`, onboarding, README, release narrative, next proof event.
-- Evidence: `app.py:index`; `app.py:legacy_hud`; `docs/master-intel-milestone-0.md`; Master Intel route test.
+- Evidence: `README.md`; `desktop_app.py`; `app.py:index`; replay identity and Practice routes; active-drill, Windows-entry, and HUD handoff tests.
 - Reversible?: yes.
-- Supersedes: older default-HUD behavior in executable routing, but not yet the product thesis.
-- Status: IMPLEMENTED_WITH_DOCUMENTATION_DRIFT
-- Revisit Trigger: immediate product-owner confirmation or any release-positioning change.
+- Supersedes: older default-HUD product thesis and the provisional documentation-drift status of this decision.
+- Status: ACTIVE
+- Revisit Trigger: real-player evidence shows the sequential review-to-execution loop is less understandable or less valuable than a different hierarchy.
 
 ## DEC-004 — One machine ledger, multiple evidence views
 
@@ -92,20 +92,20 @@ This register adopts existing decisions; it does not rewrite history. `DEC-003` 
 - Status: ACTIVE
 - Revisit Trigger: exact fog-of-war reconstruction becomes available, validated matchup policies are registered, or human review establishes a stronger grading contract.
 
-## DEC-007 — Longitudinal learning fails closed on compatibility
+## DEC-007 — Longitudinal learning fails closed on chronology, opening compatibility, and observability
 
 - Date: 2026-08-26
 - Context: comparing unrelated games creates persuasive but invalid patterns, while returning a list of every detected issue overloads the learner.
-- Decision: persist one compact learning index per case; compare only exact race, matchup, patch, map, and duration buckets; exclude win/loss and opponent intent; require at least two compatible games for recurrence; return at most one provisional correction.
+- Decision: persist one explicit player-reported identity and one player-scoped learning index per case; exclude unselected cases and prevent both sides of one replay from entering the personal cohort; compare first-five-minute behavior only across chronologically prior replays with exact race, matchup, patch, map, game mode, and complete opening coverage. Total match duration remains descriptive rather than a cohort gate because it is outcome-dependent. Exclude win/loss and opponent intent; require at least two signal-observable compatible games for recurrence; treat missing fields and sparse intervals as withheld rather than absence or duration; rank one provisional correction by a disclosed 95% Wilson recurrence lower bound, then count and current evidence timing while expert priority remains `UNVERIFIED`. Progression reports player-reported consistency rather than mastery, and evidence confidence requires both report volume and distinct sessions. Two latest met reports from distinct sessions create readiness for replay review—not mastery—and multiple distinct met follow-up replays create a player decision to keep or replace the target, never causal or durable-improvement proof.
 - Alternatives Considered: compare every replay; use win rate as the main feature; infer opponent archetypes; return every issue; the chosen strict cohort and one-correction contract.
 - Why Chosen: makes longitudinal processing efficient and keeps recommendations attributable to compatible evidence.
 - Authority: normalized compatibility fingerprint and content-addressed local case index.
 - Affected Components: `replay_intelligence.py`, `case_workspace.py`, `master_intel.py`, Master Intel replay route.
-- Evidence: `test_learning_summary_uses_strict_cohorts_and_returns_one_provisional_correction`.
+- Evidence: `test_learning_summary_uses_strict_cohorts_and_returns_one_provisional_correction`; `test_two_explicitly_owned_cases_unlock_personal_recurrence`; `test_total_game_duration_is_descriptive_not_a_first_five_cohort_gate`; `test_larger_cohort_can_outrank_perfect_two_game_rate_on_conservative_strength`; `test_signal_absence_is_withheld_when_required_fields_are_missing`; `test_sparse_single_samples_do_not_manufacture_exposure_windows`; `test_recurrence_denominator_excludes_games_without_signal_observability`; `test_player_report_confidence_requires_distinct_sessions_not_checkpoint_volume`; `test_focus_graduation_requires_met_reports_in_two_distinct_sessions`; `test_later_uncertain_report_blocks_focus_graduation`; `test_replay_followup_withholds_unknown_or_unevaluable_evidence`.
 - Reversible?: yes, through a versioned compatibility migration with replayable cohort proof.
 - Supersedes: no recorded predecessor.
 - Status: ACTIVE
-- Revisit Trigger: patch-family compatibility is validated, map equivalence classes are registered, or outcome trials justify a different correction-selection rule.
+- Revisit Trigger: patch-family compatibility is validated, map equivalence classes are registered, or expert/player outcome trials justify a different correction-selection or graduation rule. The former exact-total-duration clause was superseded on 2026-08-28 because it incorrectly fragmented the shared first-five-minute evidence window using an outcome-dependent value.
 
 ## DEC-008 — Evidence graph and dependency register govern proof sequencing
 
@@ -121,3 +121,48 @@ This register adopts existing decisions; it does not rewrite history. `DEC-003` 
 - Supersedes: adoption-report-only treatment of evidence graph and dependencies.
 - Status: ACTIVE
 - Revisit Trigger: graph validation creates false confidence, dependencies need weighted or typed semantics, or runtime source records require a richer schema.
+
+## DEC-009 — Windows release assets remain bound to one exact source and acceptance candidate
+
+- Date: 2026-08-28
+- Context: the existing `v1.13.0` assets were rebuilt from a different commit than the tag target, and rebuilding between acceptance and publication would change the bytes being claimed as accepted.
+- Decision: reserve `1.14.0` for the next candidate; require a version-matching tag; emit exact commit/ref/run metadata, dependency inventory, byte sizes, and SHA-256 values with every Windows build; prohibit `main` from clobbering tagged assets; and create tagged releases as drafts so clean-Windows acceptance runs against the exact assets later promoted unchanged.
+- Alternatives Considered: continue replacing the current-version assets from `main`; accept a branch artifact then rebuild on tag; publish immediately and retract on failure; the chosen immutable draft-promotion path.
+- Why Chosen: makes artifact identity auditable and prevents a successful source build or acceptance run from being attributed to different binaries.
+- Authority: `PROOF-NEXT-001` exact-SHA evidence requirement plus the user-directed move toward a real acceptance candidate.
+- Affected Components: `app.py`, NSIS metadata, `.github/workflows/windows-release.yml`, Windows release tests, proof kit.
+- Evidence: `test_windows_artifacts_carry_exact_sha_provenance_and_checksums`; `test_windows_release_checks_primary_master_intel_modules`; `test_v113_dev_ci_builds_without_publishing_and_marks_only_after_artifacts`; version-consistency tests.
+- Reversible?: only through another release process that preserves exact source-to-byte identity and tests the same bytes that are published.
+- Supersedes: mutable `main`-branch release asset refresh and immediate publication of unaccepted tag builds.
+- Status: ACTIVE
+- Revisit Trigger: a signed reproducible-build pipeline or provider-native promotion mechanism can preserve stronger artifact identity with less manual handling.
+
+## DEC-010 — Unbound legacy or corrupt replay metadata is recovery-only
+
+- Date: 2026-08-28
+- Context: older case folders and interrupted or tampered metadata generations do not carry the shared revision and manifest hashes required to prove that replay, analysis, and learning records belong together. Silently trusting or rewriting them would upgrade unverified local data into coaching authority.
+- Decision: production reads validate replay digest, case identity, schema, shared revision, manifest-bound metadata hashes, and analysis/learning coherence. A failed or legacy case cannot supply replay facts or coaching, but remains discoverable as a privacy-safe `Replay needs re-import` placeholder when its stored replay exists. Re-importing the original authorized replay creates a new bound generation; there is no automatic trust migration.
+- Alternatives Considered: trust old metadata indefinitely; hide failed cases completely; auto-sign existing files without their original source; the chosen visible recovery-only migration.
+- Why Chosen: fails closed on evidence authority while preserving the player's route to recovery and avoiding silent data disappearance.
+- Authority: offline-first evidence boundary and user-directed candidate hardening.
+- Affected Components: `case_workspace.py`, `master_intel.py`, replay detail/player-selection APIs, recent replay library.
+- Evidence: `test_case_metadata_tampering_fails_closed_in_production_detail`; `test_interrupted_metadata_generation_is_invisible_until_authorized_retry`; `test_legacy_case_remains_visible_only_as_privacy_safe_recovery_placeholder`.
+- Reversible?: only through a versioned migration that can independently prove the original replay-to-metadata binding.
+- Supersedes: implicit trust of pre-1.1 case metadata.
+- Status: ACTIVE
+- Revisit Trigger: a trustworthy migration can reconstruct and verify legacy generations without inventing provenance.
+
+## DEC-011 — Personal Windows installation is fixed-path and non-destructive by default
+
+- Date: 2026-08-28
+- Context: the former directory-selection page allowed installation into an arbitrary existing folder while uninstall recursively removed `$INSTDIR`. The installer also replaced the default `.SC2Replay` association without retaining its previous owner.
+- Decision: install only under the dedicated per-user application directory; abort uninstall if its resolved path differs; stop installation when the required WebView2 bootstrap fails; add a non-default **Open with SC2 Master Coach** command without taking over `.SC2Replay`; and pin direct desktop build dependencies.
+- Alternatives Considered: retain arbitrary directory selection; trust users not to select a shared folder; replace and later guess the prior replay association; portable-only distribution; the chosen guarded personal installer plus portable artifact.
+- Why Chosen: preserves a normal personal-app experience while removing avoidable deletion and file-association hazards.
+- Authority: user-directed personal application packaging and destructive-action safety.
+- Affected Components: `installer/sc2-master-coach.nsi`, `requirements-desktop.txt`, Windows packaging tests.
+- Evidence: `test_nsis_installer_uses_a_fixed_personal_app_directory_and_guarded_uninstall`; `test_desktop_direct_dependencies_are_version_pinned_for_candidate_builds`.
+- Reversible?: yes, but any future custom-path support must prove ownership of an app-created directory and restore prior shell integration safely.
+- Supersedes: arbitrary NSIS install-directory selection and default `.SC2Replay` association replacement.
+- Status: ACTIVE
+- Revisit Trigger: a signed installer framework provides transactional ownership, association restoration, and stronger rollback.

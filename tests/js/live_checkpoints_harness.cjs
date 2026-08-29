@@ -48,6 +48,43 @@ const grandmaster = checkpoints.createSession({
   skill: "Grandmaster",
 });
 
+const focusPrompts = new Set();
+for (const code of Object.keys(checkpoints.FOCUS_PROGRAMS)) {
+  const focused = checkpoints.createSession({
+    plan: adapted,
+    race: "Protoss",
+    opponent: "Terran",
+    skill: "Gold",
+    drill: { focusCode: code, title: "Replay correction" },
+  });
+  assert.equal(focused.focus.code, code);
+  assert.equal(focused.focus.authority, "player_report");
+  focusPrompts.add(focused.focus.question);
+  const checkpoint = focused.checkpoints.find((row) => row.focus);
+  assert.equal(focused.checkpoints.filter((row) => row.focus).length, 1, "focus should be asked once near its observation window");
+  assert.equal(checkpoints.confirm(focused, {
+    checkpointId: checkpoint.id,
+    status: "on_track",
+    second: checkpoint.at,
+  }), null, "a focused checkpoint requires an explicit player focus report");
+  const focusResult = checkpoints.confirm(focused, {
+    checkpointId: checkpoint.id,
+    status: "on_track",
+    focusReport: "met",
+    second: checkpoint.at,
+  });
+  assert.equal(focusResult.recorded.focusCode, code);
+  assert.equal(focusResult.recorded.focusReport, "met");
+  assert.equal(focusResult.recorded.focusAuthority, "player_report");
+  assert.equal(focusResult.recorded.focusOutcomeStatus, "reported_only");
+  const notObservedSession = checkpoints.createSession({ plan: adapted, race: "Protoss", opponent: "Terran", skill: "Gold", drill: { focusCode: code, title: "Replay correction" } });
+  const notObservedCheckpoint = notObservedSession.checkpoints.find((row) => row.focus);
+  const notObserved = checkpoints.confirm(notObservedSession, { checkpointId: notObservedCheckpoint.id, status: "on_track", focusReport: "not_observed", second: notObservedCheckpoint.at });
+  assert.equal(notObserved.recorded.focusOutcomeStatus, "not_evaluated");
+}
+assert.equal(focusPrompts.size, Object.keys(checkpoints.FOCUS_PROGRAMS).length);
+assert.equal(checkpoints.createSession({ plan: adapted, drill: { focusCode: "UNKNOWN" } }).focus, null);
+
 const bronze240 = bronze.checkpoints.find((row) => row.at === 240);
 const gm180 = grandmaster.checkpoints.find((row) => row.at === 180);
 assert.ok(bronze240.summary.includes("3 Gateways"), bronze240.summary);
@@ -63,6 +100,9 @@ assert.ok(bronze.profile.maxTargets < grandmaster.profile.maxTargets);
 let current = checkpoints.current(bronze, 105);
 assert.equal(current.kind, "checkpoint");
 assert.equal(current.checkpoint.at, 120);
+assert.equal(checkpoints.confirm(bronze, { checkpointId: current.checkpoint.id, status: "on_track", second: 10 }), null);
+assert.equal(checkpoints.current(bronze, 151).phase, "late");
+assert.equal(checkpoints.current(bronze, 151).checkpoint.at, 120);
 
 checkpoints.reportEvidence(bronze, "starport", 170);
 let tactical = checkpoints.directive(bronze, 175);
@@ -70,6 +110,7 @@ assert.equal(tactical.id, "starport");
 assert.equal(tactical.status, "modify");
 assert.match(tactical.action, /mineral-line and detection coverage/i);
 assert.equal(checkpoints.current(bronze, 175).kind, "directive");
+assert.equal(checkpoints.current(bronze, 175).directive.suppressesMacro, true);
 
 checkpoints.reportEvidence(bronze, "move_out", 180);
 tactical = checkpoints.directive(bronze, 181);
@@ -111,6 +152,14 @@ assert.equal(verify.status, "verify");
 assert.equal(verify.permission, "CAUTION");
 assert.equal(verify.suppressesMacro, false);
 assert.equal(verify.requiresConfirmation, true);
+
+const uncertainWithRecovery = checkpoints.createSession({ plan: adapted, race: "Protoss", opponent: "Terran", skill: "Diamond" });
+const recoveryCheckpoint = uncertainWithRecovery.checkpoints[0];
+checkpoints.confirm(uncertainWithRecovery, { checkpointId: recoveryCheckpoint.id, status: "behind", workers: recoveryCheckpoint.worker.min - 2, production: 0, second: recoveryCheckpoint.at });
+checkpoints.reportEvidence(uncertainWithRecovery, "move_out", recoveryCheckpoint.at + 1, { confidence: "low", location: "map_center" });
+const recoveryVerification = checkpoints.directive(uncertainWithRecovery, recoveryCheckpoint.at + 2);
+assert.equal(recoveryVerification.id, "move_out", "urgent uncertain tactical evidence must not be hidden by routine macro recovery");
+assert.equal(recoveryVerification.status, "verify");
 
 const expansion = checkpoints.createSession({ plan: adapted, race: "Protoss", opponent: "Terran", skill: "Diamond" });
 checkpoints.reportEvidence(expansion, "normal_natural", 100, { observedSecond: 100 });

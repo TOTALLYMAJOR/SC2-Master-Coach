@@ -29,7 +29,7 @@ what the evidence supports and what it cannot prove.
 ```text
 app.py route source
   -> CAP-001 Master Intel shell
-  -> JRN-001 Local replay to bounded practice decision
+  -> JRN-001 Local replay to persistent guided improvement loop
 
 case_workspace.py + replay_engine.py
   -> CAP-002 replay ingestion and local case workspace
@@ -41,8 +41,20 @@ replay_intelligence.py
   -> CAP-015 decision-context reconstruction
   -> CAP-016 longitudinal learning fingerprints
 
+Master Intel active-drill contract + Practice + Guided Execution handoff
+  -> CAP-018 persistent replay-to-execution improvement loop
+  -> JRN-001
+
+Guided Execution session snapshot + recovery + receipt contract
+  -> CAP-019 durable Guided Execution session continuity
+  -> JRN-002
+
+Master Intel resource-state + support/recovery contract
+  -> CAP-020 truthful degraded-data handling
+  -> JRN-001
+
 Strategic OS static runtime
-  -> CAP-005 Combat HUD
+  -> CAP-005 Guided Execution HUD
   -> CAP-007 Strategic OS decision kernel
   -> JRN-002 Manual battlefield report to live coaching decision
 
@@ -66,6 +78,8 @@ Windows workflow and installer definitions
 | Case manifest | Content-addressed local replay identity | Trusted player identity, clean Windows operation, or player improvement |
 | Learning index | Local compatible-case comparison input | Broad cohort truth, win-rate causality, or expert-validated coaching |
 | Strategic OS decision | Current manual-report-driven live coaching state | Direct game-process observation or completed player action |
+| Local session receipt | The plan, elapsed local clock, and player-reported evidence saved by the UI | Gameplay execution, correctness, improvement, or coaching effectiveness |
+| Sanitized support report | Bounded local readiness and count diagnostics without paths or player/replay identity | Clean-Windows behavior, successful recovery, or support usefulness |
 | Python Strategy Science advisory | Local model output with proof and uncertainty | Live state mutation or authoritative coaching policy |
 | Workflow definition | Release machinery exists in source | Current artifact, installer success, provider receipt, or user availability |
 | Clean Windows proof event | Target journey observation when executed | Retention, measured improvement, or revenue unless separately recorded |
@@ -90,9 +104,22 @@ Windows workflow and installer definitions
 | EG-014 | constrains advisory output | DEC-001 | CAP-010 | active decision |
 | EG-015 | preserves privacy/runtime boundary | DEC-002 | CAP-014 | active decision |
 | EG-016 | requires target proof | BLK-001 | PROOF-NEXT-001 | blocking dependency |
-| EG-017 | records unresolved product authority | BLK-005 | PROOF-NEXT-001 | blocking dependency |
 | EG-018 | governs evidence and dependency graph controls | DEC-008 | CAP-017 | active decision |
 | EG-019 | validates graph controls | `test_checker_validates_evidence_and_dependency_graphs` | CAP-017 | local test |
+| EG-020 | governs product hierarchy | DEC-003 | CAP-018 | active decision |
+| EG-021 | implements provenance-gated, fail-closed active-drill persistence | `normalizeDrill` + `setActiveDrill` + Practice/HUD routes | CAP-018 | source |
+| EG-022 | validates cross-mode handoff | active-drill and HUD handoff tests | CAP-018 | local test |
+| EG-023 | preserves live authority | DEC-001 | CAP-018 | active decision |
+| EG-024 | implements interrupted-session recovery | `executionSnapshot` + `restoreExecution` | CAP-019 | source |
+| EG-025 | preserves live authority | DEC-001 | CAP-019 | active decision |
+| EG-026 | implements truthful local recovery | resource-state shell + support endpoints | CAP-020 | source |
+| EG-027 | preserves offline privacy boundary | DEC-002 | CAP-020 | active decision |
+| EG-028 | supplies correction-specific replay evidence | CAP-016 | CAP-018 | tested capability dependency |
+| EG-029 | supplies required focus-report and separated progression contract | CAP-006 | CAP-018 | tested capability dependency |
+| EG-030 | governs exact-SHA candidate identity and immutable promotion | DEC-009 | CAP-013 | active decision |
+| EG-031 | governs case-integrity boundary | DEC-010 | CAP-002 | active decision |
+| EG-032 | governs visible re-import recovery | DEC-010 | CAP-020 | active decision |
+| EG-033 | governs fixed-path personal installer safety | DEC-011 | CAP-013 | active decision |
 
 ## Use Rules
 

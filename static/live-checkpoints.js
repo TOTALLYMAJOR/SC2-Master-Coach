@@ -15,6 +15,20 @@
     Grandmaster:{workerTolerance:2,windowBefore:7,windowAfter:12,maxTargets:4,cueLead:7,interval:60,label:"Precision",focus:"Optimize the exception, not only the baseline.",recoveryLead:"Correct the highest-opportunity-cost miss"}
   };
   const AUTHORITY={benchmarkType:"derived_practice_range",reviewState:"expert_review_required",patch:PATCH,reviewers:[],reviewedAt:null,evidenceBoundary:"Generated from the concrete plan schedule and worker-production assumptions; not telemetry or proof of an optimal decision."};
+  const FOCUS_PROGRAMS={
+    GENERIC_CHECKPOINT_BASELINE:{title:"Checkpoint baseline",question:"Did you complete the chosen opening through this checkpoint?",positive:"Checkpoint completed as intended",negative:"Checkpoint was not completed as intended"},
+    GENERIC_TARGET_ADHERENCE:{title:"Target adherence",question:"Did you keep this session to one behavior, one threshold, and one completion rule?",positive:"Target stayed narrow",negative:"Target expanded or changed during the session"},
+    WORKER_CONTINUITY_STALL:{title:"Worker growth",question:"Did worker production stay active, or can you name why worker count stopped growing?",positive:"Active or plateau cause named",negative:"Plateau cause not identified"},
+    MINERAL_FLOAT_EXPOSURE:{title:"Spend cycle",question:"If minerals crossed 1,000, was the bank planned, and what commitment or constraint came next?",positive:"Plan or constraint named",negative:"Crossed 1,000 without a named plan or constraint"},
+    SUPPLY_BLOCK_EXPOSURE:{title:"Supply headroom",question:"Did the next supply provider start before free supply reached zero?",positive:"Provider started in time",negative:"Supply reached zero first"},
+    PRODUCTION_IDLE_EXPOSURE:{title:"Production cadence",question:"Was the primary production cycle maintained or deliberately paused?",positive:"Maintained or deliberately paused",negative:"Paused without a clear reason"}
+  };
+
+  function normalizeFocus(drill){
+    const code=String(drill?.focusCode||"").trim();
+    const program=FOCUS_PROGRAMS[code];
+    return program?{code,...program,authority:"player_report",outcomeStatus:"reported_only"}:null;
+  }
 
   const STRUCTURES=[
     {key:"gateway",label:"Gateways",pattern:/\bgateways?\b/i},
@@ -189,7 +203,7 @@
     return [`${worker.min}–${worker.max} ${worker.label}`,...prioritized.map(row=>`${row.count} ${row.label}`)].join(" · ");
   }
 
-  function buildCheckpoints(plan,race,skill,coachingMode="standard"){
+  function buildCheckpoints(plan,race,skill,coachingMode="standard",focus=null){
     const profile=applyCoachingMode(skillProfile(skill),coachingMode);
     const rows=planRows(plan);
     const last=Math.max(300,...rows.map(row=>row.at));
@@ -208,14 +222,21 @@
         summary:checkpointSummary(worker,targets,profile.maxTargets),
         rationale:`${profile.focus} Derived practice benchmark; expert review remains required. Report actual state because battlefield evidence may replace it.`,
         authority:contentStatus(plan),
-        profile:profile.name
+        profile:profile.name,
+        focus:null
       });
+    }
+    if(focus&&checkpoints.length){
+      const observationSecond=300;
+      const closest=checkpoints.reduce((best,row)=>Math.abs(row.at-observationSecond)<Math.abs(best.at-observationSecond)?row:best,checkpoints[0]);
+      closest.focus=focus;
     }
     return checkpoints;
   }
 
-  function createSession({plan,race,opponent,skill,coachingMode="standard"}={}){
+  function createSession({plan,race,opponent,skill,coachingMode="standard",drill=null,drillKey=null}={}){
     const profile=applyCoachingMode(skillProfile(skill),coachingMode);
+    const focus=normalizeFocus(drill);
     return {
       id:`checkpoint-${Date.now()}-${Math.random().toString(16).slice(2)}`,
       patch:PATCH,
@@ -225,7 +246,9 @@
       skill:profile.name,
       profile,
       coachingMode:profile.mode,
-      checkpoints:buildCheckpoints(plan||{},race||"Unknown",profile.name,profile.mode),
+      drillKey:String(drillKey||""),
+      checkpoints:buildCheckpoints(plan||{},race||"Unknown",profile.name,profile.mode,focus),
+      focus,
       confirmations:{},
       evidence:[],
       recovery:null,
@@ -258,7 +281,8 @@
     if(session.planChanged)return {id:"plan_changed",status:"hold",permission:"HOLD",suppressesMacro:true,question:"Which operation are you executing now?",action:"Pause reminders and redeploy the correct plan.",reason:"Old benchmarks become harmful after the player changes plans."};
     const score=row=>(SIGNALS[row.id]?.priority||0)*(row.details?.confidence??1)+Math.min(12,Math.max(0,(row.details?.count||1)-1)*4);
     const active=session.evidence.filter(row=>row.expiresSecond>=now).sort((a,b)=>score(b)-score(a)||b.observedSecond-a.observedSecond||b.reportedSecond-a.reportedSecond||a.id.localeCompare(b.id))[0];
-    if(session.recovery&&session.recovery.expiresSecond>=now&&(!active||score(active)<=50))return session.recovery;
+    const activeDefinition=active?SIGNALS[active.id]:null,urgentVerification=Boolean(active&&activeDefinition?.priority>=80&&(active.details?.confidence??1)<.5);
+    if(session.recovery&&session.recovery.expiresSecond>=now&&(!active||(score(active)<=50&&!urgentVerification)))return session.recovery;
     if(!active)return null;
     const details=active.details||evidenceDetails(),count=details.count>1?`${details.count} `:"",location=details.location!=="unknown"?` near the ${details.location.replaceAll("_"," ")}`:"",confidence=details.confidence>=.9?"Confirmed":details.confidence>=.5?"Likely":"Uncertain",definition=SIGNALS[active.id];
     if(details.confidence<.5)return {id:active.id,...definition,status:"verify",permission:"CAUTION",suppressesMacro:false,requiresConfirmation:true,expiresSecond:active.expiresSecond,evidence:active,attentionScore:score(active),observation:`${confidence} ${count}${active.id.replaceAll("_"," ")}${location}.`,question:"Can you verify this scout report?",action:"Verify this report before changing the active plan.",reason:`Low-confidence report: ${count}${active.id.replaceAll("_"," ")}${location}. The current benchmark remains provisional until confirmed.`};
@@ -272,23 +296,28 @@
     if(tactical?.suppressesMacro)return {kind:"directive",key:`directive:${tactical.id}`,directive:tactical};
     const rows=session.checkpoints.filter(row=>!session.confirmations[row.id]);
     const due=rows.find(row=>now>=row.at-session.profile.cueLead&&now<=row.at+session.profile.windowAfter);
-    const next=due||rows.find(row=>row.at>now)||rows.at(-1)||null;
+    const late=rows.filter(row=>now>row.at+session.profile.windowAfter&&now-(row.at+session.profile.windowAfter)<=session.profile.interval).at(-1);
+    const next=due||late||rows.find(row=>row.at>now)||rows.at(-1)||null;
     if(!next)return tactical?{kind:"directive",key:`directive:${tactical.id}`,directive:tactical}:null;
     const phase=now<next.at-session.profile.cueLead?"upcoming":now<=next.at+session.profile.windowAfter?"due":"late";
     return {kind:"checkpoint",key:next.id,checkpoint:next,phase,directive:tactical};
   }
 
-  function confirm(session,{checkpointId,status,workers,production,second}={}){
+  function confirm(session,{checkpointId,status,workers,production,focusReport,second}={}){
     if(!session)return null;
     const checkpoint=session.checkpoints.find(row=>row.id===checkpointId);
     if(!checkpoint)return null;
+    const reportedSecond=Math.max(0,Number(second)||0);
+    if(reportedSecond<checkpoint.at-session.profile.cueLead)return null;
+    if(checkpoint.focus&&!(["met","missed","uncertain","not_observed"].includes(focusReport)))return null;
     const normalized=["on_track","behind","changed"].includes(status)?status:"on_track";
     const actualWorkers=workers===""||workers==null?null:Math.max(0,Number(workers)||0);
     const actualProduction=production===""||production==null?null:Math.max(0,Number(production)||0);
     const workerGap=actualWorkers==null?0:Math.max(0,checkpoint.worker.min-actualWorkers);
     const productionGap=actualProduction==null||!checkpoint.primaryProduction?0:Math.max(0,checkpoint.primaryProduction.count-actualProduction);
     const outcome=normalized==="changed"?"changed":normalized==="behind"||workerGap>0||productionGap>0?"behind":"on_track";
-    const recorded={checkpointId,status:normalized,outcome,workers:actualWorkers,production:actualProduction,workerGap,productionGap,expectedWorkerMin:checkpoint.worker.min,expectedWorkerMax:checkpoint.worker.max,expectedProduction:checkpoint.primaryProduction?.count??null,productionLabel:checkpoint.primaryProduction?.label||"",reportedSecond:Math.max(0,Number(second)||0),recordedAt:Date.now()};
+    const normalizedFocus=checkpoint.focus&&["met","missed","uncertain","not_observed"].includes(focusReport)?focusReport:null;
+    const recorded={checkpointId,status:normalized,outcome,workers:actualWorkers,production:actualProduction,workerGap,productionGap,expectedWorkerMin:checkpoint.worker.min,expectedWorkerMax:checkpoint.worker.max,expectedProduction:checkpoint.primaryProduction?.count??null,productionLabel:checkpoint.primaryProduction?.label||"",focusCode:checkpoint.focus?.code||null,focusReport:normalizedFocus,focusAuthority:checkpoint.focus?"player_report":null,focusOutcomeStatus:checkpoint.focus?(normalizedFocus==="not_observed"?"not_evaluated":"reported_only"):null,reportedSecond,recordedAt:Date.now()};
     session.confirmations[checkpointId]=recorded;
     if(normalized==="changed"){
       session.planChanged=true;
@@ -315,7 +344,7 @@
     return {recorded,recovery:null};
   }
 
-  const api={PATCH,SKILLS,SIGNALS,AUTHORITY,skillProfile,applyCoachingMode,contentStatus,inferGoal,inferRisk,adaptLibraryPlan,structureTargets,workerTarget,buildCheckpoints,createSession,evidenceDetails,reportEvidence,directive,current,confirm};
+  const api={PATCH,SKILLS,SIGNALS,AUTHORITY,FOCUS_PROGRAMS,normalizeFocus,skillProfile,applyCoachingMode,contentStatus,inferGoal,inferRisk,adaptLibraryPlan,structureTargets,workerTarget,buildCheckpoints,createSession,evidenceDetails,reportEvidence,directive,current,confirm};
   global.SC2LiveCheckpoints=api;
   if(typeof module!=="undefined"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);

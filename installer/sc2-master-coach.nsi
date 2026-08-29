@@ -4,7 +4,7 @@ Unicode true
 
 !define APPNAME "SC2 Master Coach"
 !define COMPANY "MBMapps"
-!define VERSION "1.13.0"
+!define VERSION "1.14.0"
 !define EXE "SC2 Master Coach.exe"
 !define APPID "SC2MasterCoach"
 
@@ -13,7 +13,7 @@ OutFile "${__FILEDIR__}\out\SC2-Master-Coach-Setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\${APPNAME}"
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
-VIProductVersion "1.13.0.0"
+VIProductVersion "1.14.0.0"
 VIAddVersionKey "ProductName" "${APPNAME}"
 VIAddVersionKey "CompanyName" "${COMPANY}"
 VIAddVersionKey "FileDescription" "SC2 combat HUD, Strategy Science, offline voice, and replay intelligence"
@@ -24,7 +24,6 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${EXE}"
 !define MUI_FINISHPAGE_RUN_TEXT "Launch SC2 Master Coach"
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_CONFIRM
@@ -43,9 +42,20 @@ Function EnsureWebView2
     InitPluginsDir
     SetOutPath "$PLUGINSDIR"
     File /oname=MicrosoftEdgeWebview2Setup.exe "${__FILEDIR__}\MicrosoftEdgeWebview2Setup.exe"
-    ExecWait '"$PLUGINSDIR\MicrosoftEdgeWebview2Setup.exe" /silent /install'
+    ExecWait '"$PLUGINSDIR\MicrosoftEdgeWebview2Setup.exe" /silent /install' $1
+    ${If} $1 != 0
+      MessageBox MB_ICONSTOP "Microsoft Edge WebView2 Runtime could not be installed (exit code $1). SC2 Master Coach was not installed."
+      Abort
+    ${EndIf}
   ${Else}
     DetailPrint "WebView2 Runtime detected: $0"
+  ${EndIf}
+FunctionEnd
+
+Function un.onInit
+  ${If} $INSTDIR != "$LOCALAPPDATA\Programs\${APPNAME}"
+    MessageBox MB_ICONSTOP "Uninstall stopped because the installation path is not the fixed SC2 Master Coach application directory."
+    Abort
   ${EndIf}
 FunctionEnd
 
@@ -65,9 +75,11 @@ Section "Install"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPID}" "UninstallString" '"$INSTDIR\Uninstall.exe"'
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPID}" "InstallLocation" "$INSTDIR"
 
-  WriteRegStr HKCU "Software\Classes\.SC2Replay" "" "SC2MasterCoach.Replay"
-  WriteRegStr HKCU "Software\Classes\SC2MasterCoach.Replay" "" "StarCraft II Replay"
-  WriteRegStr HKCU "Software\Classes\SC2MasterCoach.Replay\shell\open\command" "" '"$INSTDIR\${EXE}" "%1"'
+  ; Add a non-default Open With command without replacing the player's existing
+  ; .SC2Replay file association.
+  WriteRegStr HKCU "Software\Classes\SystemFileAssociations\.SC2Replay\shell\SC2MasterCoach" "" "Open with SC2 Master Coach"
+  WriteRegStr HKCU "Software\Classes\SystemFileAssociations\.SC2Replay\shell\SC2MasterCoach" "Icon" '"$INSTDIR\${EXE}"'
+  WriteRegStr HKCU "Software\Classes\SystemFileAssociations\.SC2Replay\shell\SC2MasterCoach\command" "" '"$INSTDIR\${EXE}" "%1"'
   System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
 SectionEnd
 
@@ -76,8 +88,7 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk"
   RMDir "$SMPROGRAMS\${APPNAME}"
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPID}"
-  DeleteRegKey HKCU "Software\Classes\SC2MasterCoach.Replay"
-  DeleteRegKey HKCU "Software\Classes\.SC2Replay"
+  DeleteRegKey HKCU "Software\Classes\SystemFileAssociations\.SC2Replay\shell\SC2MasterCoach"
   RMDir /r "$INSTDIR"
   System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
 SectionEnd

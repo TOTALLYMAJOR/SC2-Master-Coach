@@ -15,7 +15,10 @@ def test_python_shadow_adapter_exists_and_loads_after_combat_hud():
     assert '"/v111-python-shadow.js"' in app
     assert '"/v111-opportunity-cost.js"' in app
     assert app.index('"/v110-hud.js"') < app.index('"/v111-python-shadow.js"') < app.index('"/v111-opportunity-cost.js"')
-    assert 'CURRENT_VERSION = "1.13.0"' in app
+    assert 'CURRENT_VERSION = "1.14.0"' in app
+    ui = shadow.read_text(encoding="utf-8")
+    assert "v1.14.0" in ui
+    assert "v1.13.0" not in ui
 
 
 def test_shadow_adapter_uses_local_science_health_audio_and_run_endpoints():
@@ -84,16 +87,29 @@ def test_python_diagnostics_are_compact_and_include_native_microphone_boundary()
         "Windows-visible inputs",
         "This verifies Windows device visibility only",
         "v111-science-overlay",
+        'button.setAttribute?.("aria-label",row.label)',
     ):
         assert phrase in ui
     # Diagnostics are an on-demand overlay/status chip, not a permanent HUD grid.
     assert "v110-live-grid" not in ui
+    for phrase in (
+        'overlay.setAttribute("role","dialog")',
+        'overlay.setAttribute("aria-modal","true")',
+        "overlay.tabIndex=-1",
+        'document.getElementById("v111ScienceCloseTop")?.focus({preventScroll:true})',
+        "trapDialogFocus",
+        "overlayReturnFocus",
+        'event.key==="Escape"',
+    ):
+        assert phrase in ui
+    assert 'aria-label="Close Python Intelligence Diagnostics"' in ui
 
 
 def test_shadow_status_observer_is_hud_scoped_and_idempotent():
     ui = (STATIC / "v111-python-shadow.js").read_text(encoding="utf-8")
     assert "if(button.textContent!==row.label)button.textContent=row.label" in ui
     assert 'observer.observe(hud,{subtree:true,childList:true})' in ui
+    assert '#v110HudShell .v110-rail-operator' in ui
     assert "observer.observe(document.documentElement" not in ui
 
 

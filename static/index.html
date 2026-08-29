@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTIiIGZpbGw9IiMwNjE3MjIiLz48cGF0aCBkPSJNMzIgOCA1MiAyMHYyNEwzMiA1NiAxMiA0NFYyMHoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzY4ZTdmZiIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHBhdGggZD0iTTIyIDMyaDIwTTMyIDIydjIwIiBzdHJva2U9IiM2OGU3ZmYiIHN0cm9rZS13aWR0aD0iNCIvPjwvc3ZnPg==">
   <meta name="author" content="MBMapps">
   <meta name="creator" content="MBMapps">
   <meta name="color-scheme" content="dark">
@@ -20,7 +21,6 @@
       <nav class="intel-nav" aria-label="Primary navigation">
         <a href="#/home" data-route="home">Home</a>
         <a href="#/players" data-route="players">Players</a>
-        <a href="#/compare" data-route="compare">Compare</a>
         <a href="#/practice" data-route="practice">Practice</a>
         <a href="#/settings" data-route="settings">Settings</a>
       </nav>
@@ -43,21 +43,22 @@
 
   <dialog id="onboardingDialog" class="intel-dialog" aria-labelledby="onboardingTitle">
     <form method="dialog" class="dialog-card">
+      <button type="button" class="dialog-close" data-onboarding-action="later" aria-label="Continue later and close first-run setup">×</button>
       <div class="dialog-kicker">First-run setup</div>
-      <h1 id="onboardingTitle">Start with evidence already on your computer.</h1>
-      <p>SC2 Master Coach works offline. Import a replay, add a trusted player pack, or explore the bundled synthetic demonstration.</p>
+      <h1 id="onboardingTitle">Choose how you want to improve today.</h1>
+      <p>SC2 Master Coach works offline. Review a local replay, carry one target into guided practice, or inspect clearly labeled demonstration data.</p>
       <div class="onboarding-actions">
         <button type="button" class="action-card" data-onboarding-action="replay">
           <span class="action-icon" aria-hidden="true">01</span>
-          <span><strong>Import replay</strong><small>Analyze one local .SC2Replay file.</small></span>
+          <span><strong>Review my last game</strong><small>Choose a .SC2Replay, usually under Documents/StarCraft II/Accounts.</small></span>
         </button>
-        <button type="button" class="action-card" data-onboarding-action="pack">
+        <button type="button" class="action-card" data-onboarding-action="practice">
           <span class="action-icon" aria-hidden="true">02</span>
-          <span><strong>Import master-player pack</strong><small>Add verified or clearly unverified local player records.</small></span>
+          <span><strong>Practice with guided coaching</strong><small>Choose one measurable target, then open the live practice instrument.</small></span>
         </button>
         <button type="button" class="action-card" data-onboarding-action="demo">
           <span class="action-icon" aria-hidden="true">03</span>
-          <span><strong>Explore bundled demo</strong><small>Install a synthetic pack and open the player library.</small></span>
+          <span><strong>Explore reference demo</strong><small>Install synthetic player records to inspect evidence and identity boundaries.</small></span>
         </button>
       </div>
       <div class="dialog-actions">
@@ -78,6 +79,7 @@
   </dialog>
 
   <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+  <script src="/coach-progression.js"></script>
   <script type="module" src="/master-intel/app.js"></script>
 </body>
 </html>

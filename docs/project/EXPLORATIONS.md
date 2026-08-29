@@ -2,17 +2,17 @@
 
 Ideas remain here until an authorized decision promotes, parks, rejects, or supersedes them. They are not backlog commitments.
 
-## EXP-001 — Primary product center
+## EXP-001 — Primary product center (resolved)
 
 - Exploration: Master Intel versus Combat HUD as the primary product journey.
 - Question: Should launch and release positioning center replay intelligence, live practice coaching, or a neutral mode chooser?
 - Why It Matters: it changes onboarding, acceptance evidence, release language, and what must be proven next.
 - Hypothesis: Master Intel is the current executable default, while live coaching may remain the clearest differentiated user promise.
-- Evidence Gathered: `app.py` routes; Master Intel milestone record; README product thesis; overlapping default-route tests.
+- Evidence Gathered: `app.py` routes; product-capability audit; user-directed implementation; active-drill and HUD handoff tests; reconciled README and canonical state.
 - Alternatives: Master Intel primary; Combat HUD primary; neutral chooser.
-- Current Conclusion: executable truth is Master Intel primary; durable product policy is unresolved.
-- Decision Required: product owner confirms primary journey and release positioning.
-- Status: INVESTIGATING
+- Current Conclusion: `DEC-003` is active. Master Intel owns replay review and the persistent improvement loop; Guided Execution is the supporting live mode.
+- Decision Required: none. Revisit only if real-player evidence challenges the sequential model.
+- Status: RESOLVED
 
 ## EXP-002 — Normalized replay-to-master comparison
 
