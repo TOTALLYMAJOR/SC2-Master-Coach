@@ -724,14 +724,23 @@ def test_support_report_does_not_call_unwritable_storage_ready(local_client, mon
 
 def test_storage_open_accepts_only_allowlisted_roots(local_client, monkeypatch: pytest.MonkeyPatch):
     opened: list[list[str]] = []
-    monkeypatch.setattr(master_intel.subprocess, "Popen", lambda command: opened.append(command))
+    if master_intel.os.name == "nt":
+        monkeypatch.setattr(
+            master_intel.os,
+            "startfile",
+            lambda path: opened.append(["startfile", path]),
+        )
+        expected_opener = "startfile"
+    else:
+        monkeypatch.setattr(master_intel.subprocess, "Popen", lambda command: opened.append(command))
+        expected_opener = "open" if master_intel.sys.platform == "darwin" else "xdg-open"
 
     for target in ("replays", "application"):
         response = local_client.post("/api/intel/storage/open", json={"target": target})
         assert response.status_code == 200
         assert response.get_json() == {"ok": True, "target": target}
     assert len(opened) == 2
-    assert all(command[0] == "xdg-open" for command in opened)
+    assert all(command[0] == expected_opener for command in opened)
 
     for target in ("../../", "/tmp", "unknown", None):
         response = local_client.post("/api/intel/storage/open", json={"target": target})
