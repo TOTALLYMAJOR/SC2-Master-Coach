@@ -122,6 +122,7 @@ Windows workflow and installer definitions
 | EG-033 | governs fixed-path personal installer safety | DEC-011 | CAP-013 | active decision |
 | EG-034 | governs patched legacy protocol compatibility | DEC-012 | CAP-012 | active decision |
 | EG-035 | governs patched protobuf dependency pin | DEC-012 | CAP-013 | active decision |
+| EG-036 | governs private personal-artifact acceptance path | DEC-013 | CAP-013 | active decision |
 
 ## Use Rules
 

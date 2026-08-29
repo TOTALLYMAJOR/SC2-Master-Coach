@@ -9,11 +9,11 @@ Project: SC2 Master Coach
 Repository: TOTALLYMAJOR/SC2-Master-Coach
 Primary Purpose: Local, evidence-bounded StarCraft II replay intelligence and decision coaching
 Primary User / Actor: A StarCraft II player seeking structured practice and review
-Economic Buyer: Individual player hypothesis — UNVERIFIED
+Economic Buyer: Not applicable to the current personal-application scope
 Problem Solved: Turn local replay evidence or explicit player reports into one understandable next decision without fabricated certainty
-Current Product Stage: Local-first product beta; operational adoption and commercialization are UNVERIFIED
+Current Product Stage: Private local-first Windows candidate; clean-machine operation and owner acceptance are UNVERIFIED
 Primary Deployment Target: Unsigned per-user Windows desktop app with a loopback-only Flask service
-Last Evidence Reconciliation: 2026-08-28 from the current worktree based on 862f1677543231730f58b631c36a37101975a05b
+Last Evidence Reconciliation: 2026-08-28 from private build source `38fa81b7e35556eb02830195b98742560aabfe21`
 ```
 
 Portfolio membership is `UNVERIFIED`; no `.project/portfolio.json` is created without a stable interoperability contract.
@@ -25,13 +25,13 @@ SC2 Master Coach succeeds when a player can install the local Windows app, suppl
 - Technical success: local inputs produce bounded, reproducible outputs while privacy and authority contracts hold.
 - User success: the player understands what to do next and why.
 - Operational success: a clean Windows installation completes the journey with current artifact and acceptance evidence.
-- Commercial success: paying players activate, retain, and show measured improvement; all commercial dimensions are currently `UNVERIFIED`.
+- Personal success: the owner voluntarily returns to the workflow and finds that its evidence and practice guidance improve decision quality. Commercial success is outside the current scope.
 
 ## Evidence Semantics
 
 `IDEA ≠ SPECIFIED ≠ DESIGNED ≠ IMPLEMENTED ≠ TESTED ≠ VERIFIED ≠ DEPLOYED ≠ USED ≠ COMMERCIALLY_PROVEN`.
 
-The current repository has source and local-test evidence. That does not prove a current hosted build, clean-machine behavior, real hardware behavior, customer use, or revenue. See [PROOF.md](docs/project/PROOF.md), [EVIDENCE_GRAPH.md](docs/project/EVIDENCE_GRAPH.md), and [DEPENDENCIES.md](docs/project/DEPENDENCIES.md).
+The current repository has source, local-test, and exact-SHA hosted-build evidence. That does not prove clean-machine installation, real hardware behavior, genuine-replay operation, or player improvement. See [PROOF.md](docs/project/PROOF.md), [EVIDENCE_GRAPH.md](docs/project/EVIDENCE_GRAPH.md), and [DEPENDENCIES.md](docs/project/DEPENDENCIES.md).
 
 ## Canonical Journey
 
@@ -81,7 +81,7 @@ Deploy experimental practice operation
 - Replay parsing, local case persistence, player packs, the compatibility gate, the Combat HUD, adaptive checkpoints, Strategic OS, Strategy Compiler, 2v2 Team Composer, the bounded Python Digital Twin, offline voice contracts, frame-capture boundaries, Windows release definitions, and loopback security have local test coverage.
 - Replay case persistence now compares stored bytes with the authorized source digest and commits manifest, analysis, and learning data as one hash-bound generation. Production reads reject replay or cross-file identity drift. Corrupt and pre-1.1 cases cannot supply facts or coaching, but remain visible as privacy-safe re-import placeholders when their stored replay exists. Re-importing the original authorized replay creates a trusted generation; there is no automatic trust migration.
 - The opt-in disposable-workspace genuine-replay smoke probe uses production enrichment, requires supported non-observer 1v1 participants and dense first-five-minute evidence, validates the persisted case generation, and can emit its bounded proof class only when bound to the exact build artifact or the same clean Git source. Mocked calls remain test-contract-only. No genuine replay was supplied, so real parsing remains `UNVERIFIED`.
-- The `1.14.0` candidate source is frozen on a dedicated branch. Direct desktop dependencies and parser sources are pinned; patched protobuf `5.29.6` loads the legacy generated SC2 descriptors through its explicit pure-Python compatibility path; primary Master Intel modules receive recursive syntax checks. The installer is fixed to the dedicated per-user directory, refuses an unexpected uninstall path, stops if WebView2 bootstrap fails, and adds a non-default replay Open With command without replacing the player's association. The Windows workflow emits exact-SHA/run manifests, checksums, and dependency inventory. Version tags create draft releases for acceptance before unchanged promotion; no accepted artifact, tag, draft, or publication exists yet.
+- The `1.14.0` personal candidate source is frozen on a dedicated branch. Direct desktop dependencies and parser sources are pinned; patched protobuf `5.29.6` loads the legacy generated SC2 descriptors through its explicit pure-Python compatibility path; primary Master Intel modules receive recursive syntax checks. The installer is fixed to the dedicated per-user directory, refuses an unexpected uninstall path, stops if WebView2 bootstrap fails, and adds a non-default replay Open With command without replacing the player's association. Private GitHub Actions run `33228464055` built and uploaded exact-SHA artifacts for commit `38fa81b7e35556eb02830195b98742560aabfe21`; the downloaded installer, portable archive, and dependency inventory match the recorded checksums. No tag or public release is required for this personal app. Clean-Windows installation and genuine-replay operation remain `UNVERIFIED`.
 - The Python runtime implements the bounded PvT three-base Digital Twin. Most registered Strategy Science capabilities remain design-only.
 - The hard-data engine produces versioned per-player fact envelopes, compatibility fingerprints, compact second-resolution worker continuity, mineral-threshold exposure, and supply-block windows.
 - The replay observation model now attaches conservative information-before-commitment windows, separates outcome from decision reasonableness, grades expansion evidence coverage, and exposes attention-gap and repeated-phase proxies.
@@ -91,8 +91,8 @@ Deploy experimental practice operation
 - Exact private knowledge and strategic expansion safety without policy remain withheld; cross-replay recurrence is withheld unless at least two explicitly owned compatible case indexes exist.
 - Real multi-replay cohort acceptance and the correction mapping's expert/player outcome validity remain `UNVERIFIED`.
 - The comparison surface still withholds replay-to-master calculations because provenance-backed compatible references and the calculation engine do not exist.
-- GitHub Actions source, dependency pins, proof-kit documents, and release tags are repository evidence of release machinery, not current build, deployment, installation, or acceptance receipts.
-- External deployment, real-user acceptance, usage, outcomes, and commercial evidence are `UNVERIFIED`.
+- GitHub Actions run `33228464055` and its matching checksums prove the private candidate was built; they do not prove installation or correct operation on the owner's Windows machine.
+- Owner-machine acceptance, repeated personal use, and outcome evidence are `UNVERIFIED`; commercial evidence is outside the current scope.
 
 ## Repository State at Reconciliation
 
@@ -124,17 +124,17 @@ The 2026-08-27 user-directed implementation adopts one primary improvement loop:
 
 **Why It Matters:** It is the smallest event crossing source, packaging, installation, real replay parsing, persistence, capture/voice fallback behavior, UX comprehension, and human acceptance.
 
-**Prerequisites:** A version-matched draft artifact from an exact commit, a clean supported Windows environment, a supported real replay, and a named human acceptance owner.
+**Prerequisites:** An exact-SHA private Windows artifact, a clean supported Windows environment, a supported real replay, and a named human acceptance owner.
 
 **Acceptance Criteria:** Install and launch without developer tools; persist one real replay case; show patch, matchup, observed evidence, uncertainty, and one provisional practice focus; exercise frame capture or its explicit fallback; exercise voice or its manual fallback; record that the tester understood the next action and evidence boundary.
 
-**Required Evidence:** Exact commit, tag, and workflow run; build manifest, dependency inventory, and artifact checksums; install/launch record; sanitized case manifest; capture and voice result; human acceptance record; and an unchanged draft-publication receipt if promoted.
+**Required Evidence:** Exact commit and workflow run; build manifest, dependency inventory, and artifact checksums; install/launch record; sanitized case manifest; capture and voice result; and human acceptance record.
 
 **Current Blocker:** `BLK-001`.
 
 ## Next Actions
 
-1. Freeze the intentional `1.14.0` candidate commit, create its version-matched tag draft, and retain the exact-SHA manifest, checksums, dependency inventory, and provider receipt.
+1. Retain the private `1.14.0` exact-SHA artifact, manifest, checksums, dependency inventory, and provider receipt; do not require a tag or public release for personal use.
 2. Run the bound smoke probe with the consented genuine replay, then run the clean-Windows real-replay journey, including active-drill handoff plus capture and voice fallbacks.
 3. Record human comprehension and acceptance.
 4. Choose the next implementation slice only after that evidence is reconciled.

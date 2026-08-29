@@ -12,15 +12,15 @@ A player installs the app, supplies a real replay or explicit battlefield report
 
 Twenty material repository capabilities are `TESTED` locally. Master Intel owns the primary replay-to-practice loop; Guided Execution is the supporting live mode at `/hud`. Replay-observed facts, player-only reports, and bounded later-replay follow-up are explicit. Replay-derived drill persistence requires observed-replay authority, explicit player identity, provisional status, and a calculated correction-specific anchor; follow-up requires a chronologically later opening-compatible replay plus signal-specific observability, uses consistent patch fallbacks, treats missing supply timing as not observed, then persists only a bounded local receipt. Total match duration is descriptive rather than an opening-cohort gate, and recurrence ranking uses a disclosed conservative sample-size-aware lower bound. Guided Execution keeps the selected target primary over its assigned scenario, reports consistency rather than mastery, fails closed on malformed status, requires distinct-session evidence for higher confidence, exposes progression horizons, and advances repeated met reports only to readiness for replay review. Replay metadata is committed as one cross-file integrity generation; corrupt or legacy cases cannot supply coaching and remain visible only as privacy-safe re-import placeholders. Synthetic cases remain tutorial-only. These statements do not promote target-environment or user-outcome proof.
 
-Release-candidate preparation is also locally `TESTED`: replay storage verifies authorized-source digests; the opt-in genuine-replay smoke probe uses production enrichment, requires dense supported 1v1 evidence, validates the persisted case generation, and can claim its bounded proof class only when tied to the exact build artifact or the same clean Git source. Direct desktop dependencies are pinned; the formerly vulnerable protobuf compatibility pin is replaced by patched `5.29.6` running the legacy SC2 descriptors through its explicit pure-Python compatibility mode. The personal installer uses a fixed per-user application directory, guards uninstall, stops on WebView2 bootstrap failure, and adds a non-default replay Open With command rather than replacing the existing association. The Windows workflow binds installer, portable package, and dependency inventory to one exact SHA/run before creating a version-matched draft release. No genuine replay or accepted Windows artifact ran in this reconciliation. `1.14.0` is a candidate identity, not yet a verified personal artifact.
+Candidate preparation is locally `TESTED`, and a private Windows build is now provider-observed: replay storage verifies authorized-source digests; the opt-in genuine-replay smoke probe uses production enrichment, requires dense supported 1v1 evidence, validates the persisted case generation, and can claim its bounded proof class only when tied to the exact build artifact or the same clean Git source. Direct desktop dependencies are pinned; the formerly vulnerable protobuf compatibility pin is replaced by patched `5.29.6` running the legacy SC2 descriptors through its explicit pure-Python compatibility mode. The personal installer uses a fixed per-user application directory, guards uninstall, stops on WebView2 bootstrap failure, and adds a non-default replay Open With command rather than replacing the existing association. Private workflow run `33228464055` bound the installer, portable package, and dependency inventory to commit `38fa81b7e35556eb02830195b98742560aabfe21`; the downloaded files match the recorded SHA-256 values. This is a personal artifact, not a commercial launch: no tag or public release is required. No genuine replay, clean-Windows install, microphone, or capture acceptance ran in this reconciliation.
 
 ## Capability State
 
 - TESTED: 20
 - VERIFIED in a target Windows environment: 0
-- DEPLOYED with current provider evidence: 0
-- USED with customer evidence: 0
-- COMMERCIALLY_PROVEN: 0
+- INSTALLED on the owner's Windows machine: 0
+- USED with owner acceptance evidence: 0
+- COMMERCIAL PROOF: outside the current personal-app scope
 
 Highest-value tested capabilities are replay ingestion and persistence, the persistent replay-to-execution loop, durable interrupted-session recovery, truthful degraded-data handling, the evidence-bounded Guided Execution HUD, Strategic OS, and the comparison guard.
 
@@ -29,7 +29,7 @@ Highest-value tested capabilities are replay ingestion and persistence, the pers
 - Clean-Windows install and real-replay completion from a current artifact.
 - Real frame capture and microphone behavior on the target machine.
 - Expert validity or player-outcome value of strategy benchmarks.
-- Current deployment, active usage, retention, measured improvement, or revenue.
+- Owner-machine installation, repeated personal use, and measured improvement.
 
 ## Primary Journey
 
@@ -51,7 +51,7 @@ The executable primary journey is local launch → replay import → persisted c
 - P1: no current clean-Windows real-replay acceptance receipt.
 - P1: normalized replay fingerprints and replay-to-master calculations are absent.
 - P2: strategy benchmarks and coaching outcomes lack expert/player validation.
-- P2: deployment, usage, retention, outcome, and revenue evidence are absent.
+- P2: owner-machine operation, repeated-use, and improvement-outcome evidence are absent.
 
 ## Next Proof Event
 
@@ -59,14 +59,14 @@ The executable primary journey is local launch → replay import → persisted c
 
 ## Next Actions
 
-1. Freeze the intentional `1.14.0` candidate commit and create its exact-SHA draft assets.
+1. Retain the private `1.14.0` exact-SHA artifact, checksums, dependency inventory, and provider receipt.
 2. Execute the clean-Windows real-replay journey through active-drill handoff.
 3. Record human acceptance and reconcile the evidence.
 4. Select the next bounded product slice from what the proof event reveals.
 
-## Commercial / Operational Evidence
+## Personal Operational Evidence
 
-Release workflow definitions, dependency pins, and the acceptance proof kit exist. No current provider receipt, clean-install record, consented usage, retention, outcome, or revenue evidence was inspected. Commercial readiness is `UNVERIFIED`.
+Release workflow definitions, dependency pins, the acceptance proof kit, and one exact-SHA hosted build receipt exist. No clean-install record, consented usage, retention, or outcome evidence was inspected. Commercial readiness is not the governing objective for this personal app.
 
 ## Confidence
 

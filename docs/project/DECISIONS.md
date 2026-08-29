@@ -181,3 +181,18 @@ This register adopts existing decisions; it does not rewrite history. `DEC-003` 
 - Supersedes: the vulnerable `protobuf==3.20.3` compatibility pin.
 - Status: ACTIVE
 - Revisit Trigger: capture performance is inadequate, upstream descriptors are regenerated, or a newer patched protobuf line requires compatibility retesting.
+
+## DEC-013 — Private personal artifacts are the acceptance path; publication is optional
+
+- Date: 2026-08-28
+- Context: release-oriented language incorrectly implied that the application was being prepared for a commercial launch. The product owner clarified that SC2 Master Coach is a personal application.
+- Decision: use manually dispatched, private Windows artifacts for installation and acceptance. Preserve exact source, manifest, dependency, and checksum identity because it protects the owner from running ambiguous binaries. Do not require a version tag, GitHub Release, public publication, payment, customer, or commercial-readiness workflow for personal use.
+- Alternatives Considered: require the existing tag-and-draft release path; distribute an untracked local binary with no provenance; the chosen private exact-SHA artifact path.
+- Why Chosen: it keeps the useful safety and reproducibility controls while removing release ceremony and objectives that do not serve a single owner using a local app.
+- Authority: explicit product-owner correction that SC2 Master Coach is a personal application.
+- Affected Components: Canonical Project State, Windows artifact workflow use, `PROOF-NEXT-001`, and acceptance language.
+- Evidence: GitHub Actions workflow-dispatch run `33228464055` built and uploaded checksum-matching artifacts for commit `38fa81b7e35556eb02830195b98742560aabfe21` without running the branch/tag publication steps.
+- Reversible?: yes, if the product owner later chooses distribution; any future release path should retain exact-byte identity.
+- Supersedes: the DEC-009 requirement that personal acceptance depend on a version tag and draft release. DEC-009's exact-source and immutable-byte requirements remain active.
+- Status: ACTIVE
+- Revisit Trigger: the owner intentionally changes the app from personal use to distribution.

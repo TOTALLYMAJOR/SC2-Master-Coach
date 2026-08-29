@@ -26,13 +26,14 @@ Verdicts apply only to the named claim and evidence boundary. Lifecycle state re
 | Offline voice works on the target machine | Packaged model, real microphone, recognition transcript, and fallback evidence | Mocked/local contract tests and packaging definition | PARTIALLY_PROVEN |
 | Real SC2 frames can be captured reliably | Supported replay, exact installed build, successful image artifacts, and fallback record | Capture implementation and boundary tests | UNVERIFIED |
 | Runtime rejects non-loopback Host values and cross-origin browser mutation | Configuration, application guard, local request tests, and packaged runtime network observation | CSP, bind configuration, Host/Origin guard, `403` local probe, and local tests | PARTIALLY_PROVEN |
-| A Windows package can be built and installed from the current branch | Current exact-SHA CI receipt, artifact checksum, clean install and launch | Exact-SHA draft workflow, dependency pins, proof kit, and static packaging tests only | UNVERIFIED |
+| A Windows package can be built and installed from the current branch | Current exact-SHA CI receipt, artifact checksum, clean install and launch | Hosted run `33228464055` built checksum-matching artifacts for commit `38fa81b7e35556eb02830195b98742560aabfe21`; clean installation and launch were not observed | PARTIALLY_PROVEN |
 | The personal installer cannot select a broad existing directory, refuses unsafe uninstall paths, stops on WebView2 bootstrap failure, and does not replace the default `.SC2Replay` association | Installer source plus focused static contract tests | `installer/sc2-master-coach.nsi`; Windows desktop tests | PROVEN LOCALLY |
 | Patched protobuf imports the legacy SC2 protocol descriptors through explicit pure-Python compatibility mode | Isolated patched-runtime import plus repository and workflow compatibility tests | `protobuf==5.29.6`; `sc2_frame_capture.py`; protocol tests | PROVEN LOCALLY |
-| The `1.14.0` candidate is built, verified, or available to users | Version-matched tag, provider receipt, draft assets, clean-Windows acceptance, and unchanged publication receipt | Worktree version identity and workflow configuration only | UNVERIFIED |
+| The private `1.14.0` personal candidate is built | Exact-SHA provider receipt, manifest, dependency inventory, and matching artifact checksums | Hosted run `33228464055`; downloaded installer, portable archive, and dependency inventory match the manifest for commit `38fa81b7e35556eb02830195b98742560aabfe21` | PROVEN |
+| The private `1.14.0` personal candidate installs and runs correctly on the owner's Windows machine | Clean-Windows install/launch record plus genuine-replay, microphone, and capture/fallback evidence | No target-machine execution was observed | UNVERIFIED |
 | Evidence graph and dependency register are canonical project-state controls | Human graph/register docs, machine ledger sections, checker validation, and passing graph test | `EVIDENCE_GRAPH.md`; `DEPENDENCIES.md`; `.project/state.json`; graph validation test | PROVEN |
 | Real players use, retain, or improve with the product | Consented usage cohorts and measured outcome evidence | None inspected | UNVERIFIED |
-| The product has commercial demand or revenue | Offer, price, prospect, payment, and retention evidence | Buyer hypothesis only | UNVERIFIED |
+| The product has commercial demand or revenue | Offer, price, prospect, payment, and retention evidence | The product owner defines this as a personal application | OUT OF SCOPE |
 
 ## Current Local Proof Record
 
@@ -40,7 +41,18 @@ Verdicts apply only to the named claim and evidence boundary. Lifecycle state re
 - Scope: active local checkout only
 - Command: `.venv/bin/python -m pytest -q --disable-warnings`
 - Result: `249 passed, 1 skipped, 100 warnings` in the current local reconciliation run. The skipped test requires an explicitly supplied genuine replay; the warnings are dependency deprecations and do not establish target-runtime failure.
-- Non-claims: no Windows package, real microphone, real SC2 process, provider, customer, or payment was exercised by that command.
+- Non-claims: no Windows package, real microphone, real SC2 process, or provider was exercised by that local command.
+
+## Private Windows Build Record
+
+- Date: 2026-08-28 local / 2026-08-29 UTC
+- Scope: private GitHub-hosted Windows build and downloaded artifact integrity only
+- Workflow: `workflow_dispatch` run `33228464055`
+- Source: branch `personal/v1.14.0-candidate`, commit `38fa81b7e35556eb02830195b98742560aabfe21`
+- Result: protocol compatibility, JavaScript syntax, 249-test suite, PyInstaller bundle, NSIS installer, exact-SHA provenance, and artifact upload passed. The release-marking and tag-publication steps were skipped.
+- Downloaded artifacts: installer SHA-256 `0558de59cae5e60f0e2484c1672ce04faa3996adc51c56a1a0cfa22d3e8619cd`; portable ZIP SHA-256 `64da7bec14013b9748cd2716c9d7690744544d30d344cd5d4836ab2ddf8c269e`; dependency inventory SHA-256 `b87d1ff5daadd8164c9b21c723fe589824deec16dd791cc9784d85e8222779b8`.
+- Verdict: personal Windows artifacts are `BUILT` with matching provenance. Installation, launch, genuine-replay behavior, microphone, capture, and coaching value remain `UNVERIFIED`.
+- Publication boundary: no tag, GitHub Release, or public/commercial launch was created or required.
 
 ## Control-Plane Proof Record
 
@@ -58,4 +70,4 @@ Verdicts apply only to the named claim and evidence boundary. Lifecycle state re
 - Windows operation: clean-machine install, launch, replay, capture/voice result, and logs.
 - Usage: consented product events or a named acceptance record.
 - Outcome: defined baseline, post-use measurement, sample, and method.
-- Revenue: provider transaction/settlement evidence; internal intent is insufficient.
+- Commercial proof: outside the current personal-application scope; transaction evidence would be required only if that scope intentionally changes.
