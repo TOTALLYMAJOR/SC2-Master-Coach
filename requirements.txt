@@ -1,5 +1,5 @@
 Flask
 Pillow
-protobuf==3.20.3
+protobuf==5.29.6
 pysc2 @ git+https://github.com/google-deepmind/pysc2.git@0df53d38c153972f1e368572ba65b1442a0fd41f
 sc2reader @ git+https://github.com/ggtracker/sc2reader.git@e10fc9344417d0aa9649e4ed8d6423e38f6af4c9

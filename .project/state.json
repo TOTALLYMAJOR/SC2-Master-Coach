@@ -251,16 +251,18 @@
     {
       "id": "CAP-012",
       "name": "SC2 replay frame-capture boundary",
-      "description": "Validates capture requests, resolves exact SC2 protocol builds, and returns explicit unavailable fallbacks.",
+      "description": "Validates capture requests, resolves exact SC2 protocol builds, loads the legacy generated SC2 descriptors through the patched protobuf pure-Python compatibility path, and returns explicit unavailable fallbacks.",
       "lifecycle_state": "TESTED",
       "confidence": "MEDIUM",
       "evidence": [
         {"kind": "source", "path": "sc2_frame_capture.py", "symbol": "capture_replay_views"},
         {"kind": "test", "path": "tests/test_sc2_frame_capture.py", "symbol": "test_capture_filename_is_safe", "outcome": "passed", "verified_at": "2026-08-25"}
+        ,{"kind": "test", "path": "tests/test_protocol_compat.py", "symbol": "test_sc2_protocol_runtime_imports_with_supported_protobuf", "outcome": "passed", "verified_at": "2026-08-28"}
+        ,{"kind": "test", "path": "tests/test_protocol_compat.py", "symbol": "test_frame_capture_sets_patched_protobuf_legacy_descriptor_compatibility", "outcome": "passed", "verified_at": "2026-08-28"}
       ],
       "dependencies": ["CAP-002"],
       "blockers": ["BLK-001", "BLK-004"],
-      "last_verified": "2026-08-25",
+      "last_verified": "2026-08-28",
       "owner_or_authority": "Installed SC2 binary and exact replay base-build mapping",
       "unresolved_placeholders": ["Successful capture from a real replay on a clean Windows target is UNVERIFIED."],
       "current": true
@@ -268,7 +270,7 @@
     {
       "id": "CAP-013",
       "name": "Windows packaging and release definition",
-      "description": "Defines pinned direct desktop dependencies, recursive primary-UI syntax validation, PyInstaller and NSIS packaging, a fixed per-user install path with guarded uninstall and non-default replay Open With integration, explicit WebView2 failure handling, exact-SHA/run manifests, checksums, dependency inventory, a build- or clean-source-bound real-replay smoke contract, and version-matched tag-only draft publication for acceptance before unchanged promotion.",
+      "description": "Defines pinned direct desktop dependencies including patched protobuf with an explicit legacy-SC2 compatibility mode, recursive primary-UI syntax validation, PyInstaller and NSIS packaging, a fixed per-user install path with guarded uninstall and non-default replay Open With integration, explicit WebView2 failure handling, exact-SHA/run manifests, checksums, dependency inventory, a build- or clean-source-bound real-replay smoke contract, and version-matched tag-only draft publication for acceptance before unchanged promotion.",
       "lifecycle_state": "TESTED",
       "confidence": "MEDIUM",
       "evidence": [
@@ -281,6 +283,7 @@
         {"kind": "test", "path": "tests/test_real_replay_smoke.py", "symbol": "test_artifact_cannot_bind_dirty_or_different_probe_source", "outcome": "passed", "verified_at": "2026-08-28"}
         ,{"kind": "test", "path": "tests/test_windows_desktop.py", "symbol": "test_nsis_installer_uses_a_fixed_personal_app_directory_and_guarded_uninstall", "outcome": "passed", "verified_at": "2026-08-28"}
         ,{"kind": "test", "path": "tests/test_windows_desktop.py", "symbol": "test_desktop_direct_dependencies_are_version_pinned_for_candidate_builds", "outcome": "passed", "verified_at": "2026-08-28"}
+        ,{"kind": "test", "path": "tests/test_protocol_compat.py", "symbol": "test_protobuf_pin_is_present_in_runtime_requirements", "outcome": "passed", "verified_at": "2026-08-28"}
       ],
       "dependencies": ["CAP-001", "CAP-005", "CAP-010", "CAP-011"],
       "blockers": ["BLK-001", "BLK-004"],
@@ -616,6 +619,17 @@
         {"kind": "test", "path": "tests/test_windows_desktop.py", "symbol": "test_nsis_installer_uses_a_fixed_personal_app_directory_and_guarded_uninstall", "outcome": "passed", "verified_at": "2026-08-28"},
         {"kind": "test", "path": "tests/test_windows_desktop.py", "symbol": "test_desktop_direct_dependencies_are_version_pinned_for_candidate_builds", "outcome": "passed", "verified_at": "2026-08-28"}
       ]
+    },
+    {
+      "id": "DEC-012",
+      "name": "Patched protobuf runs legacy SC2 descriptors in explicit compatibility mode",
+      "status": "ACTIVE",
+      "authority": "Repository security alert review and executable SC2 protocol compatibility test",
+      "evidence": [
+        {"kind": "source", "path": "sc2_frame_capture.py", "symbol": "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"},
+        {"kind": "test", "path": "tests/test_protocol_compat.py", "symbol": "test_sc2_protocol_runtime_imports_with_supported_protobuf", "outcome": "passed", "verified_at": "2026-08-28"},
+        {"kind": "test", "path": "tests/test_protocol_compat.py", "symbol": "test_frame_capture_sets_patched_protobuf_legacy_descriptor_compatibility", "outcome": "passed", "verified_at": "2026-08-28"}
+      ]
     }
   ],
   "evidenceGraph": {
@@ -646,7 +660,9 @@
       {"id": "EG-030", "from": "DEC-009", "to": "CAP-013", "relationship": "governs_exact_artifact_identity"},
       {"id": "EG-031", "from": "DEC-010", "to": "CAP-002", "relationship": "governs_case_integrity_boundary"},
       {"id": "EG-032", "from": "DEC-010", "to": "CAP-020", "relationship": "governs_reimport_recovery"},
-      {"id": "EG-033", "from": "DEC-011", "to": "CAP-013", "relationship": "governs_personal_installer_safety"}
+      {"id": "EG-033", "from": "DEC-011", "to": "CAP-013", "relationship": "governs_personal_installer_safety"},
+      {"id": "EG-034", "from": "DEC-012", "to": "CAP-012", "relationship": "governs_patched_protocol_compatibility"},
+      {"id": "EG-035", "from": "DEC-012", "to": "CAP-013", "relationship": "governs_protobuf_dependency_pin"}
     ]
   },
   "dependencyGraph": {
@@ -747,7 +763,7 @@
       "scope": "Local checkout only",
       "result": "TESTED",
       "command": ".venv/bin/python -m pytest -q --disable-warnings",
-      "summary": "248 passed, 1 intentionally skipped genuine-replay test, 101 dependency deprecation warnings",
+      "summary": "249 passed, 1 intentionally skipped genuine-replay test, 100 dependency deprecation warnings",
       "evidence": [
         {"kind": "test", "path": "tests/test_project_state_control.py", "symbol": "test_valid_state_ledger_passes", "outcome": "passed", "verified_at": "2026-08-28"}
       ]

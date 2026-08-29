@@ -3,7 +3,7 @@ waitress==3.0.2
 pywebview==6.2.1
 pyinstaller==6.22.2
 Pillow==12.3.0
-protobuf==3.20.3
+protobuf==5.29.6
 vosk==0.3.45
 sounddevice==0.5.5
 pysc2 @ git+https://github.com/google-deepmind/pysc2.git@0df53d38c153972f1e368572ba65b1442a0fd41f

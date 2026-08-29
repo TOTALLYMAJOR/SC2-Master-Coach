@@ -166,3 +166,18 @@ This register adopts existing decisions; it does not rewrite history. `DEC-003` 
 - Supersedes: arbitrary NSIS install-directory selection and default `.SC2Replay` association replacement.
 - Status: ACTIVE
 - Revisit Trigger: a signed installer framework provides transactional ownership, association restoration, and stronger rollback.
+
+## DEC-012 — Patched protobuf runs legacy SC2 descriptors in explicit compatibility mode
+
+- Date: 2026-08-28
+- Context: `protobuf==3.20.3` allowed the legacy generated `s2clientprotocol` descriptors to import, but current repository security alerts identify high-severity denial-of-service and JSON recursion issues. Patched native protobuf rejects those old generated descriptors.
+- Decision: pin `protobuf==5.29.6` and set `PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python` before the optional SC2 capture protocol imports. Verify the real `s2clientprotocol` import in tests and the Windows workflow.
+- Alternatives Considered: retain the vulnerable pin; suppress the alerts because the app is personal; regenerate upstream SC2 descriptors in this slice; remove capture; the chosen patched compatibility mode.
+- Why Chosen: removes the known dependency vulnerabilities without disabling the bounded capture path or pretending the legacy native descriptors are compatible.
+- Authority: repository security alert review plus executable protocol-import evidence.
+- Affected Components: runtime and desktop requirements, `sc2_frame_capture.py`, Windows workflow, protocol compatibility tests.
+- Evidence: isolated `protobuf 5.29.6` import experiment; `test_sc2_protocol_runtime_imports_with_supported_protobuf`; `test_frame_capture_sets_patched_protobuf_legacy_descriptor_compatibility`.
+- Reversible?: yes, when upstream publishes regenerated descriptors compatible with patched native protobuf.
+- Supersedes: the vulnerable `protobuf==3.20.3` compatibility pin.
+- Status: ACTIVE
+- Revisit Trigger: capture performance is inadequate, upstream descriptors are regenerated, or a newer patched protobuf line requires compatibility retesting.

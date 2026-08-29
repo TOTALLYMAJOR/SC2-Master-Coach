@@ -7,18 +7,28 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_sc2_protocol_runtime_imports_with_supported_protobuf():
+    os.environ.setdefault("PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python")
     import google.protobuf
     from s2clientprotocol import sc2api_pb2
 
-    assert google.protobuf.__version__ == "3.20.3"
+    assert google.protobuf.__version__ == "5.29.6"
     assert sc2api_pb2.InterfaceOptions is not None
 
 
 def test_protobuf_pin_is_present_in_runtime_requirements():
     desktop = (ROOT / "requirements-desktop.txt").read_text(encoding="utf-8")
     service = (ROOT / "requirements.txt").read_text(encoding="utf-8")
-    assert "protobuf==3.20.3" in desktop
-    assert "protobuf==3.20.3" in service
+    assert "protobuf==5.29.6" in desktop
+    assert "protobuf==5.29.6" in service
+
+
+def test_frame_capture_sets_patched_protobuf_legacy_descriptor_compatibility():
+    source = (ROOT / "sc2_frame_capture.py").read_text(encoding="utf-8")
+    workflow = (ROOT / ".github" / "workflows" / "windows-release.yml").read_text(
+        encoding="utf-8"
+    )
+    assert 'PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python"' in source
+    assert "PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION" in workflow
 
 
 def test_new_sc2_replay_versions_bind_to_their_exact_base_build():

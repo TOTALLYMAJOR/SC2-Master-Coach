@@ -28,6 +28,7 @@ Verdicts apply only to the named claim and evidence boundary. Lifecycle state re
 | Runtime rejects non-loopback Host values and cross-origin browser mutation | Configuration, application guard, local request tests, and packaged runtime network observation | CSP, bind configuration, Host/Origin guard, `403` local probe, and local tests | PARTIALLY_PROVEN |
 | A Windows package can be built and installed from the current branch | Current exact-SHA CI receipt, artifact checksum, clean install and launch | Exact-SHA draft workflow, dependency pins, proof kit, and static packaging tests only | UNVERIFIED |
 | The personal installer cannot select a broad existing directory, refuses unsafe uninstall paths, stops on WebView2 bootstrap failure, and does not replace the default `.SC2Replay` association | Installer source plus focused static contract tests | `installer/sc2-master-coach.nsi`; Windows desktop tests | PROVEN LOCALLY |
+| Patched protobuf imports the legacy SC2 protocol descriptors through explicit pure-Python compatibility mode | Isolated patched-runtime import plus repository and workflow compatibility tests | `protobuf==5.29.6`; `sc2_frame_capture.py`; protocol tests | PROVEN LOCALLY |
 | The `1.14.0` candidate is built, verified, or available to users | Version-matched tag, provider receipt, draft assets, clean-Windows acceptance, and unchanged publication receipt | Worktree version identity and workflow configuration only | UNVERIFIED |
 | Evidence graph and dependency register are canonical project-state controls | Human graph/register docs, machine ledger sections, checker validation, and passing graph test | `EVIDENCE_GRAPH.md`; `DEPENDENCIES.md`; `.project/state.json`; graph validation test | PROVEN |
 | Real players use, retain, or improve with the product | Consented usage cohorts and measured outcome evidence | None inspected | UNVERIFIED |
@@ -38,7 +39,7 @@ Verdicts apply only to the named claim and evidence boundary. Lifecycle state re
 - Date: 2026-08-28
 - Scope: active local checkout only
 - Command: `.venv/bin/python -m pytest -q --disable-warnings`
-- Result: `248 passed, 1 skipped, 101 warnings` in the current local reconciliation run. The skipped test requires an explicitly supplied genuine replay; the warnings are dependency deprecations and do not establish target-runtime failure.
+- Result: `249 passed, 1 skipped, 100 warnings` in the current local reconciliation run. The skipped test requires an explicitly supplied genuine replay; the warnings are dependency deprecations and do not establish target-runtime failure.
 - Non-claims: no Windows package, real microphone, real SC2 process, provider, customer, or payment was exercised by that command.
 
 ## Control-Plane Proof Record
@@ -48,7 +49,7 @@ Verdicts apply only to the named claim and evidence boundary. Lifecycle state re
 - Commands:
   - `python3 scripts/check_project_state.py`
   - `.venv/bin/python -m pytest tests/test_project_state_control.py -q`
-- Result: canonical state check passed with 20 capabilities, 4 blockers, and 1 NEXT proof event; the final full suite passed 248 tests with one intentionally skipped genuine-replay test.
+- Result: canonical state check passed with 20 capabilities, 4 blockers, and 1 NEXT proof event; the final full suite passed 249 tests with one intentionally skipped genuine-replay test.
 - Non-claims: this validates graph/reference controls only. It does not prove clean Windows operation, replay capture, microphone behavior, player improvement, release availability, usage, or revenue.
 
 ## Evidence Required for External Truth

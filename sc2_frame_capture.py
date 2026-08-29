@@ -8,6 +8,10 @@ import json
 import os
 import re
 
+# Current s2clientprotocol wheels contain legacy generated descriptors. A patched
+# protobuf runtime remains compatible through its documented pure-Python path.
+os.environ.setdefault("PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python")
+
 _CAPTURE_LOCK = Lock()
 _SC2_RUNTIME_DLLS = ("icuuc52.dll", "icuin52.dll", "icudt52.dll")
 

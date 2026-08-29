@@ -120,6 +120,8 @@ Windows workflow and installer definitions
 | EG-031 | governs case-integrity boundary | DEC-010 | CAP-002 | active decision |
 | EG-032 | governs visible re-import recovery | DEC-010 | CAP-020 | active decision |
 | EG-033 | governs fixed-path personal installer safety | DEC-011 | CAP-013 | active decision |
+| EG-034 | governs patched legacy protocol compatibility | DEC-012 | CAP-012 | active decision |
+| EG-035 | governs patched protobuf dependency pin | DEC-012 | CAP-013 | active decision |
 
 ## Use Rules
 

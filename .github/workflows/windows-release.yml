@@ -67,7 +67,7 @@ jobs:
       - name: Verify SC2 protocol compatibility
         shell: pwsh
         run: |
-          python -c "import google.protobuf; from s2clientprotocol import sc2api_pb2; print(f'protobuf={google.protobuf.__version__}; sc2api_pb2=ok')"
+          python -c "import os; os.environ.setdefault('PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION', 'python'); import google.protobuf; from s2clientprotocol import sc2api_pb2; print(f'protobuf={google.protobuf.__version__}; sc2api_pb2=ok')"
 
       - name: Verify HUD JavaScript syntax
         shell: pwsh

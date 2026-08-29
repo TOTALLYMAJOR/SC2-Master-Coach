@@ -113,7 +113,7 @@ def test_desktop_direct_dependencies_are_version_pinned_for_candidate_builds():
         "pywebview==6.2.1",
         "pyinstaller==6.22.2",
         "Pillow==12.3.0",
-        "protobuf==3.20.3",
+        "protobuf==5.29.6",
         "vosk==0.3.45",
         "sounddevice==0.5.5",
     ):
