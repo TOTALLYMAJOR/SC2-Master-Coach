@@ -135,6 +135,35 @@ Any substantial future implementation packet should declare:
 - `human_gate`: owner, expert, or player decision required before promotion;
 - `blocked_if`: evidence, authority, or dependency condition that stops the work.
 
+## Adopted SC2API Portfolio
+
+`DEC-014` adopts the local PySC2/`s2clientprotocol` replay-rendering hardening
+portfolio into `docs/python-strategy-science-backlog.md`. It does not authorize
+Battle.net web data or live-process access.
+
+The current proof dependency remains first:
+
+```text
+PROOF-NEXT-001 reconciliation
+  -> SC2API-002 contract
+  -> SC2API-003 adapter hardening
+  -> SC2API-004 orchestration
+  -> SC2API-009 security boundary
+  -> SC2API-005 loopback API
+  -> SC2API-006 capture integrity
+  -> SC2API-007 replay-review UI
+  -> SC2API-008 recovery
+  -> SC2API-010 accessibility
+  -> SC2API-011 packaging and CI
+  -> SC2API-012 canonical-state reconciliation
+  -> SC2API-013 post-change clean-Windows acceptance
+```
+
+The detailed graph is acyclic in the canonical backlog. `SC2API-001` is the
+accepted decision represented by `DEC-014`; every other task remains
+`NOT_STARTED`. No task inherits the `TESTED` state of existing `CAP-012`, and
+the pre-change clean-Windows proof cannot verify post-change artifacts.
+
 ## Non-Adoption Boundary
 
 This register does not introduce QuietPilot's tenant, payment, provider, or

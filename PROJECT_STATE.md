@@ -14,6 +14,7 @@ Problem Solved: Turn local replay evidence or explicit player reports into one u
 Current Product Stage: Private local-first Windows candidate; clean-machine operation and owner acceptance are UNVERIFIED
 Primary Deployment Target: Unsigned per-user Windows desktop app with a loopback-only Flask service
 Last Evidence Reconciliation: 2026-08-28 from private build source `38fa81b7e35556eb02830195b98742560aabfe21`
+Last Governance Reconciliation: 2026-09-14 from backlog-bound source `f78c0a65a76b327202ae1a9e7b48fa60fd7564fd`
 ```
 
 Portfolio membership is `UNVERIFIED`; no `.project/portfolio.json` is created without a stable interoperability contract.
@@ -83,6 +84,7 @@ Deploy experimental practice operation
 - The opt-in disposable-workspace genuine-replay smoke probe uses production enrichment, requires supported non-observer 1v1 participants and dense first-five-minute evidence, validates the persisted case generation, and can emit its bounded proof class only when bound to the exact build artifact or the same clean Git source. Mocked calls remain test-contract-only. No genuine replay was supplied, so real parsing remains `UNVERIFIED`.
 - The `1.14.0` personal candidate source is frozen on a dedicated branch. Direct desktop dependencies and parser sources are pinned; patched protobuf `5.29.6` loads the legacy generated SC2 descriptors through its explicit pure-Python compatibility path; primary Master Intel modules receive recursive syntax checks. The installer is fixed to the dedicated per-user directory, refuses an unexpected uninstall path, stops if WebView2 bootstrap fails, and adds a non-default replay Open With command without replacing the player's association. Private GitHub Actions run `33228464055` built and uploaded exact-SHA artifacts for commit `38fa81b7e35556eb02830195b98742560aabfe21`; the downloaded installer, portable archive, and dependency inventory match the recorded checksums. No tag or public release is required for this personal app. Clean-Windows installation and genuine-replay operation remain `UNVERIFIED`.
 - The Python runtime implements the bounded PvT three-base Digital Twin. Most registered Strategy Science capabilities remain design-only.
+- `DEC-014` adopts the local PySC2/`s2clientprotocol` replay-rendering hardening portfolio into the existing Python Strategy Science backlog. “StarCraft API” is limited to postgame rendering through the installed game binary; Battle.net web integration, browser-direct credentials, live-process telemetry, input automation, and unreported battlefield truth remain out of scope. `SC2API-001` is accepted as the governing decision; `SC2API-002` through `SC2API-013` are not started. No capability lifecycle state was promoted by adoption.
 - The hard-data engine produces versioned per-player fact envelopes, compatibility fingerprints, compact second-resolution worker continuity, mineral-threshold exposure, and supply-block windows.
 - The replay observation model now attaches conservative information-before-commitment windows, separates outcome from decision reasonableness, grades expansion evidence coverage, and exposes attention-gap and repeated-phase proxies.
 - Each newly persisted case receives a compact player-scoped learning index. Personal macro vectors exclude win/loss; opponent vectors exclude intent; first-five-minute recurrence admits only chronologically prior replays with exact race, matchup, patch, map, game-mode, and observation-window compatibility. Total game duration remains descriptive because match length is outcome-dependent and does not determine whether the opening was comparable. Recurrence denominators include only games in which that specific signal was observable; provisional correction ranking uses the disclosed 95% Wilson lower bound, then count and the earliest current evidence anchor, so fragile perfect rates do not outrank materially stronger cohorts. Expert priority remains `UNVERIFIED`.
@@ -97,12 +99,12 @@ Deploy experimental practice operation
 ## Repository State at Reconciliation
 
 - Active checkout: `/home/administrator/projects_new/SC2-Master-Coach`
-- Active branch: `feat/master-intel-live-checkpoints`
-- Reconciled source base: `862f1677543231730f58b631c36a37101975a05b` plus the current bounded product-quality worktree slice
-- Remote tracking branch: `origin/feat/master-intel-live-checkpoints`
-- One worktree was present.
-- Local `main` was behind `origin/main`; it is not the authority for this reconciliation.
-- Pre-existing untracked `.agents/` and `output/` content was preserved and is not evidence of committed product state.
+- Active branch: `personal/v1.14.0-candidate`
+- Reconciled source base: `f78c0a65a76b327202ae1a9e7b48fa60fd7564fd` plus the current canonical backlog-adoption worktree slice
+- Remote tracking branch: `origin/personal/v1.14.0-candidate`
+- Two worktrees were present: this active checkout and a detached release worktree at `/mnt/c/Users/Administrator/AppData/Local/Temp/sc2-master-coach-release-6b533a5` on `862f1677543231730f58b631c36a37101975a05b`.
+- Local `main` was 28 commits behind `origin/main`; it is not the authority for this reconciliation. The active candidate branch matched its remote before this uncommitted adoption slice.
+- Pre-existing untracked `.agents/`, `.playwright-cli/`, `artifacts/`, and `output/` content was preserved and is not evidence of committed product state. The saved proposal inside `artifacts/` is the reviewed adoption input, not canonical product state.
 
 Branch, remote, workflow, and deployment facts are time-sensitive and must be refreshed before release claims.
 
@@ -117,6 +119,20 @@ Branch, remote, workflow, and deployment facts are time-sensitive and must be re
 ## Product Hierarchy Decision
 
 The 2026-08-27 user-directed implementation adopts one primary improvement loop: Master Intel owns replay review, evidence boundaries, and the persistent active drill; Guided Execution at `/hud` is the supporting live mode. This resolves the former executable-versus-release-positioning contradiction recorded as `BLK-005`. Historical release notes remain historical evidence, not current product authority.
+
+## Adopted StarCraft API Scope
+
+On 2026-09-14 the project owner adopted the saved Proofloom proposal into
+`docs/python-strategy-science-backlog.md` and selected the existing local
+PySC2/`s2clientprotocol` replay renderer as the meaning of “StarCraft API.”
+`DEC-014` governs the portfolio. The integration remains postgame, local,
+case-bound, and evidence-labeled. Strategic OS and explicit player reports remain
+live authority. Battle.net web APIs and live-process access require a future
+superseding decision; they are not latent parts of this backlog.
+
+Adoption is a planning and authority event. It does not establish new source,
+test, clean-Windows, genuine-replay, usage, or outcome evidence. The current
+`CAP-012` and `INT-002` states therefore remain unchanged.
 
 ## NEXT PROOF EVENT
 
@@ -137,7 +153,7 @@ The 2026-08-27 user-directed implementation adopts one primary improvement loop:
 1. Retain the private `1.14.0` exact-SHA artifact, manifest, checksums, dependency inventory, and provider receipt; do not require a tag or public release for personal use.
 2. Run the bound smoke probe with the consented genuine replay, then run the clean-Windows real-replay journey, including active-drill handoff plus capture and voice fallbacks.
 3. Record human comprehension and acceptance.
-4. Choose the next implementation slice only after that evidence is reconciled.
+4. After `PROOF-NEXT-001` is reconciled, begin the adopted SC2API portfolio at `SC2API-002`; preserve the local postgame-only scope and re-run clean-Windows acceptance against the changed exact-SHA artifact.
 
 ## Control Plane Operation
 

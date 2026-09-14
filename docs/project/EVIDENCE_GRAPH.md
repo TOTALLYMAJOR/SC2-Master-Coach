@@ -62,6 +62,10 @@ python_strategy_science service and contracts
   -> CAP-010 Python shadow Digital Twin
   -> DEC-001 advisory-only authority
 
+local PySC2/s2clientprotocol replay rendering
+  -> CAP-012 replay frame-capture boundary
+  -> DEC-014 local postgame-only integration scope
+
 Windows workflow and installer definitions
   -> CAP-013 Windows release definition
   -> PROOF-NEXT-001 prerequisite evidence only
@@ -123,6 +127,7 @@ Windows workflow and installer definitions
 | EG-034 | governs patched legacy protocol compatibility | DEC-012 | CAP-012 | active decision |
 | EG-035 | governs patched protobuf dependency pin | DEC-012 | CAP-013 | active decision |
 | EG-036 | governs private personal-artifact acceptance path | DEC-013 | CAP-013 | active decision |
+| EG-037 | governs local postgame-only replay-rendering scope | DEC-014 | CAP-012 | active decision |
 
 ## Use Rules
 

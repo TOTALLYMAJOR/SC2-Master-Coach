@@ -1,0 +1,573 @@
+{
+  "coverage": {
+    "capabilities": [
+      "Ratified StarCraft API scope and authority boundary.",
+      "Existing PySC2 and s2clientprotocol replay-rendering integration preserved and hardened.",
+      "Versioned replay-capture request, result, error, provenance, and cancellation contracts.",
+      "Bounded capture worker with concurrency, timeout, cancellation, and deterministic fallback behavior.",
+      "Loopback-only Flask readiness, capture, status, and artifact-serving endpoints.",
+      "Replay-digest and case-generation-bound capture persistence with explicit legacy regeneration.",
+      "Master Intel replay-review integration with evidence-class labeling.",
+      "Truthful readiness, degraded-state, retry, support, and recovery UX.",
+      "Origin, host, path, payload, case-identity, artifact, and local-process security controls.",
+      "Accessible and responsive API status, progress, results, errors, and recovery controls.",
+      "Pinned Windows runtime dependencies, exact-source artifact provenance, and CI coverage.",
+      "Canonical capability, decision, dependency, blocker, evidence, and proof-event reconciliation.",
+      "Clean-Windows genuine-replay and human-comprehension acceptance evidence."
+    ],
+    "completionBoundary": "Adoption and completion of this portfolio would prove that the selected StarCraft API scope has a ratified authority contract, repository implementation, automated tests, bounded local security and recovery behavior, exact-source Windows packaging, and the declared acceptance evidence. Source and local tests prove at most IMPLEMENTED or TESTED. VERIFIED requires clean-Windows genuine-replay observation; USED requires owner usage evidence. This portfolio would not prove live battlefield truth, coaching correctness, player improvement, Battle.net service availability, public deployment, commercial readiness, or implementation of the complete Strategy Science backlog.",
+    "exclusions": [
+      "No browser-direct Battle.net or Blizzard web API calls.",
+      "No external credentials, OAuth flow, background network traffic, or cloud service until an explicit opt-in decision is ratified.",
+      "No live StarCraft process telemetry, memory inspection, input automation, bot behavior, or claim of unreported battlefield truth.",
+      "No mutation or replacement of Strategic OS, player-report authority, or the canonical browser event log.",
+      "No implementation of the complete Python Strategy Science program.",
+      "No redistribution of Blizzard artwork, game assets, binaries, or proprietary data.",
+      "No public release, commercial-readiness, customer, revenue, or launch requirements for this personal application.",
+      "No automatic lifecycle promotion, backlog adoption, deployment claim, player-use claim, or improvement-outcome claim."
+    ],
+    "journeys": [
+      "Player launches the local or packaged Master Intel application and sees whether the installed StarCraft II API renderer is available.",
+      "Player imports or selects a trusted local replay and explicitly selects their replay-player identity.",
+      "Player requests an API-rendered replay moment from the replay review surface.",
+      "The loopback service validates case identity, replay integrity, player identity, timestamp, patch, BaseBuild, and bounded request parameters.",
+      "The installed StarCraft II engine renders player-POV and observer-truth frames without promoting observer truth into the player's historical knowledge.",
+      "Master Intel presents the rendered evidence, provenance, uncertainty, and one bounded continuation into practice.",
+      "Missing game installation, missing matching BaseBuild, corrupt replay, unsupported protocol, unavailable graphics, timeout, cancellation, and stale cached capture each produce a truthful recovery route.",
+      "Keyboard, screen-reader, reduced-motion, narrow-width, zoom, loading, error, retry, and cancellation states remain usable.",
+      "Private exact-SHA Windows packaging preserves protocol dependencies and produces an acceptance candidate.",
+      "A named owner completes a clean-Windows genuine-replay acceptance run before VERIFIED or USED claims are considered."
+    ],
+    "sourcesReviewed": [
+      {
+        "finding": "Requires Canonical Project State reconciliation, preserves Strategic OS and player reports as live authority, keeps Python advisory, and limits lifecycle claims to their evidence.",
+        "path": "AGENTS.md",
+        "role": "instructions"
+      },
+      {
+        "finding": "Requires immutable snapshots, advisory proof-carrying Python output, patch matching, deterministic fallback, bounded local workers, and no direct mutation of Strategic OS state.",
+        "path": "docs/adr/ADR-002-python-strategy-science-runtime-boundary.md",
+        "role": "architecture"
+      },
+      {
+        "finding": "Establishes Strategic OS authority, offline-first loopback-only operation, Master Intel as the primary shell, replay-integrity controls, patched protocol compatibility, and private exact-SHA Windows acceptance.",
+        "path": "docs/project/DECISIONS.md",
+        "role": "architecture"
+      },
+      {
+        "finding": "Defines the replay-to-practice primary journey, player-report-driven Guided Execution, current API and replay capabilities, unresolved clean-Windows proof, and PROOF-NEXT-001.",
+        "path": "PROJECT_STATE.md",
+        "role": "backlog"
+      },
+      {
+        "finding": "States that Master Intel is the primary product shell, replay analysis is postgame, live battlefield truth comes from player reports, and the app does not read the live StarCraft process.",
+        "path": "README.md",
+        "role": "repository context"
+      },
+      {
+        "finding": "Indexes the canonical machine ledger, evidence registers, existing Python Strategy Science backlog, architecture, contracts, schemas, and acceptance coverage.",
+        "path": "docs/README.md",
+        "role": "repository context"
+      },
+      {
+        "finding": "Confirms Python Strategy Science is advisory, dependency-light, and only partially operationalized; most planned capabilities are not active application features.",
+        "path": "python_strategy_science/README.md",
+        "role": "repository context"
+      },
+      {
+        "finding": "Runs project-state validation for pull requests and pushes to main or v1.13-dev, but does not explicitly include the personal/v1.14.0-candidate branch in push triggers.",
+        "path": ".github/workflows/project-state.yml",
+        "role": "repository context"
+      },
+      {
+        "finding": "Registers sc2reader as TESTED, PySC2 and installed-SC2 frame capture as IMPLEMENTED, the SC2 replay frame-capture boundary as TESTED, and successful clean-Windows capture as UNVERIFIED.",
+        "path": ".project/state.json",
+        "role": "machine lifecycle authority"
+      },
+      {
+        "finding": "Already uses PySC2 and s2clientprotocol to select the replay-matched local SC2 build and render player-POV and observer-truth replay frames with explicit evidence boundaries.",
+        "path": "sc2_frame_capture.py",
+        "role": "existing integration implementation"
+      },
+      {
+        "finding": "Already exposes capture readiness, synchronous replay-frame capture, frame serving, bounded timestamp validation, and explicit unavailable and reconstruction-fallback responses.",
+        "path": "app.py",
+        "role": "application API surface"
+      },
+      {
+        "finding": "Current focused capture coverage verifies only safe output naming and does not exercise the complete capture adapter or Flask journey.",
+        "path": "tests/test_sc2_frame_capture.py",
+        "role": "automated evidence"
+      },
+      {
+        "finding": "Verifies the patched protobuf pin, s2clientprotocol imports, exact BaseBuild selection, Windows runtime discovery, and release-version consistency.",
+        "path": "tests/test_protocol_compat.py",
+        "role": "automated evidence"
+      },
+      {
+        "finding": "Defines local API error contracts, performance budgets, feature flags, evidence classes, diagnostics, cancellation, privacy requirements, and optional-network gating.",
+        "path": "docs/python-strategy-science-architecture.md",
+        "role": "architecture"
+      },
+      {
+        "finding": "Contains the broader Strategy Science program; this proposed integration portfolio must be reconciled into that authority rather than becoming a second canonical backlog.",
+        "path": "docs/python-strategy-science-backlog.md",
+        "role": "existing canonical backlog"
+      }
+    ],
+    "unresolvedQuestions": [
+      "Does StarCraft API mean the already-integrated local PySC2 and s2clientprotocol replay-rendering API, Blizzard Battle.net profile and game-data APIs, a live SC2 client API, or a governed combination?",
+      "Is the intended outcome postgame replay evidence only, or does the owner want live observations that would require explicitly revisiting the current player-report and no-live-process boundary?",
+      "If Battle.net web data is required, which endpoints, regions, account scopes, consent model, credentials, rate limits, terms, retention rules, and offline fallback are authorized?",
+      "How should any newly admitted API data be classified among game_rule, replay_fact, source_claim, inference, simulation, and hypothesis?",
+      "Which Windows versions, StarCraft II patches, replay BaseBuilds, graphics configurations, and installation layouts are supported?",
+      "Should personal/v1.14.0-candidate receive direct push-triggered project-state CI coverage, or remain governed through pull-request and manually dispatched workflows?",
+      "What timeout and concurrency limits are acceptable when the installed game briefly launches to render frames?",
+      "Who is the named human acceptance owner, and which consented genuine replay may be used for clean-Windows proof?",
+      "What Blizzard terms, API policies, trademark rules, and redistribution constraints must be reviewed if the scope expands beyond local installed-game replay rendering?"
+    ]
+  },
+  "kind": "proofloom/backlog-proposal",
+  "objective": "Build a complete backlog to ntegrrate starcraft api into app",
+  "proposalStatus": "REVIEW_REQUIRED",
+  "schemaVersion": 1,
+  "tasks": [
+    {
+      "acceptanceCriteria": [
+        "The decision explicitly selects local replay rendering, Battle.net web data, live client access, or a bounded combination.",
+        "The decision states that existing PySC2 replay rendering is already implemented and must be extended rather than duplicated.",
+        "Every admitted datum has a named evidence class and authority owner.",
+        "Network access, credentials, consent, retention, rate limits, offline fallback, and unsupported uses are explicit.",
+        "Any change to DEC-001, DEC-002, DEC-003, or the no-live-process boundary is identified as requiring an explicit superseding decision.",
+        "A named owner records approval before dependent implementation begins."
+      ],
+      "dependsOn": [],
+      "description": "Create an owner-reviewable decision that identifies the intended API, admitted data, user value, authority class, network behavior, privacy boundary, fallback, supported environments, and whether any existing decision must be superseded.",
+      "evidenceRequired": [
+        "Reviewed ADR with selected scope and rejected alternatives.",
+        "Recorded owner approval.",
+        "Authority and evidence-class mapping.",
+        "List of unresolved external policy questions."
+      ],
+      "id": "SC2API-001",
+      "ownership": [
+        "docs/adr/ADR-003-starcraft-api-integration-boundary.md"
+      ],
+      "status": "PROPOSED",
+      "title": "Ratify the StarCraft API integration boundary",
+      "validation": [
+        "python3 scripts/check_project_state.py",
+        "python3 -m pytest -q tests/test_project_state_control.py"
+      ]
+    },
+    {
+      "acceptanceCriteria": [
+        "The contract inventories the existing sc2reader, PySC2, s2clientprotocol, capture endpoints, case workspace, and Master Intel surfaces.",
+        "Request fields include case identity, replay digest or generation, player identity, timestamp, patch, BaseBuild, render dimensions, and idempotency identity.",
+        "Result fields distinguish player POV, observer truth, metadata, provenance, warnings, and evidence boundaries.",
+        "Stable errors cover invalid input, missing replay, unsupported patch, missing BaseBuild, unavailable runtime, timeout, cancellation, stale result, integrity failure, and internal failure.",
+        "The contract defines worker limits, timeout budgets, caching rules, cancellation semantics, and deterministic tactical-reconstruction fallback.",
+        "No API result directly mutates Strategic OS state or becomes live battlefield fact."
+      ],
+      "dependsOn": [
+        "SC2API-001"
+      ],
+      "description": "Document the end-to-end request, response, provenance, error, timeout, cancellation, cache, evidence, and fallback contracts while mapping them to existing replay, case, Strategic OS, and Strategy Science authorities.",
+      "evidenceRequired": [
+        "Reviewed contract document.",
+        "Existing-to-target endpoint and state mapping.",
+        "Error and recovery matrix.",
+        "Evidence-class and authority matrix."
+      ],
+      "id": "SC2API-002",
+      "ownership": [
+        "docs/starcraft-api-integration-contract.md"
+      ],
+      "status": "PROPOSED",
+      "title": "Define the versioned integration contract",
+      "validation": [
+        "python3 scripts/check_project_state.py"
+      ]
+    },
+    {
+      "acceptanceCriteria": [
+        "Capture accepts only contract-valid dimensions, timestamps, player identifiers, camera coordinates, and safe moment keys.",
+        "Replay patch and DataVersion select an exact installed BaseBuild or return a stable unsupported-build error.",
+        "Windows Support64 runtime discovery remains bounded and never recommends third-party DLL downloads.",
+        "Player-POV and observer-truth outputs retain separate labels and cannot be conflated.",
+        "Adapter exceptions map to stable error codes without exposing sensitive local paths in user messages.",
+        "Tests cover success doubles, missing dependencies, missing installation, missing BaseBuild, invalid replay metadata, absent render data, map-data fallback, safe filenames, and concurrent-call serialization."
+      ],
+      "dependsOn": [
+        "SC2API-001",
+        "SC2API-002"
+      ],
+      "description": "Extend the existing frame-capture implementation with validated dimensions, bounded timestamps, exact replay-build selection, structured diagnostics, deterministic errors, and comprehensive adapter tests without adding live process authority.",
+      "evidenceRequired": [
+        "Passing focused adapter and protocol test report.",
+        "Contract-to-code traceability record.",
+        "Documented unsupported-build and missing-runtime examples.",
+        "Review showing player POV and observer truth remain distinct."
+      ],
+      "id": "SC2API-003",
+      "ownership": [
+        "sc2_frame_capture.py",
+        "tests/test_sc2_frame_capture.py",
+        "tests/test_protocol_compat.py"
+      ],
+      "status": "PROPOSED",
+      "title": "Harden the installed-game capture adapter",
+      "validation": [
+        "python3 -m pytest -q tests/test_sc2_frame_capture.py tests/test_protocol_compat.py"
+      ]
+    },
+    {
+      "acceptanceCriteria": [
+        "Duplicate requests for the same trusted replay generation and capture parameters reuse one result or one active job.",
+        "The service enforces an explicit worker and queue bound.",
+        "Queued and running work can be cancelled without corrupting case artifacts.",
+        "Timeout produces a stable terminal state and retains tactical reconstruction as the fallback.",
+        "Process or renderer failure cannot strand the queue or report success.",
+        "Tests cover queue saturation, cancellation, timeout, retry, idempotency, renderer failure, and clean shutdown."
+      ],
+      "dependsOn": [
+        "SC2API-002",
+        "SC2API-003"
+      ],
+      "description": "Place expensive installed-game capture behind a bounded local orchestration service with job identity, idempotency, progress, timeout, cancellation, concurrency control, and deterministic fallback.",
+      "evidenceRequired": [
+        "Passing orchestration test report.",
+        "Measured timeout and queue behavior.",
+        "Cancellation and retry state-transition evidence.",
+        "Proof that failure leaves no trusted partial result."
+      ],
+      "id": "SC2API-004",
+      "ownership": [
+        "sc2_capture_service.py",
+        "tests/test_sc2_capture_service.py"
+      ],
+      "status": "PROPOSED",
+      "title": "Add bounded capture orchestration",
+      "validation": [
+        "python3 -m pytest -q tests/test_sc2_capture_service.py"
+      ]
+    },
+    {
+      "acceptanceCriteria": [
+        "Non-loopback Host values, cross-site browser requests, and cross-origin mutations are rejected.",
+        "Case IDs, replay paths, frame filenames, and output paths cannot escape authorized local directories.",
+        "Payload size, timestamp, dimensions, queue depth, and request rate have explicit bounds.",
+        "User-facing diagnostics omit replay contents, account identifiers, credentials, and unnecessary absolute paths.",
+        "The renderer launches only the expected local StarCraft II executable through the approved adapter.",
+        "No browser-direct provider credentials or persistent raw API secrets are introduced.",
+        "Threat tests cover traversal, malformed identifiers, origin abuse, oversized input, queue exhaustion, artifact substitution, and diagnostic leakage."
+      ],
+      "dependsOn": [
+        "SC2API-001",
+        "SC2API-002",
+        "SC2API-003"
+      ],
+      "description": "Centralize StarCraft API request safety, local-origin enforcement, path and case validation, response redaction, and process-launch controls under the existing loopback-only model.",
+      "evidenceRequired": [
+        "Passing adversarial security test report.",
+        "Threat-boundary review.",
+        "Redacted support-report sample.",
+        "Evidence that no new remote listener or browser-direct credential path exists."
+      ],
+      "id": "SC2API-009",
+      "ownership": [
+        "sc2_api_security.py",
+        "tests/test_sc2_api_security.py",
+        "docs/security/starcraft-api-threat-boundary.md"
+      ],
+      "status": "PROPOSED",
+      "title": "Enforce the integration security and privacy boundary",
+      "validation": [
+        "python3 -m pytest -q tests/test_sc2_api_security.py"
+      ]
+    },
+    {
+      "acceptanceCriteria": [
+        "Readiness reports dependency, installation, BaseBuild, graphics, and fallback states without claiming target-machine verification.",
+        "Capture submission returns a stable job identity instead of blocking an unbounded request.",
+        "Status and cancellation endpoints expose only allowlisted state and user-safe errors.",
+        "Result retrieval serves artifacts only from the trusted case generation.",
+        "Malformed, unauthorized, saturated, cancelled, timed-out, unavailable, stale, and failed requests return contract-defined status codes and bodies.",
+        "Existing replay analysis, Master Intel, Strategy Science, and Guided Execution routes remain compatible."
+      ],
+      "dependsOn": [
+        "SC2API-004",
+        "SC2API-009"
+      ],
+      "description": "Integrate readiness, job submission, status, cancellation, result retrieval, and artifact serving into the existing Flask application using the ratified contracts and security boundary.",
+      "evidenceRequired": [
+        "Passing Flask API contract test report.",
+        "Endpoint and error-state inventory.",
+        "Compatibility evidence for existing application routes.",
+        "Recorded loopback-origin rejection cases."
+      ],
+      "id": "SC2API-005",
+      "ownership": [
+        "app.py",
+        "tests/test_sc2_capture_api.py"
+      ],
+      "status": "PROPOSED",
+      "title": "Expose the versioned loopback API workflow",
+      "validation": [
+        "python3 -m pytest -q tests/test_sc2_capture_api.py"
+      ]
+    },
+    {
+      "acceptanceCriteria": [
+        "A capture manifest contains the trusted case generation, replay digest, request hash, renderer version, patch, BaseBuild, player identity, timestamp, and artifact checksums.",
+        "Production reads reject replay, manifest, metadata, identity, request, or artifact drift.",
+        "Interrupted writes cannot expose a partially trusted capture generation.",
+        "Legacy unbound captures remain visible only as regeneration-required placeholders.",
+        "Re-import or case regeneration invalidates incompatible cached captures without silently re-signing them.",
+        "Tests cover tampering, interrupted writes, replay replacement, case regeneration, stale cache, legacy migration, and authorized regeneration."
+      ],
+      "dependsOn": [
+        "SC2API-004",
+        "SC2API-005"
+      ],
+      "description": "Version capture manifests and bind every rendered artifact to the case identity, replay digest, metadata generation, player identity, API parameters, patch, BaseBuild, and output checksums.",
+      "evidenceRequired": [
+        "Passing integrity and migration test report.",
+        "Example versioned capture manifest.",
+        "Tamper-rejection evidence.",
+        "Legacy regeneration recovery evidence."
+      ],
+      "id": "SC2API-006",
+      "ownership": [
+        "case_workspace.py",
+        "tests/test_sc2_capture_integrity.py"
+      ],
+      "status": "PROPOSED",
+      "title": "Bind capture artifacts to trusted replay generations",
+      "validation": [
+        "python3 -m pytest -q tests/test_sc2_capture_integrity.py"
+      ]
+    },
+    {
+      "acceptanceCriteria": [
+        "Replay review shows renderer readiness and offers capture only for a trusted case and explicitly selected replay player.",
+        "The user can select an evidence-backed replay moment without entering an unrestricted local path.",
+        "Loading, queued, rendering, complete, partial, unavailable, failed, cancelled, stale, and regeneration-required states are visually distinct.",
+        "Player POV and observer truth are separately titled and explain why observer truth is not the player's historical knowledge.",
+        "The rendered result links back to patch, BaseBuild, replay timestamp, case identity, and evidence boundary.",
+        "Capture does not replace the normalized replay debrief or automatically activate or alter a practice drill."
+      ],
+      "dependsOn": [
+        "SC2API-005",
+        "SC2API-006"
+      ],
+      "description": "Make installed-game rendering a bounded replay-review action in Master Intel, preserving normalized replay facts, player identity, evidence boundaries, and the one-active-drill continuation.",
+      "evidenceRequired": [
+        "Passing UI contract test report.",
+        "Desktop and narrow-width captures of readiness, progress, result, error, and recovery states.",
+        "Copy review for player-POV and observer-truth boundaries.",
+        "Evidence that active-drill state remains unchanged until an explicit user action."
+      ],
+      "id": "SC2API-007",
+      "ownership": [
+        "static/master-intel/routes/replay.js",
+        "static/master-intel/sc2-api.css",
+        "tests/test_sc2_capture_ui.py"
+      ],
+      "status": "PROPOSED",
+      "title": "Integrate API-rendered evidence into replay review",
+      "validation": [
+        "node --check static/master-intel/routes/replay.js",
+        "python3 -m pytest -q tests/test_sc2_capture_ui.py"
+      ]
+    },
+    {
+      "acceptanceCriteria": [
+        "Settings reports installed-game detection, matching BaseBuild availability, renderer dependency state, queue health, and offline fallback.",
+        "Recovery guidance distinguishes install or launch once, update through Battle.net, Scan and Repair, set SC2PATH, re-import replay, retry, and use tactical reconstruction.",
+        "No recovery route recommends third-party DLL downloads or weakens replay integrity.",
+        "Stale known-good information remains visible while refresh failure is disclosed.",
+        "Retry is bounded, cancellation is reachable, and failure does not require a full-page reload.",
+        "Support output is useful without exposing replay contents, account paths, credentials, or raw local identifiers."
+      ],
+      "dependsOn": [
+        "SC2API-005",
+        "SC2API-006",
+        "SC2API-009"
+      ],
+      "description": "Expose privacy-bounded system checks and specific recovery guidance for installation, patch, BaseBuild, runtime library, renderer, queue, artifact, and integrity failures.",
+      "evidenceRequired": [
+        "Passing recovery-state test report.",
+        "Rendered evidence for each material unavailable and retry state.",
+        "Sanitized support-report sample.",
+        "Review confirming tactical reconstruction remains available."
+      ],
+      "id": "SC2API-008",
+      "ownership": [
+        "static/master-intel/routes/settings.js",
+        "static/master-intel/lib/api.js",
+        "tests/test_sc2_capture_recovery.py"
+      ],
+      "status": "PROPOSED",
+      "title": "Add diagnostics, negative states, and recovery",
+      "validation": [
+        "node --check static/master-intel/routes/settings.js",
+        "node --check static/master-intel/lib/api.js",
+        "python3 -m pytest -q tests/test_sc2_capture_recovery.py"
+      ]
+    },
+    {
+      "acceptanceCriteria": [
+        "Every capture, cancel, retry, fallback, close, and evidence-detail action is keyboard reachable.",
+        "Focus moves predictably into progress and result regions and returns to the initiating control after closure or cancellation.",
+        "Queued, rendering, completed, failed, cancelled, and stale changes are announced without repetitive live-region noise.",
+        "Player POV and observer truth are not distinguished by color alone.",
+        "At 200 percent zoom and 390-pixel width, controls, evidence labels, errors, and recovery actions remain readable and reachable.",
+        "Reduced-motion mode removes nonessential transitions without hiding state changes."
+      ],
+      "dependsOn": [
+        "SC2API-007",
+        "SC2API-008"
+      ],
+      "description": "Validate the complete API-rendering journey for keyboard, screen reader, focus, announcements, reduced motion, zoom, mobile-width layout, long errors, cancellation, retry, and comparison semantics.",
+      "evidenceRequired": [
+        "Passing accessibility contract test report.",
+        "Keyboard walkthrough record.",
+        "Screen-reader announcement review.",
+        "Rendered 1440-pixel, 768-pixel, 390-pixel, and 200-percent-zoom evidence."
+      ],
+      "id": "SC2API-010",
+      "ownership": [
+        "tests/test_sc2_capture_accessibility.py"
+      ],
+      "status": "PROPOSED",
+      "title": "Prove accessibility and responsive operation",
+      "validation": [
+        "python3 -m pytest -q tests/test_sc2_capture_accessibility.py"
+      ]
+    },
+    {
+      "acceptanceCriteria": [
+        "PySC2, s2clientprotocol, protobuf, image, and orchestration dependencies are directly pinned where packaging requires them.",
+        "Patched protobuf compatibility remains executable and security scanning does not silently reintroduce the vulnerable pin.",
+        "Portable and installer builds collect required Python packages, descriptors, schemas, and runtime modules.",
+        "The workflow runs protocol, API, security, integrity, and packaging tests before artifact upload.",
+        "Build metadata binds commit, ref, workflow run, dependency inventory, artifact sizes, and SHA-256 checksums.",
+        "Private workflow-dispatch artifacts remain sufficient; no tag or public release is required.",
+        "The owner records whether the personal candidate branch needs direct push-triggered project-state validation."
+      ],
+      "dependsOn": [
+        "SC2API-003",
+        "SC2API-004",
+        "SC2API-005",
+        "SC2API-009"
+      ],
+      "description": "Preserve patched protocol compatibility, package all required capture dependencies, verify source-to-artifact identity, and exercise the selected integration in repository and Windows build workflows.",
+      "evidenceRequired": [
+        "Passing packaging and protocol test report.",
+        "Dependency inventory.",
+        "Exact-source build manifest.",
+        "Installer and portable artifact checksums.",
+        "Workflow receipt for the bound candidate commit."
+      ],
+      "id": "SC2API-011",
+      "ownership": [
+        "requirements-desktop.txt",
+        "requirements.txt",
+        "build_windows_portable.bat",
+        "build_windows_onefile.bat",
+        ".github/workflows/windows-release.yml",
+        ".github/workflows/master-intel-m0.yml",
+        "tests/test_sc2_api_packaging.py"
+      ],
+      "status": "PROPOSED",
+      "title": "Qualify dependencies, packaging, and CI",
+      "validation": [
+        "python3 -m pytest -q tests/test_protocol_compat.py tests/test_sc2_api_packaging.py tests/test_windows_desktop.py",
+        "python3 scripts/check_project_state.py"
+      ]
+    },
+    {
+      "acceptanceCriteria": [
+        "The adopted work is integrated into the existing backlog and machine ledger rather than maintained as a competing authority.",
+        "The selected API, state authority, evidence classes, integration state, dependencies, and blockers are recorded consistently.",
+        "Code without tests is not promoted beyond IMPLEMENTED and passing tests are not promoted beyond TESTED.",
+        "Clean-Windows, genuine-replay, human-use, and outcome claims remain UNVERIFIED until their evidence exists.",
+        "Exactly one proof event remains NEXT.",
+        "The project-state checker reports no drift, missing references, invalid lifecycle promotion, duplicate IDs, graph errors, or deprecated-current contradiction."
+      ],
+      "dependsOn": [
+        "SC2API-006",
+        "SC2API-007",
+        "SC2API-008",
+        "SC2API-010",
+        "SC2API-011"
+      ],
+      "description": "After implementation evidence exists, adopt the approved work into existing repository authorities and record capability, integration, dependency, blocker, decision, proof, and lifecycle changes without creating a second canonical backlog.",
+      "evidenceRequired": [
+        "Passing project-state checker output.",
+        "Reviewed canonical-state diff.",
+        "Backlog adoption decision.",
+        "Updated evidence and dependency graph entries.",
+        "Explicit list of capabilities and claims that remain UNVERIFIED."
+      ],
+      "id": "SC2API-012",
+      "ownership": [
+        ".project/state.json",
+        "PROJECT_STATE.md",
+        "docs/project/CAPABILITIES.md",
+        "docs/project/DECISIONS.md",
+        "docs/project/DEPENDENCIES.md",
+        "docs/project/EVIDENCE_GRAPH.md",
+        "docs/project/BLOCKERS.md",
+        "docs/project/PROOF.md",
+        "docs/python-strategy-science-backlog.md"
+      ],
+      "status": "PROPOSED",
+      "title": "Reconcile Canonical Project State and the existing backlog",
+      "validation": [
+        "python3 scripts/check_project_state.py",
+        "python3 -m pytest -q tests/test_project_state_control.py"
+      ]
+    },
+    {
+      "acceptanceCriteria": [
+        "The exact checksum-bound installer or portable artifact launches on a clean supported Windows environment without developer tools.",
+        "A consented genuine replay is imported into a trusted case and the selected replay player is explicit.",
+        "Readiness detects the installed game and matching BaseBuild or presents the correct bounded recovery.",
+        "At least one player-POV and observer-truth capture is generated, integrity checked, and explained correctly.",
+        "Missing capture capability, cancellation, interruption, restart, retry, and tactical-reconstruction fallback are exercised.",
+        "The owner can explain what is replay fact, API-rendered evidence, observer truth, inference, and unverified guidance.",
+        "Keyboard, focus, zoom, narrow-width, and reduced-motion acceptance results are recorded.",
+        "Only observed evidence is eligible for VERIFIED; repeated use and improvement remain separately UNVERIFIED."
+      ],
+      "dependsOn": [
+        "SC2API-011",
+        "SC2API-012"
+      ],
+      "description": "Exercise the exact-SHA private Windows artifact with a consented genuine replay and named owner, recording installation, readiness, capture, fallback, evidence comprehension, accessibility, interruption, and recovery observations.",
+      "evidenceRequired": [
+        "Exact commit, workflow run, build manifest, dependency inventory, and artifact checksums.",
+        "Clean-Windows install and launch record.",
+        "Sanitized genuine-replay case and capture manifests.",
+        "Player-POV and observer-truth artifact checksums.",
+        "Negative-state, cancellation, interruption, retry, and fallback observations.",
+        "Accessibility walkthrough record.",
+        "Named human comprehension and acceptance receipt.",
+        "Canonical-state reconciliation identifying the highest proven lifecycle state."
+      ],
+      "id": "SC2API-013",
+      "ownership": [
+        "scripts/sc2_api_acceptance.py",
+        "tests/test_sc2_api_acceptance.py",
+        "docs/proof/sc2-api-acceptance-plan.md"
+      ],
+      "status": "PROPOSED",
+      "title": "Run clean-Windows genuine-replay acceptance",
+      "validation": [
+        "python3 -m pytest -q tests/test_sc2_api_acceptance.py",
+        "python3 scripts/sc2_api_acceptance.py --self-check"
+      ]
+    }
+  ]
+}

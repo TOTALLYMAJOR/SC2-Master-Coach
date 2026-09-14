@@ -76,6 +76,203 @@ Patch migration, source conflicts, and strategy-pack validation are operational.
 
 Narrative generation, cognitive optimization, reproducible experiments, packaging, and diagnostics are complete.
 
+# Adopted program SC2API — Local replay-rendering integration
+
+- **Adoption date:** 2026-09-14
+- **Adoption authority:** Explicit project-owner instruction
+- **Source proposal:** `artifacts/design/backlog-proposals/proposed-backlog.json`
+- **Source proposal SHA-256:** `a03ab359f8feb4d114b7e647b3dc6f7e9b9ca832c1f901615bb6d100eb8a4d39`
+- **Adoption status:** Accepted into this canonical backlog; implementation is not started
+- **Execution authority:** None until a bounded implementation packet is approved
+- **Execution gate:** Reconcile `PROOF-NEXT-001` before starting `SC2API-002`
+
+## Accepted scope
+
+“StarCraft API” means the existing local PySC2/`s2clientprotocol`
+replay-rendering integration backed by the installed StarCraft II binary. The
+program hardens and productizes that bounded replay-review path. It does not
+authorize Battle.net web APIs, browser-direct credentials, live-process
+telemetry, game-memory inspection, input automation, bot behavior, or any
+unreported battlefield-truth claim.
+
+The Strategic OS event log and player reports remain live authority. API-rendered
+player POV and observer truth are postgame replay evidence and remain visibly
+distinct. Tactical reconstruction remains the deterministic fallback. The
+saved Proofloom proposal remains provenance for this adoption, not a second
+canonical backlog.
+
+## Portfolio sequence
+
+| Task | Canonical status | Depends on | Bounded outcome |
+| --- | --- | --- | --- |
+| SC2API-001 | ACCEPTED | none | Scope and authority decision recorded as `DEC-014` |
+| SC2API-002 | NOT_STARTED | SC2API-001, PROOF-NEXT-001 reconciliation | Versioned request, result, error, provenance, timeout, cancellation, cache, and fallback contract |
+| SC2API-003 | NOT_STARTED | SC2API-001, SC2API-002 | Existing installed-game capture adapter hardened and tested |
+| SC2API-004 | NOT_STARTED | SC2API-002, SC2API-003 | Bounded capture orchestration with idempotency, timeout, cancellation, and queue limits |
+| SC2API-009 | NOT_STARTED | SC2API-001, SC2API-002, SC2API-003 | Loopback, path, process, payload, privacy, and abuse controls |
+| SC2API-005 | NOT_STARTED | SC2API-004, SC2API-009 | Versioned loopback readiness, job, cancellation, result, and artifact API |
+| SC2API-006 | NOT_STARTED | SC2API-004, SC2API-005 | Capture artifacts bound to trusted replay and case generations |
+| SC2API-007 | NOT_STARTED | SC2API-005, SC2API-006 | API-rendered evidence integrated into Master Intel replay review |
+| SC2API-008 | NOT_STARTED | SC2API-005, SC2API-006, SC2API-009 | Truthful diagnostics, negative states, retry, and recovery |
+| SC2API-010 | NOT_STARTED | SC2API-007, SC2API-008 | Keyboard, screen-reader, zoom, responsive, and reduced-motion acceptance |
+| SC2API-011 | NOT_STARTED | SC2API-003, SC2API-004, SC2API-005, SC2API-009 | Pinned packaging, protocol compatibility, exact-source artifacts, and CI |
+| SC2API-012 | NOT_STARTED | SC2API-006, SC2API-007, SC2API-008, SC2API-010, SC2API-011 | Post-implementation Canonical Project State reconciliation |
+| SC2API-013 | NOT_STARTED | SC2API-011, SC2API-012 | Clean-Windows genuine-replay reacceptance of the changed artifact |
+
+## Adopted task packets
+
+### SC2API-001 — Ratify the StarCraft API integration boundary
+
+- **Outcome:** Accepted as the local PySC2/`s2clientprotocol` replay renderer;
+  `DEC-014` records the authority boundary.
+- **Excluded:** Battle.net web data, live client telemetry, live-process access,
+  browser-direct credentials, and cloud execution.
+- **Evidence:** Explicit owner adoption plus the source proposal checksum.
+- **Lifecycle effect:** Decision accepted; no implementation or capability state
+  was promoted.
+
+### SC2API-002 — Define the versioned integration contract
+
+- **Owns:** `docs/starcraft-api-integration-contract.md`
+- **Acceptance:** Inventory existing replay/capture surfaces; define trusted case,
+  replay, player, patch, BaseBuild, render, idempotency, result, evidence,
+  timeout, cancellation, cache, and stable error contracts; preserve Strategic
+  OS non-mutation and tactical-reconstruction fallback.
+- **Validation:** `python3 scripts/check_project_state.py`
+- **Terminal evidence:** Reviewed contract, endpoint/state map, error/recovery
+  matrix, and evidence-class map.
+
+### SC2API-003 — Harden the installed-game capture adapter
+
+- **Owns:** `sc2_frame_capture.py`, `tests/test_sc2_frame_capture.py`,
+  `tests/test_protocol_compat.py`
+- **Acceptance:** Validate request bounds; resolve exact replay builds; preserve
+  patched protobuf compatibility; separate player POV from observer truth; map
+  failures to stable errors; cover success, unavailable, mismatch, missing
+  render data, map fallback, naming, and concurrency.
+- **Validation:** `python3 -m pytest -q tests/test_sc2_frame_capture.py tests/test_protocol_compat.py`
+- **Terminal evidence:** Passing focused tests and contract-to-code traceability.
+
+### SC2API-004 — Add bounded capture orchestration
+
+- **Owns:** `sc2_capture_service.py`, `tests/test_sc2_capture_service.py`
+- **Acceptance:** Enforce worker and queue bounds, idempotency, progress, timeout,
+  cancellation, retry, clean shutdown, and fail-closed partial-result handling.
+- **Validation:** `python3 -m pytest -q tests/test_sc2_capture_service.py`
+- **Terminal evidence:** Passing queue, timeout, cancellation, retry, and failure
+  tests plus measured bounded behavior.
+
+### SC2API-009 — Enforce the integration security and privacy boundary
+
+- **Owns:** `sc2_api_security.py`, `tests/test_sc2_api_security.py`,
+  `docs/security/starcraft-api-threat-boundary.md`
+- **Acceptance:** Reject non-loopback, cross-site, cross-origin, traversal,
+  oversized, saturated, substituted-artifact, and diagnostic-leak paths; launch
+  only the expected local executable; introduce no provider credential path.
+- **Validation:** `python3 -m pytest -q tests/test_sc2_api_security.py`
+- **Terminal evidence:** Passing adversarial tests, threat review, and sanitized
+  diagnostic sample.
+
+### SC2API-005 — Expose the versioned loopback API workflow
+
+- **Owns:** `app.py`, `tests/test_sc2_capture_api.py`
+- **Acceptance:** Provide bounded readiness, submission, status, cancellation,
+  result, and trusted artifact endpoints with stable unavailable, stale,
+  saturated, failed, cancelled, and timed-out responses; preserve existing
+  application routes.
+- **Validation:** `python3 -m pytest -q tests/test_sc2_capture_api.py`
+- **Terminal evidence:** Passing Flask contract tests and endpoint/error inventory.
+
+### SC2API-006 — Bind capture artifacts to trusted replay generations
+
+- **Owns:** `case_workspace.py`, `tests/test_sc2_capture_integrity.py`
+- **Acceptance:** Bind capture manifests and checksums to case generation, replay
+  digest, request, renderer, patch, BaseBuild, player, and timestamp; reject
+  drift and interrupted writes; require regeneration for unbound legacy data.
+- **Validation:** `python3 -m pytest -q tests/test_sc2_capture_integrity.py`
+- **Terminal evidence:** Passing tamper, interruption, stale-cache, legacy, and
+  regeneration tests plus an example versioned manifest.
+
+### SC2API-007 — Integrate API-rendered evidence into replay review
+
+- **Owns:** `static/master-intel/routes/replay.js`,
+  `static/master-intel/sc2-api.css`, `tests/test_sc2_capture_ui.py`
+- **Acceptance:** Offer capture only for trusted cases with explicit player
+  identity; expose progress and terminal states; label player POV and observer
+  truth separately; show provenance; never mutate the active drill implicitly.
+- **Validation:** `node --check static/master-intel/routes/replay.js` and
+  `python3 -m pytest -q tests/test_sc2_capture_ui.py`
+- **Terminal evidence:** Passing UI tests and rendered desktop/narrow state proof.
+
+### SC2API-008 — Add diagnostics, negative states, and recovery
+
+- **Owns:** `static/master-intel/routes/settings.js`,
+  `static/master-intel/lib/api.js`, `tests/test_sc2_capture_recovery.py`
+- **Acceptance:** Distinguish installation, BaseBuild, dependency, runtime,
+  graphics, queue, integrity, and artifact failures; preserve stale values;
+  provide bounded retry, cancellation, re-import, Scan and Repair, `SC2PATH`,
+  and tactical-reconstruction recovery without unsafe DLL advice.
+- **Validation:** JavaScript syntax checks plus
+  `python3 -m pytest -q tests/test_sc2_capture_recovery.py`
+- **Terminal evidence:** Passing recovery tests, rendered failure states, and a
+  privacy-bounded support sample.
+
+### SC2API-010 — Prove accessibility and responsive operation
+
+- **Owns:** `tests/test_sc2_capture_accessibility.py`
+- **Acceptance:** Verify keyboard reachability, focus restoration, non-noisy live
+  announcements, non-color-only evidence distinctions, 200% zoom, 390-pixel
+  width, and reduced-motion behavior across success and recovery states.
+- **Validation:** `python3 -m pytest -q tests/test_sc2_capture_accessibility.py`
+- **Terminal evidence:** Automated results plus keyboard, screen-reader, zoom,
+  desktop, and mobile rendered evidence.
+
+### SC2API-011 — Qualify dependencies, packaging, and CI
+
+- **Owns:** `requirements-desktop.txt`, `requirements.txt`, Windows build scripts,
+  `.github/workflows/windows-release.yml`, `.github/workflows/master-intel-m0.yml`,
+  and `tests/test_sc2_api_packaging.py`
+- **Acceptance:** Pin direct dependencies; retain patched protocol compatibility;
+  package required modules; run integration/security/integrity tests before
+  upload; bind private artifacts to commit, run, inventory, size, and checksum.
+- **Validation:** Focused protocol, packaging, desktop, and project-state tests.
+- **Terminal evidence:** Passing tests, dependency inventory, exact-source build
+  manifest, checksums, and private workflow receipt.
+
+### SC2API-012 — Reconcile Canonical Project State and this backlog
+
+- **Owns:** `.project/state.json`, `PROJECT_STATE.md`, the project decision,
+  capability, dependency, evidence, blocker, and proof registers, and this file.
+- **Acceptance:** Record only evidence-supported capability states; keep exactly
+  one NEXT proof event; reconcile adopted task dispositions without creating a
+  second backlog or converting implementation into target proof.
+- **Validation:** `python3 scripts/check_project_state.py` and
+  `python3 -m pytest -q tests/test_project_state_control.py`
+- **Terminal evidence:** Passing checker, reviewed canonical-state diff, evidence
+  graph, dependency graph, and explicit UNVERIFIED list.
+
+### SC2API-013 — Run clean-Windows genuine-replay reacceptance
+
+- **Owns:** `scripts/sc2_api_acceptance.py`,
+  `tests/test_sc2_api_acceptance.py`, `docs/proof/sc2-api-acceptance-plan.md`
+- **Acceptance:** Exercise the changed exact-SHA artifact on clean Windows with a
+  consented genuine replay, player identity, installed-game readiness, rendered
+  player/observer frames, integrity checks, cancellation, interruption, retry,
+  fallback, accessibility, and owner comprehension.
+- **Validation:** `python3 -m pytest -q tests/test_sc2_api_acceptance.py` and the
+  acceptance script self-check.
+- **Terminal evidence:** Exact artifact provenance, clean-Windows run, sanitized
+  manifests, rendered checksums, recovery observations, accessibility record,
+  and named human acceptance.
+
+## Adoption and completion boundary
+
+Adoption proves only that the owner selected this bounded portfolio and placed it
+in the canonical backlog. It does not prove implementation, tests, clean-Windows
+operation, genuine-replay rendering, usage, or improvement. Source can support at
+most `IMPLEMENTED`; current passing tests can support at most `TESTED`; target
+observation is required for `VERIFIED`; owner usage is required for `USED`.
+
 # Epic PSS-000 — Shared contracts and authority boundary
 
 **Priority:** P0  

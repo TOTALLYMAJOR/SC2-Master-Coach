@@ -196,3 +196,18 @@ This register adopts existing decisions; it does not rewrite history. `DEC-003` 
 - Supersedes: the DEC-009 requirement that personal acceptance depend on a version tag and draft release. DEC-009's exact-source and immutable-byte requirements remain active.
 - Status: ACTIVE
 - Revisit Trigger: the owner intentionally changes the app from personal use to distribution.
+
+## DEC-014 — StarCraft API means the local replay-rendering boundary
+
+- Date: 2026-09-14
+- Context: Proofloom assembled a 13-task proposal for the ambiguous objective to integrate the “StarCraft API.” The repository already contains PySC2/`s2clientprotocol` replay rendering, while the accepted live-evidence and offline boundaries prohibit silently expanding that phrase into Battle.net web access or live-process telemetry.
+- Decision: Adopt the proposal into the existing Python Strategy Science backlog with “StarCraft API” defined as the installed-game PySC2/`s2clientprotocol` replay renderer. Extend the existing `sc2_frame_capture.py` path rather than creating a competing adapter. Keep all rendering postgame and case-bound; player POV and observer truth remain separate evidence views. Do not add Battle.net web APIs, browser-direct credentials, live client telemetry, process-memory inspection, input automation, bot behavior, cloud execution, or unreported battlefield-truth claims. Strategic OS and player reports retain live authority. Reconcile `PROOF-NEXT-001` before implementation begins, then re-run clean-Windows genuine-replay acceptance against the changed exact-SHA artifact.
+- Alternatives Considered: Battle.net profile/game-data integration; live SC2 client observation; a cloud rendering service; a new parallel capture stack; the chosen hardening of the existing local replay-rendering integration.
+- Why Chosen: it provides the requested product integration while preserving current privacy, evidence, runtime, product-hierarchy, and deterministic-fallback decisions and minimizing duplicate architecture.
+- Authority: explicit project-owner adoption on 2026-09-14.
+- Affected Components: `docs/python-strategy-science-backlog.md`, `CAP-012`, `INT-002`, Master Intel replay review, loopback Flask capture endpoints, Windows packaging, `PROOF-NEXT-001`, and post-change acceptance.
+- Evidence: Proofloom proposal `artifacts/design/backlog-proposals/proposed-backlog.json` with SHA-256 `a03ab359f8feb4d114b7e647b3dc6f7e9b9ca832c1f901615bb6d100eb8a4d39`; adopted `SC2API` program in `docs/python-strategy-science-backlog.md`; existing `sc2_frame_capture.py`; explicit user decision.
+- Reversible?: yes, but broader provider or live access requires a superseding decision with consent, privacy, security, terms, authority, fallback, and target-proof controls.
+- Supersedes: the ambiguous API scope in the source proposal; it does not supersede DEC-001, DEC-002, DEC-003, DEC-010, DEC-012, or DEC-013.
+- Status: ACTIVE
+- Revisit Trigger: the owner explicitly requests Battle.net data, live client observation, a remote service, or a different evidence authority.
